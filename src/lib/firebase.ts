@@ -4,15 +4,27 @@ import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 import { getStorage, connectStorageEmulator } from 'firebase/storage'
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'demo-api-key',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'demo.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456789:web:demo123',
 }
 
-// Validate Firebase configuration
+// Debug environment variables
+console.log('=== Firebase Environment Variables Debug ===')
+console.log('NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'LOADED' : 'MISSING')
+console.log('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ? 'LOADED' : 'MISSING')
+console.log('NEXT_PUBLIC_FIREBASE_PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? 'LOADED' : 'MISSING')
+console.log('NODE_ENV:', process.env.NODE_ENV)
+console.log('Firebase config loaded:', { 
+  apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING', 
+  authDomain: firebaseConfig.authDomain ? 'SET' : 'MISSING', 
+  projectId: firebaseConfig.projectId ? 'SET' : 'MISSING' 
+})
+
+// Validate Firebase configuration only in browser
 const requiredEnvVars = [
   'NEXT_PUBLIC_FIREBASE_API_KEY',
   'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN', 
@@ -22,9 +34,15 @@ const requiredEnvVars = [
   'NEXT_PUBLIC_FIREBASE_APP_ID'
 ]
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required Firebase environment variable: ${envVar}`)
+// Only validate in browser environment where Firebase will actually be used
+if (typeof window !== 'undefined') {
+  const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar])
+  if (missingVars.length > 0) {
+    console.error('Missing Firebase environment variables:', missingVars)
+    // Only throw if we're using demo config in production
+    if (process.env.NODE_ENV === 'production' && firebaseConfig.apiKey === 'demo-api-key') {
+      throw new Error(`Missing required Firebase environment variables: ${missingVars.join(', ')}`)
+    }
   }
 }
 
