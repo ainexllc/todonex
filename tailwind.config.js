@@ -121,13 +121,15 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // Natural Harmony palette
-        'sage-light': 'hsl(var(--sage-light))',
-        'sage-medium': 'hsl(var(--sage-medium))',
-        'sage-dark': 'hsl(var(--sage-dark))',
-        'gold-light': 'hsl(var(--gold-light))',
-        'gold-medium': 'hsl(var(--gold-medium))',
-        'gold-dark': 'hsl(var(--gold-dark))',
+        // Clean slate palette like HabitTracker
+        'slate-50': 'hsl(var(--slate-50))',
+        'slate-100': 'hsl(var(--slate-100))',
+        'slate-200': 'hsl(var(--slate-200))',
+        'slate-700': 'hsl(var(--slate-700))',
+        'slate-800': 'hsl(var(--slate-800))',
+        'slate-900': 'hsl(var(--slate-900))',
+        'blue-500': 'hsl(var(--blue-500))',
+        'blue-600': 'hsl(var(--blue-600))',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -141,16 +143,14 @@ module.exports = {
     function({ addUtilities }) {
       addUtilities({
         '.glass': {
-          'backdrop-filter': 'blur(12px) saturate(180%)',
-          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(220, 234, 208, 0.3))',
-          'border': '1px solid rgba(134, 176, 142, 0.3)',
-          'box-shadow': '0 8px 32px 0 rgba(134, 176, 142, 0.15)',
+          'background': 'hsl(var(--card))',
+          'border': '1px solid hsl(var(--border))',
+          'box-shadow': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         },
         '.glass-dark': {
-          'backdrop-filter': 'blur(12px) saturate(180%)',
-          'background': 'linear-gradient(135deg, rgba(46, 82, 54, 0.3), rgba(134, 176, 142, 0.1))',
-          'border': '1px solid rgba(218, 165, 32, 0.4)',
-          'box-shadow': '0 8px 32px 0 rgba(46, 82, 54, 0.4)',
+          'background': 'hsl(var(--card))',
+          'border': '1px solid hsl(var(--border))',
+          'box-shadow': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)',
         },
         '.glass-mobile': {
           // Lighter blur for mobile performance
