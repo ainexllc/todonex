@@ -9,6 +9,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Navigation } from './navigation'
 import { MobileNavigation } from './mobile-navigation'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 
 interface MainLayoutProps {
@@ -137,8 +138,9 @@ export function MainLayout({ children }: MainLayoutProps) {
               HomeKeep
             </h1>
             
-            {/* User menu will go here */}
-            <div className="flex items-center space-x-4">
+            {/* Theme toggle and user menu */}
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
               <div className="h-8 w-8 rounded-full glass-effect"></div>
             </div>
           </div>

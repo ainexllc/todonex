@@ -87,7 +87,8 @@ export function QuickActionsWidget({ size = 'medium' }: QuickActionsWidgetProps)
     if (!usage) return 0
     
     // Calculate score based on count and recency
-    const recency = Math.max(0, 7 - (Date.now() - usage.lastUsed.getTime()) / (1000 * 60 * 60 * 24))
+    const lastUsedTime = usage.lastUsed instanceof Date ? usage.lastUsed.getTime() : usage.lastUsed
+    const recency = Math.max(0, 7 - (Date.now() - lastUsedTime) / (1000 * 60 * 60 * 24))
     return usage.count + recency
   }
 
