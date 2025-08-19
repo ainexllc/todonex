@@ -1,26 +1,212 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme: Warm sage green with gold accents */
+  --background: 45 25% 97%;
+  --foreground: 158 15% 20%;
+  --card: 45 40% 99%;
+  --card-foreground: 158 15% 20%;
+  --popover: 45 40% 99%;
+  --popover-foreground: 158 15% 20%;
+  --primary: 158 64% 45%;
+  --primary-foreground: 45 40% 99%;
+  --secondary: 45 20% 90%;
+  --secondary-foreground: 158 15% 20%;
+  --muted: 45 20% 92%;
+  --muted-foreground: 158 8% 40%;
+  --accent: 42 78% 75%;
+  --accent-foreground: 158 15% 20%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 45 40% 99%;
+  --border: 45 15% 85%;
+  --input: 45 20% 94%;
+  --ring: 158 64% 45%;
+  --radius: 0.75rem;
+  
+  /* Custom color variants */
+  --sage-light: 150 30% 85%;
+  --sage-medium: 158 45% 65%;
+  --sage-dark: 158 64% 45%;
+  --gold-light: 42 78% 85%;
+  --gold-medium: 42 78% 65%;
+  --gold-dark: 42 88% 45%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Dark theme: Deep forest with warm gold highlights */
+  --background: 158 25% 8%;
+  --foreground: 45 15% 92%;
+  --card: 158 20% 11%;
+  --card-foreground: 45 15% 92%;
+  --popover: 158 20% 11%;
+  --popover-foreground: 45 15% 92%;
+  --primary: 42 88% 65%;
+  --primary-foreground: 158 25% 8%;
+  --secondary: 158 15% 18%;
+  --secondary-foreground: 45 15% 92%;
+  --muted: 158 15% 18%;
+  --muted-foreground: 45 10% 75%;
+  --accent: 158 45% 35%;
+  --accent-foreground: 45 15% 92%;
+  --destructive: 0 75% 65%;
+  --destructive-foreground: 45 15% 92%;
+  --border: 158 15% 22%;
+  --input: 158 15% 18%;
+  --ring: 42 88% 65%;
+  
+  /* Custom color variants for dark mode */
+  --sage-light: 158 45% 65%;
+  --sage-medium: 158 55% 45%;
+  --sage-dark: 158 64% 35%;
+  --gold-light: 42 78% 75%;
+  --gold-medium: 42 88% 65%;
+  --gold-dark: 42 88% 55%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--sage-light)) 100%);
+  min-height: 100vh;
+  color: hsl(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.dark body {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(158 30% 12%) 50%, hsl(42 15% 8%) 100%);
+}
+
+/* Mobile-first optimizations */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Touch improvements */
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+/* Natural Harmony glass morphism with sage and gold */
+.glass-effect {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(220, 234, 208, 0.3));
+  border: 1px solid rgba(134, 176, 142, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(134, 176, 142, 0.15);
+}
+
+.dark .glass-effect {
+  background: linear-gradient(135deg, rgba(46, 82, 54, 0.3), rgba(134, 176, 142, 0.1));
+  border: 1px solid rgba(218, 165, 32, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(46, 82, 54, 0.4);
+}
+
+/* Mobile glass effect (lighter for performance) */
+@media (max-width: 639px) {
+  .glass-effect {
+    backdrop-filter: blur(5px) saturate(150%);
+    -webkit-backdrop-filter: blur(5px) saturate(150%);
+  }
+}
+
+/* Smooth transitions for adaptive changes */
+.adaptive-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Masonry grid fallback */
+@supports not (grid-template-rows: masonry) {
+  .masonry-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .masonry-grid > * {
+    width: calc(50% - 0.5rem);
+    margin-bottom: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .masonry-grid > * {
+      width: calc(33.333% - 0.66rem);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .masonry-grid > * {
+      width: calc(25% - 0.75rem);
+    }
+  }
+}
+
+/* Smooth scrolling for better mobile experience */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced text contrast for glass elements */
+.glass h1, .glass h2, .glass h3, .glass h4, .glass h5, .glass h6 {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.glass p, .glass span, .glass div {
+  color: hsl(var(--foreground));
+}
+
+.glass .text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+/* Improved button contrast on glass backgrounds */
+.glass button {
+  font-weight: 500;
+}
+
+/* Enhanced card readability with Natural Harmony theme */
+.glass.rounded-xl, .glass.rounded-2xl {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(220, 234, 208, 0.4));
+  border: 1px solid rgba(134, 176, 142, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(134, 176, 142, 0.12);
+}
+
+.dark .glass.rounded-xl, .dark .glass.rounded-2xl {
+  background: linear-gradient(135deg, rgba(46, 82, 54, 0.4), rgba(218, 165, 32, 0.08));
+  border: 1px solid rgba(218, 165, 32, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(46, 82, 54, 0.3);
+}
+
+/* Ensure text is always readable */
+.text-readable {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .text-readable {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }

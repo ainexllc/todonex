@@ -1,0 +1,92 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "dueDate", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION", 
+      "fields": [
+        {"fieldPath": "assignedTo", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "dueDate", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "bills",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "dueDate", "order": "ASCENDING"},
+        {"fieldPath": "isPaid", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "subscriptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "nextBilling", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "shoppingLists",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "lastUpdated", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "tags", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "rating", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "notes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "lastModified", "order": "DESCENDING"},
+        {"fieldPath": "tags", "arrayConfig": "CONTAINS"}
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "familyId", "order": "ASCENDING"},
+        {"fieldPath": "start", "order": "ASCENDING"},
+        {"fieldPath": "end", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "usage",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "feature", "order": "ASCENDING"},
+        {"fieldPath": "lastUsed", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "usage",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "timestamp", "order": "DESCENDING"}
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

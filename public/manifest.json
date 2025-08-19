@@ -1,0 +1,22 @@
+{
+  "name": "HomeKeep - Family Home Management",
+  "short_name": "HomeKeep",
+  "description": "Simple home management for families - tasks, bills, shopping & recipes",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#6366f1",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon.svg", 
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

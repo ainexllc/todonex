@@ -1,0 +1,176 @@
+// Simple Firebase data layer for HomeKeep
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc,
+  getDocs,
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy, 
+  serverTimestamp,
+  onSnapshot,
+  Unsubscribe 
+} from 'firebase/firestore'
+import { db, auth } from './firebase'
+
+// Generic CRUD operations
+export async function createDocument<T extends Record<string, any>>(
+  collectionName: string,
+  id: string,
+  data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<void> {
+  if (!auth.currentUser) throw new Error('Not authenticated')
+  
+  const docData = {
+    ...data,
+    id,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    createdBy: auth.currentUser.uid,
+    familyId: auth.currentUser.uid // For now, user ID is family ID
+  }
+  
+  await setDoc(doc(db, collectionName, id), docData)
+}
+
+export async function updateDocument<T extends Record<string, any>>(
+  collectionName: string,
+  id: string,
+  data: Partial<T>
+): Promise<void> {
+  const docData = {
+    ...data,
+    updatedAt: serverTimestamp()
+  }
+  
+  await setDoc(doc(db, collectionName, id), docData, { merge: true })
+}
+
+export async function getDocument<T>(
+  collectionName: string,
+  id: string
+): Promise<T | null> {
+  const docSnapshot = await getDoc(doc(db, collectionName, id))
+  if (docSnapshot.exists()) {
+    const data = docSnapshot.data()
+    return {
+      ...data,
+      id: docSnapshot.id,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate()
+    } as T
+  }
+  return null
+}
+
+export async function deleteDocument(
+  collectionName: string,
+  id: string
+): Promise<void> {
+  await deleteDoc(doc(db, collectionName, id))
+}
+
+export async function getUserDocuments<T>(
+  collectionName: string,
+  orderByField = 'updatedAt'
+): Promise<T[]> {
+  if (!auth.currentUser) return []
+  
+  const q = query(
+    collection(db, collectionName),
+    where('familyId', '==', auth.currentUser.uid),
+    orderBy(orderByField, 'desc')
+  )
+  
+  const querySnapshot = await getDocs(q)
+  return querySnapshot.docs.map(doc => {
+    const data = doc.data()
+    return {
+      ...data,
+      id: doc.id,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate()
+    } as T
+  })
+}
+
+export function subscribeToUserDocuments<T>(
+  collectionName: string,
+  callback: (items: T[]) => void,
+  orderByField = 'updatedAt'
+): Unsubscribe {
+  if (!auth.currentUser) {
+    callback([])
+    return () => {}
+  }
+  
+  const q = query(
+    collection(db, collectionName),
+    where('familyId', '==', auth.currentUser.uid),
+    orderBy(orderByField, 'desc')
+  )
+  
+  return onSnapshot(q, (querySnapshot) => {
+    const items = querySnapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate()
+      } as T
+    })
+    callback(items)
+  })
+}
+
+// Connection status utilities
+export function isOnline(): boolean {
+  return typeof navigator !== 'undefined' ? navigator.onLine : true
+}
+
+export function onNetworkChange(callback: (online: boolean) => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  
+  const handleOnline = () => callback(true)
+  const handleOffline = () => callback(false)
+  
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
+  
+  return () => {
+    window.removeEventListener('online', handleOnline)
+    window.removeEventListener('offline', handleOffline)
+  }
+}
+
+// Simple preferences using localStorage only
+export function savePreference<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(`homekeep-${key}`, JSON.stringify(value))
+  } catch (error) {
+    console.warn('Failed to save preference:', error)
+  }
+}
+
+export function getPreference<T>(key: string, defaultValue: T): T {
+  if (typeof window === 'undefined') return defaultValue
+  try {
+    const stored = localStorage.getItem(`homekeep-${key}`)
+    return stored ? JSON.parse(stored) : defaultValue
+  } catch {
+    return defaultValue
+  }
+}
+
+export function clearPreferences(): void {
+  if (typeof window === 'undefined') return
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('homekeep-')) {
+      localStorage.removeItem(key)
+    }
+  })
+}

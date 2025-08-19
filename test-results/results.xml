@@ -1,0 +1,12 @@
+<testsuites id="" name="" tests="4" failures="0" skipped="0" errors="0" time="2.212426">
+<testsuite name="example.spec.ts" timestamp="2025-08-18T18:09:54.207Z" hostname="chromium" tests="4" failures="0" skipped="0" time="5.883" errors="0">
+<testcase name="has title" classname="example.spec.ts" time="1.262">
+</testcase>
+<testcase name="mobile responsive layout" classname="example.spec.ts" time="1.525">
+</testcase>
+<testcase name="glass morphism effects load" classname="example.spec.ts" time="1.54">
+</testcase>
+<testcase name="auth page welcome state" classname="example.spec.ts" time="1.556">
+</testcase>
+</testsuite>
+</testsuites>
