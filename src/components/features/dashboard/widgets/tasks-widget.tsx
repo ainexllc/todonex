@@ -97,17 +97,17 @@ export function TasksWidget() {
 
   if (loading) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <CheckSquare className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <CheckSquare className="h-4 w-4 mr-2 text-blue-500" />
             Tasks
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-6 bg-white/5 rounded animate-pulse" />
+              <div key={i} className="h-8 bg-gray-100 rounded-lg animate-pulse" />
             ))}
           </div>
         </CardContent>
@@ -117,34 +117,33 @@ export function TasksWidget() {
 
   if (tasks.length === 0) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <CheckSquare className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <CheckSquare className="h-4 w-4 mr-2 text-blue-500" />
             Tasks
           </CardTitle>
           <Link href="/tasks">
             <Button 
               variant="ghost" 
-              size="sm"
-              className="h-8 w-8 p-0 hover:bg-white/10"
+              size="icon"
+              className="h-8 w-8 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('tasks', 'navigate')}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-gray-600" />
             </Button>
           </Link>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">
-            <div className="h-10 w-10 mx-auto mb-2 rounded-lg glass flex items-center justify-center">
-              <CheckSquare className="h-5 w-5 text-muted-foreground" />
+          <div className="text-center py-6">
+            <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+              <CheckSquare className="h-5 w-5 text-gray-400" />
             </div>
-            <p className="text-sm text-muted-foreground mb-3">No pending tasks</p>
+            <p className="text-sm text-gray-600 mb-4">No pending tasks</p>
             <Link href="/tasks">
               <Button 
                 size="sm" 
                 variant="outline" 
-                className="glass border-glass hover:bg-white/5"
                 onClick={() => trackFeatureUsage('tasks', 'navigate')}
               >
                 Create Task
@@ -157,28 +156,28 @@ export function TasksWidget() {
   }
 
   return (
-    <Card className="glass">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-base font-medium flex items-center">
-          <CheckSquare className="h-4 w-4 mr-2" />
+        <CardTitle className="text-base font-medium flex items-center text-gray-900">
+          <CheckSquare className="h-4 w-4 mr-2 text-blue-500" />
           Tasks
-          <span className="ml-2 text-xs text-muted-foreground">
+          <span className="ml-2 text-xs text-gray-500">
             ({tasks.length} pending)
           </span>
         </CardTitle>
         <Link href="/tasks">
           <Button 
             variant="ghost" 
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-white/10"
+            size="icon"
+            className="h-8 w-8 hover:bg-gray-100"
             onClick={() => trackFeatureUsage('tasks', 'navigate')}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 text-gray-600" />
           </Button>
         </Link>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {tasks.map((task) => {
             const overdue = isOverdue(task)
             const dueSoon = isDueSoon(task)
@@ -187,29 +186,29 @@ export function TasksWidget() {
               <div
                 key={task.id}
                 className={cn(
-                  "flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors",
-                  overdue && "bg-red-500/10",
-                  dueSoon && !overdue && "bg-orange-500/10"
+                  "flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all bg-white",
+                  overdue && "border-red-200 bg-red-50",
+                  dueSoon && !overdue && "border-orange-200 bg-orange-50"
                 )}
               >
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 hover:bg-white/10"
+                  size="icon"
+                  className="h-5 w-5 p-0 hover:bg-gray-100 rounded-full"
                   onClick={() => toggleTask(task.id, !task.completed)}
                 >
-                  <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                  <Circle className="h-4 w-4 text-gray-400 hover:text-blue-500" />
                 </Button>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{task.title}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
                   {task.dueDate && (
-                    <div className="flex items-center gap-1 text-xs">
+                    <div className="flex items-center gap-1 text-xs mt-1">
                       <Clock className="h-3 w-3" />
                       <span className={cn(
-                        "text-muted-foreground",
-                        overdue && "text-red-500",
-                        dueSoon && !overdue && "text-orange-500"
+                        "text-gray-500",
+                        overdue && "text-red-600",
+                        dueSoon && !overdue && "text-orange-600"
                       )}>
                         {formatDueDate(new Date(task.dueDate))}
                       </span>
@@ -228,12 +227,12 @@ export function TasksWidget() {
           })}
         </div>
         
-        <div className="mt-3 pt-3 border-t border-glass/50">
+        <div className="mt-4 pt-3 border-t border-gray-100">
           <Link href="/tasks">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full hover:bg-white/10"
+              className="w-full text-gray-600 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('tasks', 'navigate')}
             >
               View All Tasks

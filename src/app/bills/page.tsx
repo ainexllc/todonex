@@ -16,22 +16,7 @@ import {
 } from '@/lib/firebase-data'
 import { useAuthStore } from '@/store/auth-store'
 import { useAdaptiveStore } from '@/store/adaptive-store'
-
-interface Bill {
-  id: string
-  name: string
-  amount: number
-  dueDate: Date
-  category?: string
-  description?: string
-  isPaid: boolean
-  isRecurring?: boolean
-  recurringInterval?: 'monthly' | 'quarterly' | 'yearly'
-  familyId: string
-  createdBy: string
-  createdAt: Date
-  updatedAt: Date
-}
+import { Bill } from '@/types'
 
 export default function BillsPage() {
   const { user } = useAuthStore()
@@ -75,11 +60,24 @@ export default function BillsPage() {
   const handleCreateBill = async (billData: Omit<Bill, 'id' | 'createdAt' | 'updatedAt' | 'familyId' | 'createdBy'>) => {
     if (!user || !online) return
 
+    const billId = generateId()
+    const now = new Date()
+    
+    const bill: Bill = {
+      id: billId,
+      ...billData,
+      isPaid: false,
+      familyId: user.familyId || '',
+      createdBy: user.id,
+      createdAt: now,
+      updatedAt: now,
+      attachments: [],
+      reminders: [],
+      autopay: false
+    }
+
     try {
-      await createDocument<Bill>('bills', generateId(), {
-        ...billData,
-        isPaid: false
-      })
+      await createDocument<Bill>('bills', billId, bill)
       
       setShowForm(false)
       trackFeatureUsage('bills', 'create')
@@ -261,7 +259,7 @@ export default function BillsPage() {
       <BillFilters 
         filters={filters} 
         onFiltersChange={setFilters}
-        categories={[...new Set(bills.map(b => b.category).filter(Boolean))]}
+        categories={[...new Set(bills.map(b => b.category))]}
       />
 
       {/* Bills List */}

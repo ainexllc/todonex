@@ -11,6 +11,9 @@ import { TasksWidget } from './widgets/tasks-widget'
 import { TodayTasksWidget } from './widgets/today-tasks-widget'
 import { ShoppingWidget } from './widgets/shopping-widget'
 import { RecipesWidget } from './widgets/recipes-widget'
+import { NotesWidget } from './widgets/notes-widget'
+import { SubscriptionsWidget } from './widgets/subscriptions-widget'
+import { CalendarWidget } from './widgets/calendar-widget'
 import { 
   UpcomingBillsWidget,
   TodayEventsWidget,
@@ -34,9 +37,9 @@ const widgetComponents = {
   'recipes': RecipesWidget,
   'this-week-meals': RecipesWidget, // Using RecipesWidget as placeholder
   'upcoming-bills': UpcomingBillsWidget,
-  'today-events': TodayEventsWidget,
-  'recent-notes': RecentNotesWidget,
-  'subscription-overview': SubscriptionOverviewWidget,
+  'today-events': CalendarWidget,
+  'recent-notes': NotesWidget,
+  'subscription-overview': SubscriptionsWidget,
   'spending-chart': UpcomingBillsWidget, // Using UpcomingBillsWidget as placeholder
   'task-stats': TasksWidget, // Using TasksWidget as placeholder
 }
@@ -72,32 +75,6 @@ export function AdaptiveDashboard() {
     )
   }
 
-  const getWidgetClassName = (size: string, position: number) => {
-    const baseClasses = "adaptive-transition hover:scale-[1.02] hover:shadow-lg"
-    
-    switch (size) {
-      case 'large':
-        return cn(
-          baseClasses,
-          "col-span-full lg:col-span-2 row-span-2 lg:row-span-2"
-        )
-      case 'medium':
-        return cn(
-          baseClasses,
-          "col-span-full sm:col-span-1 lg:col-span-1 row-span-1"
-        )
-      case 'small':
-        return cn(
-          baseClasses,
-          "col-span-full sm:col-span-1 row-span-1"
-        )
-      default:
-        return cn(
-          baseClasses,
-          "col-span-full sm:col-span-1"
-        )
-    }
-  }
 
   return (
     <div className="space-y-8">
@@ -112,7 +89,7 @@ export function AdaptiveDashboard() {
       )}
 
       {/* Adaptive Widget Grid */}
-      <div className="masonry-grid gap-6 sm:columns-2 lg:columns-3 xl:columns-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
         {currentLayout.widgets
           .filter(widget => widget.isVisible)
           .sort((a, b) => a.position - b.position)
@@ -128,8 +105,10 @@ export function AdaptiveDashboard() {
               <div
                 key={`${widget.type}-${widget.position}`}
                 className={cn(
-                  "break-inside-avoid mb-6",
-                  getWidgetClassName(widget.size, widget.position)
+                  "adaptive-transition hover:scale-[1.02] hover:shadow-lg",
+                  widget.size === 'large' && "sm:col-span-2 lg:col-span-2",
+                  widget.size === 'medium' && "col-span-1",
+                  widget.size === 'small' && "col-span-1"
                 )}
               >
                 <WidgetComponent 
@@ -147,7 +126,7 @@ export function AdaptiveDashboard() {
         <div className="flex h-96 flex-col items-center justify-center space-y-4 text-center">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20"></div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold text-foreground">Welcome to HomeKeep!</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Welcome to NextTaskPro!</h2>
             <p className="text-muted-foreground max-w-md">
               Your intelligent home management platform is ready. Start by exploring the features or adding your first task, bill, or recipe.
             </p>

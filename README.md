@@ -1,4 +1,4 @@
-# HomeKeep - Adaptive Home Management Platform
+# NextTaskPro - Adaptive Home Management Platform
 
 An intelligent home management platform that adapts to your family's needs. Track tasks, bills, recipes, shopping lists and more with an interface that morphs based on your usage patterns.
 
@@ -111,7 +111,7 @@ src/
 
 ## 🎯 Adaptive Behavior
 
-HomeKeep automatically adapts its interface based on your usage:
+NextTaskPro automatically adapts its interface based on your usage:
 
 - **Bills Only**: Becomes a dedicated bills tracker
 - **Tasks Only**: Transforms into a task management app

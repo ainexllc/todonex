@@ -34,7 +34,7 @@ export function DashboardHero({ type, user }: DashboardHeroProps) {
       icon: Sparkles,
       title: `${getTimeGreeting()}, ${displayName}!`,
       subtitle: 'Welcome to your adaptive home management hub',
-      description: 'HomeKeep learns from how you use it and adapts to show you what matters most.',
+      description: 'NextTaskPro learns from how you use it and adapts to show you what matters most.',
       gradient: 'from-blue-500/20 via-purple-500/20 to-pink-500/20',
       accent: 'text-blue-500'
     },

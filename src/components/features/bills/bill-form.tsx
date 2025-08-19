@@ -19,18 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-
-interface Bill {
-  id: string
-  name: string
-  amount: number
-  dueDate: Date
-  category: string
-  description?: string
-  isPaid: boolean
-  isRecurring: boolean
-  recurringInterval?: 'weekly' | 'monthly' | 'yearly'
-}
+import { Bill } from '@/types'
 
 interface BillFormProps {
   bill?: Bill | null

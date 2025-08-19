@@ -153,7 +153,7 @@ export default function TasksPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
-            Manage your family's tasks and to-dos
+            Manage your family&apos;s tasks and to-dos
             {!online && (
               <span className="flex items-center gap-1 text-amber-600">
                 <WifiOff className="h-3 w-3" />

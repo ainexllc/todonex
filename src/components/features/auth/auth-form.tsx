@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation'
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   updateProfile
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
+import { signInWithGoogle } from '@/lib/auth'
 import { useAuthStore } from '@/store/auth-store'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -96,61 +95,61 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
     setError('')
 
     try {
-      const provider = new GoogleAuthProvider()
-      const userCredential = await signInWithPopup(auth, provider)
+      const result = await signInWithGoogle()
       
-      // Create or update user document
-      const userDoc = {
-        id: userCredential.user.uid,
-        email: userCredential.user.email || '',
-        displayName: userCredential.user.displayName || userCredential.user.email?.split('@')[0] || 'User',
-        photoURL: userCredential.user.photoURL,
-        role: 'user' as const,
-        preferences: {
-          theme: 'system' as const,
-          colorMode: 'default' as const,
-          layout: 'comfortable' as const,
-          language: 'en',
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          notifications: {
-            email: true,
-            push: true,
-            sms: false,
-            taskReminders: true,
-            billReminders: true,
-            subscriptionAlerts: true,
+      if (result.user && !result.error) {
+        // Create or update user document
+        const userDoc = {
+          id: result.user.uid,
+          email: result.user.email || '',
+          displayName: result.user.displayName || result.user.email?.split('@')[0] || 'User',
+          photoURL: result.user.photoURL,
+          role: 'user' as const,
+          preferences: {
+            theme: 'system' as const,
+            colorMode: 'default' as const,
+            layout: 'comfortable' as const,
+            language: 'en',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            notifications: {
+              email: true,
+              push: true,
+              sms: false,
+              taskReminders: true,
+              billReminders: true,
+              subscriptionAlerts: true,
+            },
+            dataSync: 'wifi-only' as const
           },
-          dataSync: 'wifi-only' as const
-        },
-        createdAt: new Date(),
-        lastLoginAt: new Date()
+          createdAt: new Date(),
+          lastLoginAt: new Date()
+        }
+
+        await setDoc(doc(db, 'users', result.user.uid), userDoc, { merge: true })
+        setUser(userDoc)
+        router.push('/')
+      } else {
+        setError(result.error || 'Google sign-in failed')
       }
-
-      await setDoc(doc(db, 'users', userCredential.user.uid), userDoc, { merge: true })
-      setUser(userDoc)
-
-      router.push('/')
     } catch (err: any) {
-      setError(err.message || 'An error occurred')
+      setError(err.message || 'An error occurred during Google sign-in')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Card glass className="w-full max-w-md mx-auto relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
-      
-      <CardHeader className="relative text-center space-y-4">
+    <Card className="w-full max-w-md mx-auto border border-border bg-card">
+      <CardHeader className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-2">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-2xl bg-blue-600 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-2xl font-bold">HomeKeep</h1>
+          <h1 className="text-2xl font-bold text-foreground">NextTaskPro</h1>
         </div>
         
         <div className="space-y-2">
-          <CardTitle className="text-xl">
+          <CardTitle className="text-xl text-foreground">
             {mode === 'signin' ? 'Welcome back' : 'Get started'}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -162,7 +161,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="relative space-y-6">
+      <CardContent className="space-y-6">
         {error && (
           <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
             <p className="text-sm text-destructive">{error}</p>
@@ -172,8 +171,8 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         {/* Google Sign In */}
         <Button
           variant="outline"
-          size="touch"
-          className="w-full glass-effect hover:bg-white/20 dark:hover:bg-black/20"
+          size="lg"
+          className="w-full border-border bg-background hover:bg-muted"
           onClick={handleGoogleAuth}
           disabled={loading}
         >
@@ -184,10 +183,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-glass/50" />
+            <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
+            <span className="bg-card px-2 text-muted-foreground">
               Or continue with email
             </span>
           </div>
@@ -205,11 +204,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={cn(
                   "w-full pl-10 pr-4 py-3 rounded-lg",
-                  "bg-white/10 dark:bg-black/10 backdrop-blur-sm",
-                  "border border-glass/50 focus:border-primary",
+                  "bg-background border border-border",
                   "text-foreground placeholder:text-muted-foreground",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  "min-touch"
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  "transition-colors"
                 )}
                 required={mode === 'signup'}
                 disabled={loading}
@@ -226,11 +224,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               className={cn(
                 "w-full pl-10 pr-4 py-3 rounded-lg",
-                "bg-white/10 dark:bg-black/10 backdrop-blur-sm",
-                "border border-glass/50 focus:border-primary",
+                "bg-background border border-border",
                 "text-foreground placeholder:text-muted-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-primary/20",
-                "min-touch"
+                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                "transition-colors"
               )}
               required
               disabled={loading}
@@ -246,11 +243,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               className={cn(
                 "w-full pl-10 pr-4 py-3 rounded-lg",
-                "bg-white/10 dark:bg-black/10 backdrop-blur-sm",
-                "border border-glass/50 focus:border-primary",
+                "bg-background border border-border",
                 "text-foreground placeholder:text-muted-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-primary/20",
-                "min-touch"
+                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                "transition-colors"
               )}
               required
               disabled={loading}
@@ -260,12 +256,12 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
           <Button 
             type="submit" 
-            size="touch" 
-            className="w-full"
+            size="lg" 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             disabled={loading}
           >
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               mode === 'signin' ? 'Sign In' : 'Create Account'
             )}
@@ -273,7 +269,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         </form>
 
         {/* Toggle Mode */}
-        <div className="text-center pt-4 border-t border-glass/50">
+        <div className="text-center pt-4 border-t border-border">
           <p className="text-sm text-muted-foreground">
             {mode === 'signin' ? "Don't have an account?" : "Already have an account?"}
           </p>
@@ -282,7 +278,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
             size="sm"
             onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
             disabled={loading}
-            className="text-primary hover:text-primary/80"
+            className="text-blue-600 hover:text-blue-700"
           >
             {mode === 'signin' ? 'Create one here' : 'Sign in instead'}
           </Button>
@@ -290,8 +286,8 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
         {/* Features Preview for New Users */}
         {mode === 'signup' && (
-          <div className="rounded-lg bg-white/5 dark:bg-black/5 p-4 space-y-2">
-            <h4 className="text-sm font-medium">What you'll get:</h4>
+          <div className="rounded-lg bg-muted/50 p-4 space-y-2">
+            <h4 className="text-sm font-medium text-foreground">What you'll get:</h4>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• Adaptive dashboard that learns your habits</li>
               <li>• Smart task and bill management</li>

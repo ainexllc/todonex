@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth-store'
 import { useAdaptiveStore } from '@/store/adaptive-store'
-import { onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
-import { auth, db } from '@/lib/firebase'
 import { Navigation } from './navigation'
 import { MobileNavigation } from './mobile-navigation'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -18,10 +15,6 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const { 
-    setFirebaseUser, 
-    setUser, 
-    setLoading, 
-    setInitialized, 
     user,
     firebaseUser,
     loading,
@@ -44,45 +37,12 @@ export function MainLayout({ children }: MainLayoutProps) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Initialize Firebase auth listener
+  // Track app launch when user is available
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setFirebaseUser(firebaseUser)
-      
-      if (firebaseUser) {
-        // Fetch user data from Firestore
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
-          if (userDoc.exists()) {
-            const userData = userDoc.data()
-            setUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email!,
-              displayName: firebaseUser.displayName || userData.displayName,
-              photoURL: firebaseUser.photoURL || userData.photoURL,
-              familyId: userData.familyId,
-              role: userData.role || 'user',
-              preferences: userData.preferences,
-              createdAt: userData.createdAt?.toDate() || new Date(),
-              lastLoginAt: new Date()
-            })
-            
-            // Track app launch
-            trackFeatureUsage('app', 'launch')
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error)
-        }
-      } else {
-        setUser(null)
-      }
-      
-      setLoading(false)
-      setInitialized(true)
-    })
-
-    return unsubscribe
-  }, [setFirebaseUser, setUser, setLoading, setInitialized, trackFeatureUsage])
+    if (user && initialized) {
+      trackFeatureUsage('app', 'launch')
+    }
+  }, [user, initialized, trackFeatureUsage])
 
   // Handle authentication redirects
   useEffect(() => {
@@ -100,10 +60,10 @@ export function MainLayout({ children }: MainLayoutProps) {
   // Show loading spinner during initialization
   if (!initialized || loading) {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-dvh bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-          <p className="text-muted-foreground">Loading HomeKeep...</p>
+          <p className="text-muted-foreground">Loading NextTaskPro...</p>
         </div>
       </div>
     )
@@ -112,14 +72,14 @@ export function MainLayout({ children }: MainLayoutProps) {
   // Show auth layout for authentication pages
   if (!firebaseUser || pathname?.startsWith('/auth')) {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-dvh bg-background">
         {children}
       </div>
     )
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-dvh bg-background">
       {/* Desktop Navigation */}
       {!isMobile && (
         <Navigation />
@@ -135,7 +95,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <header className="sticky top-0 z-40 glass-effect border-b border-glass">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <h1 className="text-xl font-semibold text-foreground">
-              HomeKeep
+              NextTaskPro
             </h1>
             
             {/* Theme toggle and user menu */}

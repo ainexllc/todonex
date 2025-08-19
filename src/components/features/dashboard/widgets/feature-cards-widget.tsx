@@ -99,7 +99,7 @@ export function FeatureCardsWidget({ size = 'medium' }: FeatureCardsWidgetProps)
       <CardHeader>
         <CardTitle className="text-lg">Explore Features</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Discover what HomeKeep can do for your family
+          Discover what NextTaskPro can do for your family
         </p>
       </CardHeader>
       

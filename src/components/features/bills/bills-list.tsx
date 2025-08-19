@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Circle, Calendar, DollarSign, Edit2, Trash2, MoreVertical, AlertTriangle, Clock, Repeat } from 'lucide-react'
+import { CheckCircle2, Circle, Calendar, Edit2, Trash2, MoreVertical, AlertTriangle, Clock, Repeat } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -12,20 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-
-interface Bill {
-  id: string
-  name: string
-  amount: number
-  dueDate: Date
-  category: string
-  description?: string
-  isPaid: boolean
-  isRecurring: boolean
-  recurringInterval?: 'weekly' | 'monthly' | 'yearly'
-  createdAt: Date
-  updatedAt: Date
-}
+import { Bill } from '@/types'
 
 interface BillsListProps {
   bills: Bill[]

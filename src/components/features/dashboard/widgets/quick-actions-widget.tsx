@@ -104,17 +104,15 @@ export function QuickActionsWidget({ size = 'medium' }: QuickActionsWidgetProps)
       : sortedActions.slice(0, 4)
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <Zap className="h-5 w-5 text-primary" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <Zap className="h-4 w-4 text-blue-500" />
           <span>Quick Actions</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
+      <CardContent>
         <div className={cn(
           "grid gap-2",
           size === 'small' ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"
@@ -129,23 +127,19 @@ export function QuickActionsWidget({ size = 'medium' }: QuickActionsWidgetProps)
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-auto p-3 justify-start adaptive-transition",
-                  "hover:scale-[1.02] hover:bg-white/10 dark:hover:bg-black/10",
-                  usageCount > 0 && "ring-1 ring-primary/20 bg-primary/5"
+                  "h-auto p-3 justify-start border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-all bg-white",
+                  usageCount > 0 && "border-blue-200 bg-blue-50"
                 )}
                 onClick={() => handleActionClick(action)}
               >
                 <div className="flex items-center space-x-2 text-left">
-                  <div className={cn(
-                    "rounded-md p-1.5 bg-gradient-to-br",
-                    action.color
-                  )}>
+                  <div className="rounded-md p-1.5 bg-blue-500">
                     <Icon className="h-3 w-3 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium">{action.label}</p>
+                    <p className="text-xs font-medium text-gray-900">{action.label}</p>
                     {usageCount > 0 && (
-                      <p className="text-xs text-primary">
+                      <p className="text-xs text-blue-600">
                         {usageCount} time{usageCount !== 1 ? 's' : ''}
                       </p>
                     )}
@@ -158,11 +152,11 @@ export function QuickActionsWidget({ size = 'medium' }: QuickActionsWidgetProps)
 
         {/* Expand/Collapse for medium/large sizes */}
         {size !== 'small' && sortedActions.length > 4 && (
-          <div className="mt-3 pt-3 border-t border-glass/50">
+          <div className="mt-3 pt-3 border-t border-gray-100">
             <Button
               variant="ghost"
               size="sm"
-              className="w-full text-xs hover:bg-white/10 dark:hover:bg-black/10"
+              className="w-full text-xs text-gray-600 hover:bg-gray-100"
               onClick={() => setIsExpanded(!isExpanded)}
             >
               {isExpanded ? 'Show Less' : `Show ${sortedActions.length - 4} More`}
@@ -172,8 +166,8 @@ export function QuickActionsWidget({ size = 'medium' }: QuickActionsWidgetProps)
 
         {/* Usage tip */}
         {Object.keys(usagePattern?.featureUsage || {}).length === 0 && (
-          <div className="mt-3 pt-3 border-t border-glass/50">
-            <p className="text-xs text-muted-foreground text-center">
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center">
               💡 Most-used actions will appear at the top
             </p>
           </div>

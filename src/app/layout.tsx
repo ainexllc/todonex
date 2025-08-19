@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { MainLayout } from "@/components/layout/main-layout";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,12 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HomeKeep - Your Adaptive Home Management Hub",
+  title: "NextTaskPro - Your Adaptive Home Management Hub",
   description: "An intelligent home management platform that adapts to your family's needs. Track tasks, bills, recipes, shopping lists and more.",
   keywords: ["home management", "family organizer", "task management", "bill tracking", "recipe manager"],
-  authors: [{ name: "HomeKeep Team" }],
-  creator: "HomeKeep",
-  publisher: "HomeKeep",
+  authors: [{ name: "NextTaskPro Team" }],
+  creator: "NextTaskPro",
+  publisher: "NextTaskPro",
   formatDetection: {
     email: false,
     address: false,
@@ -52,7 +53,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="HomeKeep" />
+        <meta name="apple-mobile-web-app-title" content="NextTaskPro" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
       <body
@@ -60,13 +61,15 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <MainLayout>
-            {children}
-          </MainLayout>
+          <AuthProvider>
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

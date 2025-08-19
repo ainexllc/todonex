@@ -88,7 +88,7 @@ export function GettingStartedWidget({ size = 'large' }: GettingStartedWidgetPro
           <span>Quick Start</span>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Choose what you&apos;d like to try first. HomeKeep will adapt to show you more of what you use.
+          Choose what you&apos;d like to try first. NextTaskPro will adapt to show you more of what you use.
         </p>
       </CardHeader>
 

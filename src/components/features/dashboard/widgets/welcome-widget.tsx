@@ -35,13 +35,13 @@ export function WelcomeWidget({ size = 'medium' }: WelcomeWidgetProps) {
       <CardContent className="relative">
         <div className="space-y-3">
           <p className="text-muted-foreground">
-            Welcome to your personalized home management hub. HomeKeep adapts to how you use it, 
+            Welcome to your personalized home management hub. NextTaskPro adapts to how you use it, 
             showing you the most relevant information and features.
           </p>
           
           <div className="rounded-lg bg-white/5 dark:bg-black/5 p-3">
             <p className="text-sm text-muted-foreground">
-              💡 <strong>Tip:</strong> The more you use HomeKeep, the smarter your dashboard becomes. 
+              💡 <strong>Tip:</strong> The more you use NextTaskPro, the smarter your dashboard becomes. 
               Start by adding a task, tracking a bill, or saving a recipe.
             </p>
           </div>

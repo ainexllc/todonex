@@ -24,29 +24,26 @@ export function UpcomingBillsWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-emerald-500/5 to-teal-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <CreditCard className="h-5 w-5 text-green-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <CreditCard className="h-4 w-4 text-blue-500" />
           <span>Upcoming Bills</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-green-500/10 mx-auto flex items-center justify-center">
-            <CreditCard className="h-6 w-6 text-green-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Track Your Bills</h4>
-            <p className="text-sm text-muted-foreground">
-              Never miss a payment with automated bill tracking and reminders
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Track Your Bills</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Never miss a payment with automated bill tracking and reminders
+          </p>
           <Button 
             size="sm" 
+            variant="outline"
             onClick={() => trackFeatureUsage('bills', 'explore')}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -62,29 +59,26 @@ export function ActiveShoppingListsWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-violet-500/5 to-indigo-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <ShoppingCart className="h-5 w-5 text-purple-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <ShoppingCart className="h-4 w-4 text-blue-500" />
           <span>Shopping Lists</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-purple-500/10 mx-auto flex items-center justify-center">
-            <ShoppingCart className="h-6 w-6 text-purple-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <ShoppingCart className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Smart Shopping Lists</h4>
-            <p className="text-sm text-muted-foreground">
-              Organize groceries by store layout and share with family
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Smart Shopping Lists</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Organize groceries by store layout and share with family
+          </p>
           <Button 
             size="sm"
+            variant="outline"
             onClick={() => trackFeatureUsage('shopping', 'explore')}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -100,29 +94,26 @@ export function ThisWeekMealsWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-yellow-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <ChefHat className="h-5 w-5 text-orange-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <ChefHat className="h-4 w-4 text-blue-500" />
           <span>This Week's Meals</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-orange-500/10 mx-auto flex items-center justify-center">
-            <ChefHat className="h-6 w-6 text-orange-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <ChefHat className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Meal Planning</h4>
-            <p className="text-sm text-muted-foreground">
-              Plan weekly meals and generate shopping lists automatically
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Meal Planning</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Plan weekly meals and generate shopping lists automatically
+          </p>
           <Button 
             size="sm"
+            variant="outline"
             onClick={() => trackFeatureUsage('recipes', 'explore')}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -138,29 +129,26 @@ export function TodayEventsWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-blue-500/5 to-cyan-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <Calendar className="h-5 w-5 text-indigo-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <Calendar className="h-4 w-4 text-blue-500" />
           <span>Today's Events</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-indigo-500/10 mx-auto flex items-center justify-center">
-            <Calendar className="h-6 w-6 text-indigo-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <Calendar className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Calendar Integration</h4>
-            <p className="text-sm text-muted-foreground">
-              Sync with Google Calendar and manage family schedules
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Calendar Integration</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Sync with Google Calendar and manage family schedules
+          </p>
           <Button 
             size="sm"
+            variant="outline"
             onClick={() => trackFeatureUsage('calendar', 'explore')}
           >
             <ArrowRight className="mr-2 h-4 w-4" />
@@ -176,29 +164,26 @@ export function RecentNotesWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-amber-500/5 to-orange-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <StickyNote className="h-5 w-5 text-yellow-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <StickyNote className="h-4 w-4 text-blue-500" />
           <span>Quick Notes</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-yellow-500/10 mx-auto flex items-center justify-center">
-            <StickyNote className="h-6 w-6 text-yellow-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <StickyNote className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Family Notes</h4>
-            <p className="text-sm text-muted-foreground">
-              Capture ideas, voice memos, and share family updates
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Family Notes</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Capture ideas, voice memos, and share family updates
+          </p>
           <Button 
             size="sm"
+            variant="outline"
             onClick={() => trackFeatureUsage('notes', 'explore')}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -214,29 +199,26 @@ export function SubscriptionOverviewWidget({ size = 'medium' }: WidgetProps) {
   const { trackFeatureUsage } = useAdaptiveStore()
 
   return (
-    <Card glass className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-rose-500/5 to-red-500/5"></div>
-      
-      <CardHeader className="relative pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <BarChart3 className="h-5 w-5 text-pink-500" />
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base font-medium text-gray-900">
+          <BarChart3 className="h-4 w-4 text-blue-500" />
           <span>Subscriptions</span>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-center py-6 space-y-3">
-          <div className="h-12 w-12 rounded-full bg-pink-500/10 mx-auto flex items-center justify-center">
-            <BarChart3 className="h-6 w-6 text-pink-500" />
+      <CardContent>
+        <div className="text-center py-6">
+          <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+            <BarChart3 className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-1">
-            <h4 className="font-medium">Subscription Tracker</h4>
-            <p className="text-sm text-muted-foreground">
-              Monitor subscriptions and optimize your spending
-            </p>
-          </div>
+          <h4 className="font-medium text-gray-900 mb-2">Subscription Tracker</h4>
+          <p className="text-sm text-gray-600 mb-4">
+            Monitor subscriptions and optimize your spending
+          </p>
           <Button 
             size="sm"
+            variant="outline"
             onClick={() => trackFeatureUsage('subscriptions', 'explore')}
           >
             <Plus className="mr-2 h-4 w-4" />

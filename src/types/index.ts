@@ -230,14 +230,19 @@ export interface Bill {
   category: string
   isPaid: boolean
   paymentMethod?: PaymentMethod
-  attachments: string[]
-  reminders: Reminder[]
-  autopay: boolean
+  attachments?: string[]
+  reminders?: Reminder[]
+  autopay?: boolean
   familyId?: string
   createdBy: string
   paidBy?: string
   paidAt?: Date
   notes?: string
+  description?: string
+  isRecurring?: boolean
+  recurringInterval?: 'monthly' | 'quarterly' | 'yearly'
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface PaymentMethod {

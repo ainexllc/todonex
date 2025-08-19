@@ -66,17 +66,17 @@ export function RecipesWidget() {
 
   if (loading) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <ChefHat className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <ChefHat className="h-4 w-4 mr-2 text-blue-500" />
             Recipes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-white/5 rounded-lg animate-pulse" />
+              <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
             ))}
           </div>
         </CardContent>
@@ -86,34 +86,33 @@ export function RecipesWidget() {
 
   if (recipes.length === 0) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <ChefHat className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <ChefHat className="h-4 w-4 mr-2 text-blue-500" />
             Recipes
           </CardTitle>
           <Link href="/recipes">
             <Button 
               variant="ghost" 
-              size="sm"
-              className="h-8 w-8 p-0 hover:bg-white/10"
+              size="icon"
+              className="h-8 w-8 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('recipes', 'navigate')}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-gray-600" />
             </Button>
           </Link>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">
-            <div className="h-10 w-10 mx-auto mb-2 rounded-lg glass flex items-center justify-center">
-              <ChefHat className="h-5 w-5 text-muted-foreground" />
+          <div className="text-center py-6">
+            <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+              <ChefHat className="h-5 w-5 text-gray-400" />
             </div>
-            <p className="text-sm text-muted-foreground mb-3">No recipes yet</p>
+            <p className="text-sm text-gray-600 mb-4">No recipes yet</p>
             <Link href="/recipes">
               <Button 
                 size="sm" 
-                variant="outline" 
-                className="glass border-glass hover:bg-white/5"
+                variant="outline"
                 onClick={() => trackFeatureUsage('recipes', 'navigate')}
               >
                 Add Recipe
@@ -126,23 +125,23 @@ export function RecipesWidget() {
   }
 
   return (
-    <Card className="glass">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-base font-medium flex items-center">
-          <ChefHat className="h-4 w-4 mr-2" />
+        <CardTitle className="text-base font-medium flex items-center text-gray-900">
+          <ChefHat className="h-4 w-4 mr-2 text-blue-500" />
           Recipes
-          <span className="ml-2 text-xs text-muted-foreground">
+          <span className="ml-2 text-xs text-gray-500">
             ({recipes.length} recipes)
           </span>
         </CardTitle>
         <Link href="/recipes">
           <Button 
             variant="ghost" 
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-white/10"
+            size="icon"
+            className="h-8 w-8 hover:bg-gray-100"
             onClick={() => trackFeatureUsage('recipes', 'navigate')}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 text-gray-600" />
           </Button>
         </Link>
       </CardHeader>
@@ -155,7 +154,7 @@ export function RecipesWidget() {
             return (
               <div
                 key={recipe.id}
-                className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="flex items-start gap-3 p-3 border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-all bg-white cursor-pointer"
               >
                 {/* Recipe Image or Placeholder */}
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
@@ -166,8 +165,8 @@ export function RecipesWidget() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full glass flex items-center justify-center">
-                      <ChefHat className="h-5 w-5 text-muted-foreground" />
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <ChefHat className="h-5 w-5 text-gray-400" />
                     </div>
                   )}
                 </div>
@@ -175,14 +174,14 @@ export function RecipesWidget() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium truncate flex items-center gap-1">
+                      <h4 className="text-sm font-medium truncate flex items-center gap-1 text-gray-900">
                         {recipe.title}
                         {isFavorite && (
                           <Heart className="h-3 w-3 text-red-500 fill-current" />
                         )}
                       </h4>
                       
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                         {totalTime > 0 && (
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -205,7 +204,7 @@ export function RecipesWidget() {
                             <Badge 
                               key={tag} 
                               variant="secondary" 
-                              className="text-xs bg-white/10 text-muted-foreground"
+                              className="text-xs"
                             >
                               {tag}
                             </Badge>
@@ -213,7 +212,7 @@ export function RecipesWidget() {
                           {recipe.tags.length > 2 && (
                             <Badge 
                               variant="secondary" 
-                              className="text-xs bg-white/10 text-muted-foreground"
+                              className="text-xs"
                             >
                               +{recipe.tags.length - 2}
                             </Badge>
@@ -228,12 +227,12 @@ export function RecipesWidget() {
           })}
         </div>
         
-        <div className="mt-3 pt-3 border-t border-glass/50">
+        <div className="mt-4 pt-3 border-t border-gray-100">
           <Link href="/recipes">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full hover:bg-white/10"
+              className="w-full text-gray-600 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('recipes', 'navigate')}
             >
               View All Recipes

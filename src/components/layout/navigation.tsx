@@ -12,7 +12,8 @@ import {
   StickyNote,
   Settings,
   BarChart3,
-  Plus
+  Plus,
+  TrendingUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdaptiveStore } from '@/store/adaptive-store'
@@ -27,6 +28,7 @@ const navigationItems = [
   { name: 'Calendar', href: '/calendar', icon: Calendar, feature: 'calendar' },
   { name: 'Notes', href: '/notes', icon: StickyNote, feature: 'notes' },
   { name: 'Subscriptions', href: '/subscriptions', icon: BarChart3, feature: 'subscriptions' },
+  { name: 'Analytics', href: '/analytics', icon: TrendingUp, feature: 'analytics' },
 ]
 
 export function Navigation() {
@@ -55,7 +57,7 @@ export function Navigation() {
         <div className="flex h-16 items-center px-6">
           <div className="flex items-center space-x-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
-            <span className="text-xl font-bold text-foreground">HomeKeep</span>
+            <span className="text-xl font-bold text-foreground">NextTaskPro</span>
           </div>
         </div>
 

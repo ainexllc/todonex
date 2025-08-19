@@ -79,17 +79,17 @@ export function ShoppingWidget() {
 
   if (loading) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <ShoppingCart className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <ShoppingCart className="h-4 w-4 mr-2 text-blue-500" />
             Shopping List
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-6 bg-white/5 rounded animate-pulse" />
+              <div key={i} className="h-8 bg-gray-100 rounded-lg animate-pulse" />
             ))}
           </div>
         </CardContent>
@@ -99,34 +99,33 @@ export function ShoppingWidget() {
 
   if (items.length === 0) {
     return (
-      <Card className="glass">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <ShoppingCart className="h-4 w-4 mr-2" />
+          <CardTitle className="text-base font-medium flex items-center text-gray-900">
+            <ShoppingCart className="h-4 w-4 mr-2 text-blue-500" />
             Shopping List
           </CardTitle>
           <Link href="/shopping">
             <Button 
               variant="ghost" 
-              size="sm"
-              className="h-8 w-8 p-0 hover:bg-white/10"
+              size="icon"
+              className="h-8 w-8 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('shopping', 'navigate')}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-gray-600" />
             </Button>
           </Link>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">
-            <div className="h-10 w-10 mx-auto mb-2 rounded-lg glass flex items-center justify-center">
-              <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+          <div className="text-center py-6">
+            <div className="h-10 w-10 mx-auto mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+              <ShoppingCart className="h-5 w-5 text-gray-400" />
             </div>
-            <p className="text-sm text-muted-foreground mb-3">Shopping list is empty</p>
+            <p className="text-sm text-gray-600 mb-4">Shopping list is empty</p>
             <Link href="/shopping">
               <Button 
                 size="sm" 
-                variant="outline" 
-                className="glass border-glass hover:bg-white/5"
+                variant="outline"
                 onClick={() => trackFeatureUsage('shopping', 'navigate')}
               >
                 Add Items
@@ -139,47 +138,47 @@ export function ShoppingWidget() {
   }
 
   return (
-    <Card className="glass">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-base font-medium flex items-center">
-          <ShoppingCart className="h-4 w-4 mr-2" />
+        <CardTitle className="text-base font-medium flex items-center text-gray-900">
+          <ShoppingCart className="h-4 w-4 mr-2 text-blue-500" />
           Shopping List
-          <span className="ml-2 text-xs text-muted-foreground">
+          <span className="ml-2 text-xs text-gray-500">
             ({items.length} items)
           </span>
         </CardTitle>
         <Link href="/shopping">
           <Button 
             variant="ghost" 
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-white/10"
+            size="icon"
+            className="h-8 w-8 hover:bg-gray-100"
             onClick={() => trackFeatureUsage('shopping', 'navigate')}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 text-gray-600" />
           </Button>
         </Link>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-all bg-white"
             >
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0 hover:bg-white/10"
+                size="icon"
+                className="h-5 w-5 p-0 hover:bg-gray-100 rounded-full"
                 onClick={() => toggleItem(item.id, !item.purchased)}
               >
-                <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                <Circle className="h-4 w-4 text-gray-400 hover:text-blue-500" />
               </Button>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm truncate">{item.name}</span>
+                  <span className="text-sm font-medium text-gray-900 truncate">{item.name}</span>
                   {formatQuantity(item) && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                       {formatQuantity(item)}
                     </span>
                   )}
@@ -195,12 +194,12 @@ export function ShoppingWidget() {
           ))}
         </div>
         
-        <div className="mt-3 pt-3 border-t border-glass/50">
+        <div className="mt-4 pt-3 border-t border-gray-100">
           <Link href="/shopping">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="w-full hover:bg-white/10"
+              className="w-full text-gray-600 hover:bg-gray-100"
               onClick={() => trackFeatureUsage('shopping', 'navigate')}
             >
               View Shopping List

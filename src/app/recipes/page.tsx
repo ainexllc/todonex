@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, ChefHat, Clock, Users, Search, WifiOff } from 'lucide-react'
+import { Plus, ChefHat, Search, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RecipeGrid } from '@/components/features/recipes/recipe-grid'
@@ -82,8 +82,20 @@ export default function RecipesPage() {
   const handleCreateRecipe = async (recipeData: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt' | 'familyId' | 'createdBy'>) => {
     if (!user || !online) return
 
+    const recipeId = generateId()
+    const now = new Date()
+    
+    const recipe: Recipe = {
+      id: recipeId,
+      ...recipeData,
+      familyId: user.familyId || '',
+      createdBy: user.id,
+      createdAt: now,
+      updatedAt: now
+    }
+
     try {
-      await createDocument<Recipe>('recipes', generateId(), recipeData)
+      await createDocument<Recipe>('recipes', recipeId, recipe)
       
       setShowForm(false)
       trackFeatureUsage('recipes', 'create')
