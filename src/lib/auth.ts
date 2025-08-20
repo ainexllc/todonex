@@ -26,20 +26,9 @@ const isLocalhost = () => {
 const canUsePopup = () => {
   if (typeof window === 'undefined') return false
   
-  // Always use popup on localhost for better dev experience
-  if (isLocalhost()) return true
-  
-  // Check if popup is supported
-  try {
-    const popup = window.open('', '_blank', 'width=1,height=1')
-    if (popup) {
-      popup.close()
-      return true
-    }
-    return false
-  } catch {
-    return false
-  }
+  // Use popup for both localhost AND production (like HabitTracker)
+  // Modern browsers generally allow popups for user-initiated actions
+  return true
 }
 
 export interface AuthResult {
@@ -47,38 +36,28 @@ export interface AuthResult {
   error?: string
 }
 
-// Enhanced Google Sign-In with environment detection
+// Enhanced Google Sign-In with popup method (like HabitTracker)
 export async function signInWithGoogle(): Promise<AuthResult> {
   try {
-    let userCredential
-    
-    if (canUsePopup()) {
-      // Use popup method (localhost and supported environments)
-      console.log('Using popup authentication method')
-      userCredential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver)
-    } else {
-      // Use redirect method (production and popup-blocked environments)
-      console.log('Using redirect authentication method')
-      
-      // Check if we're returning from a redirect
-      const redirectResult = await getRedirectResult(auth)
-      if (redirectResult) {
-        return { user: redirectResult.user }
-      }
-      
-      // Initiate redirect
-      await signInWithRedirect(auth, googleProvider)
-      // This will redirect away, so we won't reach this point
-      return { user: null }
-    }
-    
+    console.log('Using popup authentication method')
+    const userCredential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver)
     return { user: userCredential.user }
     
   } catch (error) {
     console.error('Google Sign-In Error:', error)
+    
+    // If popup fails, provide helpful error message
+    const authError = error as AuthError
+    if (authError.code === 'auth/popup-blocked') {
+      return { 
+        user: null, 
+        error: 'Please allow popups for this site and try again. You may need to check your browser\'s popup blocker settings.' 
+      }
+    }
+    
     return { 
       user: null, 
-      error: getAuthErrorMessage(error as AuthError) 
+      error: getAuthErrorMessage(authError) 
     }
   }
 }
