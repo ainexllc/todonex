@@ -32,7 +32,10 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div 
+      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
+      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
+    >
       <CalendarView 
         onNewEvent={handleNewEvent}
         onEditEvent={handleEditEvent}

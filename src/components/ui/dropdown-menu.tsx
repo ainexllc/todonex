@@ -24,8 +24,10 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-lg px-2 py-2 text-sm",
-      "outline-none focus:bg-white/10 data-[state=open]:bg-white/10",
+      "flex cursor-default select-none items-center rounded-xl px-3 py-2.5 text-sm font-medium",
+      "outline-none transition-all duration-200",
+      "focus:bg-hover-bg hover:bg-hover-bg hover:-translate-y-0.5",
+      "data-[state=open]:bg-hover-bg data-[state=open]:shadow-sm",
       "touch-friendly", // 44px minimum height
       inset && "pl-8",
       className
@@ -33,7 +35,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className="ml-auto h-4 w-4" />
+    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200" />
   </DropdownMenuPrimitive.SubTrigger>
 ))
 DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName
@@ -45,8 +47,9 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-xl p-1",
-      "bg-white/10 backdrop-filter backdrop-blur-md border border-white/20 shadow-lg",
+      "z-50 min-w-[10rem] overflow-hidden rounded-2xl p-2",
+      "bg-card/95 backdrop-filter backdrop-blur-xl border-2 border-border",
+      "shadow-2xl shadow-glass-shadow/20",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -62,14 +65,15 @@ DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayNam
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = 8, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-xl p-1",
-        "bg-white/10 backdrop-filter backdrop-blur-md border border-white/20 shadow-lg",
+        "z-50 min-w-[10rem] overflow-hidden rounded-2xl p-2",
+        "bg-card/95 backdrop-filter backdrop-blur-xl border-2 border-border",
+        "shadow-2xl shadow-glass-shadow/20",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -92,8 +96,11 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-lg px-2 py-2 text-sm",
-      "outline-none transition-colors focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-xl px-3 py-2.5 text-sm font-medium",
+      "outline-none transition-all duration-200",
+      "focus:bg-hover-bg hover:bg-hover-bg hover:-translate-y-0.5 hover:shadow-sm",
+      "active:translate-y-0 active:shadow-none",
+      "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       "touch-friendly", // 44px minimum height
       inset && "pl-8",
       className

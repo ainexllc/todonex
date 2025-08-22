@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth-store'
 import { useAdaptiveStore } from '@/store/adaptive-store'
-import { Navigation } from './navigation'
+import { Sidebar } from './Sidebar'
 import { MobileNavigation } from './mobile-navigation'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 
 interface MainLayoutProps {
@@ -22,8 +21,23 @@ export function MainLayout({ children }: MainLayoutProps) {
   } = useAuthStore()
   const { trackFeatureUsage } = useAdaptiveStore()
   const [isMobile, setIsMobile] = useState(false)
+  const [emergencyBypass, setEmergencyBypass] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  
+  // Emergency bypass for persistent loading issues in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const timer = setTimeout(() => {
+        if (!initialized && loading) {
+          console.warn('MainLayout: Emergency bypass activated due to persistent loading')
+          setEmergencyBypass(true)
+        }
+      }, 15000) // 15 seconds
+      
+      return () => clearTimeout(timer)
+    }
+  }, [initialized, loading])
 
   // Handle responsive design
   useEffect(() => {
@@ -57,13 +71,24 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [firebaseUser, initialized, loading, pathname, router])
 
-  // Show loading spinner during initialization
-  if (!initialized || loading) {
+  // Show loading spinner during initialization (unless emergency bypass is active)
+  if ((!initialized || loading) && !emergencyBypass) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
           <p className="text-muted-foreground">Loading NextTaskPro...</p>
+          <p className="text-xs text-muted-foreground opacity-60">
+            Initialized: {initialized ? 'Yes' : 'No'} | Loading: {loading ? 'Yes' : 'No'}
+          </p>
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              onClick={() => setEmergencyBypass(true)}
+              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+            >
+              Emergency Bypass (Dev Only)
+            </button>
+          )}
         </div>
       </div>
     )
@@ -79,38 +104,19 @@ export function MainLayout({ children }: MainLayoutProps) {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      {/* Desktop Navigation */}
+    <div className="flex min-h-screen bg-background">
+      {/* Desktop Sidebar */}
       {!isMobile && (
-        <Navigation />
+        <Sidebar />
       )}
       
       {/* Main Content */}
-      <div className={cn(
-        "min-h-dvh transition-all duration-300",
-        !isMobile && "pl-64", // Desktop sidebar width
+      <main className={cn(
+        "flex-1 overflow-auto page-transition",
         isMobile && "pb-16" // Mobile bottom nav height
       )}>
-        {/* Header */}
-        <header className="sticky top-0 z-40 glass-effect border-b border-glass">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            <h1 className="text-xl font-semibold text-foreground">
-              NextTaskPro
-            </h1>
-            
-            {/* Theme toggle and user menu */}
-            <div className="flex items-center space-x-3">
-              <ThemeToggle />
-              <div className="h-8 w-8 rounded-full glass-effect"></div>
-            </div>
-          </div>
-        </header>
-        
-        {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
-      </div>
+        {children}
+      </main>
       
       {/* Mobile Navigation */}
       {isMobile && (

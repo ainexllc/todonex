@@ -176,99 +176,144 @@ export default function BillsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Bills & Budget</h1>
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            Track your bills and manage your budget
-            {!online && (
-              <span className="flex items-center gap-1 text-amber-600">
-                <WifiOff className="h-3 w-3" />
-                Offline
-              </span>
-            )}
-          </p>
+    <div 
+      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
+      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground flex gap-2 items-center">
+              <CreditCard className="h-5 w-5" />
+              Bills & Budget
+            </h1>
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              Track your bills and manage your budget
+              {!online && (
+                <span className="flex items-center gap-1 text-amber-600">
+                  <WifiOff className="h-3 w-3" />
+                  Offline
+                </span>
+              )}
+            </p>
+          </div>
+          
+          <Button onClick={() => setShowForm(true)} disabled={!online} className="h-7 text-xs">
+            <Plus className="h-3 w-3 mr-2" />
+            Add Bill
+          </Button>
         </div>
-        
-        <Button onClick={() => setShowForm(true)} disabled={!online}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Bill
-        </Button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-primary">{billStats.total}</div>
-          <div className="text-xs text-muted-foreground">Total Bills</div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-primary">{billStats.total}</div>
+            <div className="text-xs text-muted-foreground">Total Bills</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-orange-500">{billStats.pending}</div>
+            <div className="text-xs text-muted-foreground">Pending</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-red-500">{billStats.overdue}</div>
+            <div className="text-xs text-muted-foreground">Overdue</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-green-500">{billStats.paid}</div>
+            <div className="text-xs text-muted-foreground">Paid</div>
+          </div>
         </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-orange-500">{billStats.pending}</div>
-          <div className="text-xs text-muted-foreground">Pending</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-red-500">{billStats.overdue}</div>
-          <div className="text-xs text-muted-foreground">Overdue</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-green-500">{billStats.paid}</div>
-          <div className="text-xs text-muted-foreground">Paid</div>
-        </div>
-      </div>
 
-      {/* Amount Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-blue-500" />
-                Outstanding
-              </h3>
-              <p className="text-3xl font-bold text-blue-500 mt-2">
-                {formatCurrency(billStats.totalAmount)}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {billStats.pending} pending bills
-              </p>
+        {/* Amount Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-blue-500" />
+                  Outstanding
+                </h3>
+                <p className="text-xl font-bold text-blue-500 mt-2">
+                  {formatCurrency(billStats.totalAmount)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {billStats.pending} pending bills
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                  Overdue
+                </h3>
+                <p className="text-xl font-bold text-red-500 mt-2">
+                  {formatCurrency(billStats.overdueAmount)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {billStats.overdue} overdue bills
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                Overdue
-              </h3>
-              <p className="text-3xl font-bold text-red-500 mt-2">
-                {formatCurrency(billStats.overdueAmount)}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {billStats.overdue} overdue bills
-              </p>
+        {/* Filters */}
+        <BillFilters 
+          filters={filters} 
+          onFiltersChange={setFilters}
+          categories={[...new Set(bills.map(b => b.category))]}
+        />
+
+        {/* Bills List */}
+        <BillsList
+          bills={filteredBills}
+          onBillUpdate={handleUpdateBill}
+          onBillDelete={handleDeleteBill}
+          onBillEdit={handleEditBill}
+        />
+
+        {/* Empty State */}
+        {bills.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
+              <CreditCard className="h-8 w-8 text-muted-foreground" />
             </div>
+            <h3 className="text-sm font-semibold mb-2">No bills yet</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Add your bills to track due dates and manage your budget
+            </p>
+            <Button onClick={() => setShowForm(true)} className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-2" />
+              Add First Bill
+            </Button>
           </div>
-        </div>
+        )}
+
+        {/* No Results State */}
+        {bills.length > 0 && filteredBills.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
+              <Calendar className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-semibold mb-2">No bills match your filters</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Try adjusting your search or filter criteria
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => setFilters({ status: 'all', category: 'all', search: '', period: 'current' })}
+              className="h-7 text-xs glass border-glass hover:bg-white/5"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
       </div>
-
-      {/* Filters */}
-      <BillFilters 
-        filters={filters} 
-        onFiltersChange={setFilters}
-        categories={[...new Set(bills.map(b => b.category))]}
-      />
-
-      {/* Bills List */}
-      <BillsList
-        bills={filteredBills}
-        onBillUpdate={handleUpdateBill}
-        onBillDelete={handleDeleteBill}
-        onBillEdit={handleEditBill}
-      />
 
       {/* Bill Form Modal */}
       {showForm && (
@@ -280,43 +325,6 @@ export default function BillsPage() {
           }
           onClose={handleCloseForm}
         />
-      )}
-
-      {/* Empty State */}
-      {bills.length === 0 && (
-        <div className="text-center py-12">
-          <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
-            <CreditCard className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No bills yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Add your bills to track due dates and manage your budget
-          </p>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add First Bill
-          </Button>
-        </div>
-      )}
-
-      {/* No Results State */}
-      {bills.length > 0 && filteredBills.length === 0 && (
-        <div className="text-center py-12">
-          <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
-            <Calendar className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No bills match your filters</h3>
-          <p className="text-muted-foreground mb-4">
-            Try adjusting your search or filter criteria
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => setFilters({ status: 'all', category: 'all', search: '', period: 'current' })}
-            className="glass border-glass hover:bg-white/5"
-          >
-            Clear Filters
-          </Button>
-        </div>
       )}
     </div>
   )

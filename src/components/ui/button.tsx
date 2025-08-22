@@ -4,28 +4,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 min-touch touch-action-manipulation",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium tracking-wide transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 min-touch touch-action-manipulation grok-button-enhanced",
   {
     variants: {
       variant: {
-        default: "bg-blue-500 text-white hover:bg-blue-600 shadow-sm active:scale-95",
-        destructive:
-          "bg-red-500 text-white hover:bg-red-600 shadow-sm active:scale-95",
-        outline:
-          "border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm active:scale-95",
-        secondary:
-          "bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm active:scale-95",
-        ghost: "hover:bg-gray-100 text-gray-700 active:scale-95",
-        link: "text-blue-500 underline-offset-4 hover:underline",
-        glass: "glass-effect text-foreground hover:bg-white/20 dark:hover:bg-black/20",
-        success: "bg-green-500 text-white hover:bg-green-600 shadow-sm active:scale-95",
+        default: "bg-primary text-primary-foreground shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
+        outline: "border-2 border-border bg-background text-foreground shadow-sm hover:shadow-md hover:bg-hover-bg hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
+        ghost: "text-foreground hover:bg-hover-bg hover:-translate-y-0.5 active:translate-y-0",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
+        success: "bg-green-500 text-white shadow-sm hover:shadow-md hover:bg-green-600 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-lg px-8",
-        icon: "h-9 w-9",
-        touch: "min-h-touch min-w-touch h-12 px-6", // Mobile-first touch-friendly
+        default: "h-10 px-6 py-2.5 rounded-xl",
+        sm: "h-8 px-4 py-1.5 rounded-lg text-xs",
+        lg: "h-12 px-8 py-3 rounded-xl text-base",
+        icon: "h-10 w-10 rounded-xl",
+        touch: "min-h-touch min-w-touch h-12 px-6 rounded-xl", // Mobile-first touch-friendly
       },
     },
     defaultVariants: {

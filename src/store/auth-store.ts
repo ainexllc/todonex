@@ -78,8 +78,17 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-store',
       partialize: (state) => ({
         user: state.user,
-        initialized: state.initialized
+        // Don't persist loading or initialized state to prevent hydration issues
       }),
+      // Add onRehydrateStorage to handle hydration properly
+      onRehydrateStorage: () => (state) => {
+        console.log('Auth store hydrated:', state)
+        // Ensure loading and initialized states are reset after hydration
+        if (state) {
+          state.loading = true
+          state.initialized = false
+        }
+      },
     }
   )
 )

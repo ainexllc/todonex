@@ -194,75 +194,120 @@ export default function RecipesPage() {
   const allTags = [...new Set(recipes.flatMap(r => r.tags || []))]
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Recipes</h1>
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            {recipes.length} recipes in your collection
-            {!online && (
-              <span className="flex items-center gap-1 text-amber-600">
-                <WifiOff className="h-3 w-3" />
-                Offline
-              </span>
-            )}
-          </p>
+    <div 
+      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
+      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground flex gap-2 items-center">
+              <ChefHat className="h-5 w-5" />
+              Recipes
+            </h1>
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              {recipes.length} recipes in your collection
+              {!online && (
+                <span className="flex items-center gap-1 text-amber-600">
+                  <WifiOff className="h-3 w-3" />
+                  Offline
+                </span>
+              )}
+            </p>
+          </div>
+          
+          <Button onClick={() => setShowForm(true)} disabled={!online} className="h-7 text-xs">
+            <Plus className="h-3 w-3 mr-2" />
+            Add Recipe
+          </Button>
         </div>
-        
-        <Button onClick={() => setShowForm(true)} disabled={!online}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Recipe
-        </Button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-primary">{recipeStats.total}</div>
-          <div className="text-xs text-muted-foreground">Total Recipes</div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-primary">{recipeStats.total}</div>
+            <div className="text-xs text-muted-foreground">Total Recipes</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-green-500">{recipeStats.quick}</div>
+            <div className="text-xs text-muted-foreground">Quick (≤30min)</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-red-500">{recipeStats.favorites}</div>
+            <div className="text-xs text-muted-foreground">Favorites</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-blue-500">{recipeStats.recentlyAdded}</div>
+            <div className="text-xs text-muted-foreground">This Week</div>
+          </div>
         </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-green-500">{recipeStats.quick}</div>
-          <div className="text-xs text-muted-foreground">Quick (≤30min)</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-red-500">{recipeStats.favorites}</div>
-          <div className="text-xs text-muted-foreground">Favorites</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-blue-500">{recipeStats.recentlyAdded}</div>
-          <div className="text-xs text-muted-foreground">This Week</div>
-        </div>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="space-y-4">
-        {/* Quick Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search recipes, ingredients, or tags..."
-            value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-            className="pl-10 glass border-glass"
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          {/* Quick Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Input
+              placeholder="Search recipes, ingredients, or tags..."
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              className="pl-8 h-7 text-xs glass border-glass"
+            />
+          </div>
+
+          {/* Advanced Filters */}
+          <RecipeFilters 
+            filters={filters} 
+            onFiltersChange={setFilters}
+            availableTags={allTags}
           />
         </div>
 
-        {/* Advanced Filters */}
-        <RecipeFilters 
-          filters={filters} 
-          onFiltersChange={setFilters}
-          availableTags={allTags}
+        {/* Recipe Grid */}
+        <RecipeGrid
+          recipes={filteredRecipes}
+          onRecipeEdit={handleEditRecipe}
+          onRecipeDelete={handleDeleteRecipe}
         />
-      </div>
 
-      {/* Recipe Grid */}
-      <RecipeGrid
-        recipes={filteredRecipes}
-        onRecipeEdit={handleEditRecipe}
-        onRecipeDelete={handleDeleteRecipe}
-      />
+        {/* Empty State */}
+        {recipes.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
+              <ChefHat className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-semibold mb-2">No recipes yet</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Start building your recipe collection by adding your favorite dishes
+            </p>
+            <Button onClick={() => setShowForm(true)} className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-2" />
+              Add First Recipe
+            </Button>
+          </div>
+        )}
+
+        {/* No Results State */}
+        {recipes.length > 0 && filteredRecipes.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-semibold mb-2">No recipes found</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Try adjusting your search or filters to find recipes
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => setFilters({ search: '', tags: [], prepTime: 'all', servings: 'all' })}
+              className="h-7 text-xs glass border-glass hover:bg-white/5"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Recipe Form Modal */}
       {showForm && (
@@ -274,43 +319,6 @@ export default function RecipesPage() {
           }
           onClose={handleCloseForm}
         />
-      )}
-
-      {/* Empty State */}
-      {recipes.length === 0 && (
-        <div className="text-center py-12">
-          <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
-            <ChefHat className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No recipes yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Start building your recipe collection by adding your favorite dishes
-          </p>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add First Recipe
-          </Button>
-        </div>
-      )}
-
-      {/* No Results State */}
-      {recipes.length > 0 && filteredRecipes.length === 0 && (
-        <div className="text-center py-12">
-          <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
-            <Search className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No recipes found</h3>
-          <p className="text-muted-foreground mb-4">
-            Try adjusting your search or filters to find recipes
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => setFilters({ search: '', tags: [], prepTime: 'all', servings: 'all' })}
-            className="glass border-glass hover:bg-white/5"
-          >
-            Clear Filters
-          </Button>
-        </div>
       )}
     </div>
   )

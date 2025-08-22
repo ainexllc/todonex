@@ -15,7 +15,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { setUser, setFirebaseUser, setLoading, setInitialized } = useAuthStore()
 
   useEffect(() => {
+    console.log('AuthProvider: Starting initialization')
+    
+    // Immediately set loading to true to ensure consistent state
+    setLoading(true)
+    setInitialized(false)
+    
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('Auth initialization timeout - setting initialized to true')
+      setLoading(false)
+      setInitialized(true)
+    }, 5000) // 5 second timeout
+
+    console.log('AuthProvider: Setting up Firebase auth listener')
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      clearTimeout(timeoutId) // Clear timeout since auth state changed
+      console.log('AuthProvider: Auth state changed', firebaseUser ? 'User logged in' : 'User logged out')
       setLoading(true)
       setFirebaseUser(firebaseUser)
 
@@ -99,7 +116,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setInitialized(true)
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribe()
+      clearTimeout(timeoutId)
+    }
   }, [setUser, setFirebaseUser, setLoading, setInitialized])
 
   return <>{children}</>

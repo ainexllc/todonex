@@ -32,23 +32,24 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 max-w-7xl">
-        <SubscriptionsList 
-          onNewSubscription={handleNewSubscription}
-          onEditSubscription={handleEditSubscription}
-        />
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <SubscriptionForm
-              subscription={editingSubscription}
-              onSaved={handleSubscriptionSaved}
-              onCancel={handleCancel}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+    <div 
+      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
+      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
+    >
+      <SubscriptionsList 
+        onNewSubscription={handleNewSubscription}
+        onEditSubscription={handleEditSubscription}
+      />
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <SubscriptionForm
+            subscription={editingSubscription}
+            onSaved={handleSubscriptionSaved}
+            onCancel={handleCancel}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

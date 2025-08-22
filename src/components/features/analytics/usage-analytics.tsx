@@ -56,16 +56,17 @@ export function UsageAnalytics({ className }: UsageAnalyticsProps) {
     if (usagePattern) {
       const featureInsights = Object.entries(usagePattern.featureUsage).map(([name, data]) => {
         const score = calculateFeatureScore(data)
+        const lastUsedDate = toDate(data.lastUsed)
         return {
           name,
           displayName: featureDisplayNames[name] || name,
           count: data.count,
-          lastUsed: data.lastUsed,
+          lastUsed: lastUsedDate,
           frequency: data.frequency,
           totalTime: data.totalTime,
           score,
           trend: calculateTrend(data),
-          insights: generateFeatureInsights(name, data)
+          insights: generateFeatureInsights(name, { ...data, lastUsed: lastUsedDate })
         }
       }).sort((a, b) => b.score - a.score)
 
@@ -75,16 +76,27 @@ export function UsageAnalytics({ className }: UsageAnalyticsProps) {
     }
   }, [usagePattern])
 
-  const calculateFeatureScore = (data: { count: number; lastUsed: Date; totalTime: number }): number => {
-    const recency = Math.max(0, 7 - (Date.now() - data.lastUsed.getTime()) / (1000 * 60 * 60 * 24))
+  // Helper function to safely convert Firebase Timestamp to Date
+  const toDate = (dateValue: any): Date => {
+    if (!dateValue) return new Date()
+    if (dateValue instanceof Date) return dateValue
+    if (dateValue.toDate) return dateValue.toDate() // Firebase Timestamp
+    if (dateValue.seconds) return new Date(dateValue.seconds * 1000) // Firebase Timestamp object
+    return new Date(dateValue) // Fallback for string or number
+  }
+
+  const calculateFeatureScore = (data: { count: number; lastUsed: any; totalTime: number }): number => {
+    const lastUsedDate = toDate(data.lastUsed)
+    const recency = Math.max(0, 7 - (Date.now() - lastUsedDate.getTime()) / (1000 * 60 * 60 * 24))
     const frequency = data.count
     const engagement = data.totalTime / 1000 / 60 // minutes
     
     return (recency * 0.3) + (frequency * 0.5) + (engagement * 0.2)
   }
 
-  const calculateTrend = (data: { count: number; lastUsed: Date }): 'up' | 'down' | 'stable' => {
-    const daysSinceLastUse = (Date.now() - data.lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+  const calculateTrend = (data: { count: number; lastUsed: any }): 'up' | 'down' | 'stable' => {
+    const lastUsedDate = toDate(data.lastUsed)
+    const daysSinceLastUse = (Date.now() - lastUsedDate.getTime()) / (1000 * 60 * 60 * 24)
     
     if (daysSinceLastUse <= 1) return 'up'
     if (daysSinceLastUse > 7) return 'down'

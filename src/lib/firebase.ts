@@ -38,21 +38,29 @@ const requiredEnvVars = [
 if (typeof window !== 'undefined') {
   const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar])
   if (missingVars.length > 0) {
-    console.error('Missing Firebase environment variables:', missingVars)
-    // Only throw if we're using demo config in production
-    if (process.env.NODE_ENV === 'production' && firebaseConfig.apiKey === 'demo-api-key') {
-      throw new Error(`Missing required Firebase environment variables: ${missingVars.join(', ')}`)
+    // Only show warning in development, error in production
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Missing Firebase environment variables:', missingVars)
+      if (firebaseConfig.apiKey === 'demo-api-key') {
+        throw new Error(`Missing required Firebase environment variables: ${missingVars.join(', ')}`)
+      }
+    } else {
+      console.warn('Using demo Firebase config in development. Missing env vars:', missingVars)
     }
   }
 }
 
 // Initialize Firebase
+console.log('Initializing Firebase app...')
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+console.log('Firebase app initialized:', app.name)
 
 // Initialize Firebase services
+console.log('Initializing Firebase services...')
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
+console.log('Firebase services initialized successfully')
 
 // Connect to emulators in development (only if explicitly enabled)
 if (process.env.NODE_ENV === 'development' && process.env.USE_FIREBASE_EMULATOR === 'true' && typeof window !== 'undefined') {

@@ -93,7 +93,8 @@ export async function getUserDocuments<T>(
       ...data,
       id: doc.id,
       createdAt: data.createdAt?.toDate(),
-      updatedAt: data.updatedAt?.toDate()
+      updatedAt: data.updatedAt?.toDate(),
+      dueDate: data.dueDate?.toDate ? data.dueDate.toDate() : data.dueDate
     } as T
   })
 }
@@ -121,7 +122,8 @@ export function subscribeToUserDocuments<T>(
         ...data,
         id: doc.id,
         createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate()
+        updatedAt: data.updatedAt?.toDate(),
+        dueDate: data.dueDate?.toDate ? data.dueDate.toDate() : data.dueDate
       } as T
     })
     callback(items)

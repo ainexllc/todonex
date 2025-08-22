@@ -172,75 +172,100 @@ export default function ShoppingPage() {
   }, {} as Record<string, any[]>)
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Shopping List</h1>
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            {itemStats.pending} to buy, {itemStats.purchased} purchased
-            {!online && (
-              <span className="flex items-center gap-1 text-amber-600">
-                <WifiOff className="h-3 w-3" />
-                Offline
-              </span>
-            )}
-          </p>
-        </div>
+    <div 
+      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
+      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground flex gap-2 items-center">
+              <ShoppingCart className="h-5 w-5" />
+              Shopping List
+            </h1>
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
+              {itemStats.pending} to buy, {itemStats.purchased} purchased
+              {!online && (
+                <span className="flex items-center gap-1 text-amber-600">
+                  <WifiOff className="h-3 w-3" />
+                  Offline
+                </span>
+              )}
+            </p>
+          </div>
         
-        <div className="flex gap-2">
-          {itemStats.purchased > 0 && (
-            <Button 
-              variant="outline" 
-              onClick={clearPurchased}
-              disabled={!online}
-              className="glass border-glass hover:bg-white/5"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Clear Purchased
+          <div className="flex gap-2">
+            {itemStats.purchased > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={clearPurchased}
+                disabled={!online}
+                className="h-7 text-xs"
+              >
+                <Check className="h-3 w-3 mr-2" />
+                Clear Purchased
+              </Button>
+            )}
+            <Button onClick={() => setShowForm(true)} disabled={!online} className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-2" />
+              Add Item
             </Button>
-          )}
-          <Button onClick={() => setShowForm(true)} disabled={!online}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Item
-          </Button>
+          </div>
         </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-primary">{itemStats.total}</div>
+            <div className="text-xs text-muted-foreground">Total Items</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-orange-500">{itemStats.pending}</div>
+            <div className="text-xs text-muted-foreground">To Buy</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-green-500">{itemStats.purchased}</div>
+            <div className="text-xs text-muted-foreground">Purchased</div>
+          </div>
+          <div className="glass rounded-2xl p-4 text-center">
+            <div className="text-lg font-bold text-blue-500">{itemStats.categories}</div>
+            <div className="text-xs text-muted-foreground">Categories</div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <ShoppingFilters 
+          filters={filters} 
+          onFiltersChange={setFilters}
+          categories={[...new Set(items.map(i => i.category).filter(Boolean))]}
+        />
+
+        {/* Shopping List */}
+        <ShoppingList
+          groupedItems={groupedItems}
+          onItemUpdate={handleUpdateItem}
+          onItemDelete={handleDeleteItem}
+          onItemEdit={handleEditItem}
+        />
+
+        {/* Empty State */}
+        {items.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-semibold mb-2">No items in your shopping list</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Add items to your shopping list to keep track of what you need to buy
+            </p>
+            <Button onClick={() => setShowForm(true)} className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-2" />
+              Add First Item
+            </Button>
+          </div>
+        )}
       </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-primary">{itemStats.total}</div>
-          <div className="text-xs text-muted-foreground">Total Items</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-orange-500">{itemStats.pending}</div>
-          <div className="text-xs text-muted-foreground">To Buy</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-green-500">{itemStats.purchased}</div>
-          <div className="text-xs text-muted-foreground">Purchased</div>
-        </div>
-        <div className="glass rounded-2xl p-4 text-center">
-          <div className="text-2xl font-bold text-blue-500">{itemStats.categories}</div>
-          <div className="text-xs text-muted-foreground">Categories</div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <ShoppingFilters 
-        filters={filters} 
-        onFiltersChange={setFilters}
-        categories={[...new Set(items.map(i => i.category).filter(Boolean))]}
-      />
-
-      {/* Shopping List */}
-      <ShoppingList
-        groupedItems={groupedItems}
-        onItemUpdate={handleUpdateItem}
-        onItemDelete={handleDeleteItem}
-        onItemEdit={handleEditItem}
-      />
 
       {/* Shopping Form Modal */}
       {showForm && (
@@ -252,23 +277,6 @@ export default function ShoppingPage() {
           }
           onClose={handleCloseForm}
         />
-      )}
-
-      {/* Empty State */}
-      {items.length === 0 && (
-        <div className="text-center py-12">
-          <div className="h-16 w-16 mx-auto mb-4 rounded-2xl glass flex items-center justify-center">
-            <ShoppingCart className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No items in your shopping list</h3>
-          <p className="text-muted-foreground mb-4">
-            Add items to your shopping list to keep track of what you need to buy
-          </p>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add First Item
-          </Button>
-        </div>
       )}
     </div>
   )
