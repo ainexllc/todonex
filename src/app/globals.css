@@ -260,17 +260,17 @@ input, textarea {
 /* Task typography using Universal Sans Text */
 .task-title {
   font-family: 'Inter', 'Universal Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   font-feature-settings: 'kern' 1, 'liga' 1;
-  font-size: 0.875rem !important; /* 14px - readable but compact */
-  line-height: 1.4;
+  font-size: 0.875rem !important; /* 14px - same as text-sm */
+  line-height: 1.5;
 }
 
 .task-description, .task-content {
   font-family: 'Inter', 'Universal Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-feature-settings: 'kern' 1;
-  font-size: 0.8125rem !important; /* 13px - readable but compact */
+  font-size: 0.875rem !important; /* 14px - same as text-sm */
   line-height: 1.5;
 }
 
@@ -1779,53 +1779,57 @@ code, pre, .grok-mono {
     0 3px 6px -1px hsl(var(--glass-shadow) / 0.1);
 }
 
-/* Task-specific card enhancements with dark gray backgrounds */
+/* Task-specific card enhancements with adaptive backgrounds */
 .task-card {
-  background: hsl(0 0% 15%); /* Dark gray for light mode */
-  color: hsl(0 0% 95%);
-  border: 1px solid rgba(252, 252, 252, 0.06);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
   box-shadow: 
-    0 1px 2px 0 hsl(var(--glass-shadow) / 0.08),
-    0 1px 3px 0 hsl(var(--glass-shadow) / 0.05);
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    0 1px 3px 0 hsl(var(--glass-shadow) / 0.1),
+    0 1px 2px 0 hsl(var(--glass-shadow) / 0.06);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .task-card:hover {
-  background: hsl(0 0% 18%);
-  border-color: rgba(252, 252, 252, 0.12);
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
   box-shadow: 
-    0 2px 4px 0 hsl(var(--glass-shadow) / 0.12),
-    0 2px 6px 0 hsl(var(--glass-shadow) / 0.08);
+    0 10px 25px -5px hsl(var(--glass-shadow) / 0.15),
+    0 8px 10px -6px hsl(var(--glass-shadow) / 0.1),
+    0 1px 0px 0px hsl(var(--border));
+  transform: translateY(-4px) scale(1.01);
 }
 
 .dark .task-card {
-  background: hsl(0 0% 12%); /* Very dark gray for dark mode */
-  color: hsl(0 0% 95%);
-  border: 1px solid rgba(252, 252, 252, 0.06);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
   box-shadow: 
-    0 1px 2px 0 hsl(var(--glass-shadow) / 0.15),
-    0 1px 3px 0 hsl(var(--glass-shadow) / 0.08);
+    0 1px 3px 0 hsl(var(--glass-shadow) / 0.15),
+    0 1px 2px 0 hsl(var(--glass-shadow) / 0.08);
 }
 
 .dark .task-card:hover {
-  background: hsl(0 0% 15%);
-  border-color: rgba(252, 252, 252, 0.12);
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
   box-shadow: 
-    0 2px 4px 0 hsl(var(--glass-shadow) / 0.20),
-    0 2px 6px 0 hsl(var(--glass-shadow) / 0.12);
+    0 10px 25px -5px hsl(var(--glass-shadow) / 0.25),
+    0 8px 10px -6px hsl(var(--glass-shadow) / 0.15),
+    0 1px 0px 0px hsl(var(--border));
+  transform: translateY(-4px) scale(1.01);
 }
 
-/* Task card text color overrides to ensure readability */
+/* Task card text uses theme-appropriate colors */
 .task-card .task-title {
-  color: hsl(0 0% 95%) !important;
+  color: hsl(var(--foreground));
 }
 
 .task-card .task-description {
-  color: hsl(0 0% 80%) !important;
+  color: hsl(var(--muted-foreground));
 }
 
 .task-card .text-muted-foreground {
-  color: hsl(0 0% 70%) !important;
+  color: hsl(var(--muted-foreground));
 }
 
 /* Kanban column cards with enhanced depth */

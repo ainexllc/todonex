@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Calendar, Flag, Sparkles, AlertCircle } from 'lucide-react'
+import { X, Calendar, Flag, Sparkles, AlertCircle, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -23,6 +23,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
+interface Subtask {
+  id: string
+  title: string
+  completed: boolean
+}
+
 interface Task {
   id: string
   title: string
@@ -31,6 +37,7 @@ interface Task {
   priority: 'low' | 'medium' | 'high'
   dueDate?: Date
   categoryId?: string
+  subtasks?: Subtask[]
 }
 
 interface TaskFormProps {
@@ -55,6 +62,7 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     priority: 'medium' as 'low' | 'medium' | 'high',
     dueDate: '',
     categoryId: '',
+    subtasks: [] as Subtask[],
     // AI Enhancement fields
     aiEnhanced: false,
     aiEnhancedTitle: '',
@@ -82,6 +90,7 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
         priority: task.priority || 'medium',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         categoryId: task.categoryId || '',
+        subtasks: task.subtasks || [],
         // AI Enhancement fields
         aiEnhanced: false,
         aiEnhancedTitle: '',
@@ -97,6 +106,35 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       })
     }
   }, [task])
+
+  // Subtask management functions
+  const addSubtask = () => {
+    const newSubtask: Subtask = {
+      id: Math.random().toString(36).substring(2) + Date.now().toString(36),
+      title: '',
+      completed: false
+    }
+    setFormData(prev => ({
+      ...prev,
+      subtasks: [...prev.subtasks, newSubtask]
+    }))
+  }
+
+  const updateSubtask = (subtaskId: string, title: string) => {
+    setFormData(prev => ({
+      ...prev,
+      subtasks: prev.subtasks.map(subtask =>
+        subtask.id === subtaskId ? { ...subtask, title } : subtask
+      )
+    }))
+  }
+
+  const removeSubtask = (subtaskId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      subtasks: prev.subtasks.filter(subtask => subtask.id !== subtaskId)
+    }))
+  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -128,7 +166,8 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       description: formData.description.trim() || undefined,
       priority: formData.priority,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
-      categoryId: formData.categoryId || undefined
+      categoryId: formData.categoryId || undefined,
+      subtasks: formData.subtasks.filter(subtask => subtask.title.trim() !== '')
     }
     
     onSubmit(taskData)
@@ -468,6 +507,58 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
               rows={3}
               className="glass border-glass resize-none"
             />
+          </div>
+
+          {/* Subtasks */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                Subtasks (Optional)
+              </Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addSubtask}
+                className="h-8 px-3 text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Subtask
+              </Button>
+            </div>
+            
+            {formData.subtasks.length > 0 && (
+              <div className="space-y-2">
+                {formData.subtasks.map((subtask, index) => (
+                  <div key={subtask.id} className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-6">
+                      {index + 1}.
+                    </span>
+                    <Input
+                      value={subtask.title}
+                      onChange={(e) => updateSubtask(subtask.id, e.target.value)}
+                      placeholder="Enter subtask..."
+                      className="flex-1 glass border-glass text-sm h-8"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeSubtask(subtask.id)}
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {formData.subtasks.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Break down your task into smaller, manageable steps
+              </p>
+            )}
           </div>
 
           {/* Priority */}

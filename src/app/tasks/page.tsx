@@ -11,8 +11,6 @@ import { TaskAIInput } from '@/components/ai/task-ai-input'
 import { TaskDetailPanel } from '@/components/features/tasks/task-detail-panel'
 import { AIStatusIndicator } from '@/lib/ai/context'
 import { ViewSwitcher, TaskView, useViewSwitcherShortcuts } from '@/components/features/tasks/views/ViewSwitcher'
-import { KanbanView } from '@/components/features/tasks/views/KanbanView'
-import { CalendarView } from '@/components/features/tasks/views/CalendarView'
 import { MyDayView } from '@/components/features/tasks/views/MyDayView'
 import { 
   createDocument, 
@@ -26,6 +24,12 @@ import { useAuthStore } from '@/store/auth-store'
 import { useAdaptiveStore } from '@/store/adaptive-store'
 import { cn } from '@/lib/utils'
 
+interface Subtask {
+  id: string
+  title: string
+  completed: boolean
+}
+
 interface Task {
   id: string
   title: string
@@ -34,6 +38,7 @@ interface Task {
   priority: 'low' | 'medium' | 'high'
   dueDate?: Date
   categoryId?: string
+  subtasks?: Subtask[]
   familyId: string
   createdBy: string
   createdAt: Date
@@ -55,7 +60,7 @@ export default function TasksPage() {
     // Load saved view preference from localStorage
     if (typeof window !== 'undefined') {
       const savedView = localStorage.getItem('tasks-view-preference')
-      if (savedView && ['list', 'kanban', 'calendar', 'my-day'].includes(savedView)) {
+      if (savedView && ['list', 'my-day'].includes(savedView)) {
         return savedView as TaskView
       }
     }
@@ -73,7 +78,7 @@ export default function TasksPage() {
   }, [trackFeatureUsage])
 
   // Setup keyboard shortcuts for view switching
-  useViewSwitcherShortcuts(currentView, setCurrentView, ['list', 'kanban', 'calendar', 'my-day'])
+  useViewSwitcherShortcuts(currentView, setCurrentView, ['list', 'my-day'])
 
   // View change handler with tracking and persistence
   const handleViewChange = (view: TaskView) => {
@@ -116,16 +121,75 @@ export default function TasksPage() {
     return unsubscribe
   }, [user])
 
+  // Auto-cleanup completed tasks after 12 hours
+  useEffect(() => {
+    if (!user || !online) return
+
+    const cleanupCompletedTasks = async () => {
+      const now = new Date()
+      const twelveHoursAgo = new Date(now.getTime() - (12 * 60 * 60 * 1000)) // 12 hours in milliseconds
+
+      // Find completed tasks older than 12 hours
+      const tasksToDelete = tasks.filter(task => {
+        if (!task.completed) return false
+        
+        // Check if task was completed more than 12 hours ago
+        const completedTime = new Date(task.updatedAt)
+        return completedTime < twelveHoursAgo
+      })
+
+      // Delete old completed tasks
+      for (const task of tasksToDelete) {
+        try {
+          await deleteDocument('tasks', task.id)
+          console.log(`Auto-removed completed task: ${task.title}`)
+        } catch (error) {
+          console.error('Failed to auto-remove completed task:', error)
+        }
+      }
+
+      if (tasksToDelete.length > 0) {
+        trackFeatureUsage('tasks', 'auto_cleanup')
+      }
+    }
+
+    // Run cleanup immediately
+    cleanupCompletedTasks()
+
+    // Set up interval to run cleanup every hour
+    const cleanupInterval = setInterval(cleanupCompletedTasks, 60 * 60 * 1000) // 1 hour
+
+    return () => clearInterval(cleanupInterval)
+  }, [tasks, user, online, trackFeatureUsage])
+
   const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36)
 
   const handleCreateTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'familyId' | 'createdBy'>) => {
     if (!user || !online) return
 
     try {
-      await createDocument<Task>('tasks', generateId(), {
-        ...taskData,
+      // Clean the task data to remove undefined values
+      const cleanTaskData: any = {
+        title: taskData.title || '',
+        priority: taskData.priority || 'medium',
         completed: false
-      })
+      }
+
+      // Only add optional fields if they have valid values
+      if (taskData.description && taskData.description.trim()) {
+        cleanTaskData.description = taskData.description.trim()
+      }
+      if (taskData.dueDate) {
+        cleanTaskData.dueDate = taskData.dueDate
+      }
+      if (taskData.categoryId) {
+        cleanTaskData.categoryId = taskData.categoryId
+      }
+      if (taskData.subtasks && taskData.subtasks.length > 0) {
+        cleanTaskData.subtasks = taskData.subtasks
+      }
+
+      await createDocument<Task>('tasks', generateId(), cleanTaskData)
       
       setShowForm(false)
       trackFeatureUsage('tasks', 'create')
@@ -138,7 +202,13 @@ export default function TasksPage() {
     if (!online) return
     
     try {
-      await updateDocument('tasks', id, updates)
+      // Always update the updatedAt timestamp
+      const updatesWithTimestamp = {
+        ...updates,
+        updatedAt: new Date()
+      }
+      
+      await updateDocument('tasks', id, updatesWithTimestamp)
       
       if (updates.completed !== undefined) {
         trackFeatureUsage('tasks', updates.completed ? 'complete' : 'uncomplete')
@@ -167,16 +237,20 @@ export default function TasksPage() {
     try {
       const taskData: any = {
         title: aiTask.title || aiTask.name || 'New Task',
-        description: aiTask.description || '',
         priority: aiTask.priority || 'medium',
         completed: false,
       }
 
-      // Only add optional fields if they have valid values
+      // Only add optional fields if they have valid, non-undefined values
+      if (aiTask.description && aiTask.description.trim() !== '') {
+        taskData.description = aiTask.description
+      }
+      
       if (aiTask.suggestedDueDate) {
         taskData.dueDate = new Date(aiTask.suggestedDueDate)
       }
-      if (aiTask.category) {
+      
+      if (aiTask.category && aiTask.category.trim() !== '') {
         taskData.categoryId = aiTask.category
       }
 
@@ -195,16 +269,20 @@ export default function TasksPage() {
       const createPromises = aiTasks.slice(0, 10).map(aiTask => {
         const taskData: any = {
           title: aiTask.title || aiTask.name || 'New Task',
-          description: aiTask.description || '',
           priority: aiTask.priority || 'medium',
           completed: false,
         }
 
-        // Only add optional fields if they have valid values
+        // Only add optional fields if they have valid, non-undefined values
+        if (aiTask.description && aiTask.description.trim() !== '') {
+          taskData.description = aiTask.description
+        }
+        
         if (aiTask.suggestedDueDate) {
           taskData.dueDate = new Date(aiTask.suggestedDueDate)
         }
-        if (aiTask.category) {
+        
+        if (aiTask.category && aiTask.category.trim() !== '') {
           taskData.categoryId = aiTask.category
         }
 
@@ -289,22 +367,32 @@ export default function TasksPage() {
     })
   }
 
-  // Filter tasks based on current filters
-  const filteredTasks = tasks.filter(task => {
-    // Status filter
-    if (filters.status === 'pending' && task.completed) return false
-    if (filters.status === 'completed' && !task.completed) return false
-    
-    // Priority filter
-    if (filters.priority !== 'all' && task.priority !== filters.priority) return false
-    
-    // Search filter
-    if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false
-    }
-    
-    return true
-  })
+  // Filter and sort tasks based on current filters
+  const filteredTasks = tasks
+    .filter(task => {
+      // Status filter
+      if (filters.status === 'pending' && task.completed) return false
+      if (filters.status === 'completed' && !task.completed) return false
+      
+      // Priority filter
+      if (filters.priority !== 'all' && task.priority !== filters.priority) return false
+      
+      // Search filter
+      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false
+      }
+      
+      return true
+    })
+    .sort((a, b) => {
+      // First sort by completion status: incomplete tasks first
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1
+      }
+      
+      // For tasks with same completion status, sort by updated time (most recent first)
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
 
   // Task statistics
   const taskStats = {
@@ -407,7 +495,7 @@ export default function TasksPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Multiple views: List, Kanban, Calendar, My Day</span>
+                  <span>Multiple views: List and My Day focus</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
@@ -494,7 +582,7 @@ export default function TasksPage() {
             {getTodaysTasks().length > 0 && (
               <div className="glass rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Target className="h-5 w-5 text-blue-500" />
+                  <Target className="h-5 w-5 text-primary" />
                   <h2 className="text-sm font-semibold">Today's Focus</h2>
                   <span className="text-xs text-muted-foreground">
                     {getTodaysTasks().length} task{getTodaysTasks().length !== 1 ? 's' : ''}
@@ -504,7 +592,7 @@ export default function TasksPage() {
                   {getTodaysTasks().slice(0, 3).map((task, index) => (
                     <div 
                       key={task.id}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background cursor-pointer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background cursor-pointer transition-all duration-250 hover:shadow-lg hover:-translate-y-1"
                       onClick={() => handleSelectTask(task)}
                     >
                       <button
@@ -527,7 +615,7 @@ export default function TasksPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         {task.priority === 'high' && (
-                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded">High</span>
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 rounded">High</span>
                         )}
                       </div>
                     </div>
@@ -543,7 +631,7 @@ export default function TasksPage() {
                 <ViewSwitcher
                   currentView={currentView}
                   onViewChange={handleViewChange}
-                  availableViews={['list', 'kanban', 'calendar', 'my-day']}
+                  availableViews={['list', 'my-day']}
                 />
                 
                 <TaskFilters 
@@ -563,24 +651,6 @@ export default function TasksPage() {
                   onTaskDelete={handleDeleteTask}
                   onTaskEdit={handleEditTask}
                   onTaskSelect={handleSelectTask}
-                />
-              )}
-            
-              {currentView === 'kanban' && (
-                <KanbanView
-                  tasks={filteredTasks}
-                  onTaskUpdate={handleUpdateTask}
-                  onTaskDelete={handleDeleteTask}
-                  onTaskEdit={handleEditTask}
-                />
-              )}
-              
-              {currentView === 'calendar' && (
-                <CalendarView
-                  tasks={filteredTasks}
-                  onTaskUpdate={handleUpdateTask}
-                  onTaskDelete={handleDeleteTask}
-                  onTaskEdit={handleEditTask}
                 />
               )}
               

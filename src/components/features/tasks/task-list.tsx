@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Circle, Calendar, Flag, Edit2, Trash2, MoreVertical } from 'lucide-react'
+import { CheckCircle2, Circle, Calendar, Flag, Edit2, Trash2, MoreVertical, Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -12,6 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
+interface Subtask {
+  id: string
+  title: string
+  completed: boolean
+}
+
 interface Task {
   id: string
   title: string
@@ -20,6 +26,7 @@ interface Task {
   priority: 'low' | 'medium' | 'high'
   dueDate?: Date
   categoryId?: string
+  subtasks?: Subtask[]
   createdAt: Date
   updatedAt: Date
 }
@@ -68,22 +75,54 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
     }
   }
 
-  const formatDate = (date: Date | null | undefined) => {
-    if (!date) return 'No date'
+  const formatRepeatSchedule = (task: Task) => {
+    // For now, we'll simulate repeat patterns based on task properties
+    // In a real app, you'd have a repeat field in the task model
     
-    // Convert Firebase Timestamp to Date if needed
-    const dateObj = date instanceof Date ? date : new Date(date)
-    
-    // Check if date is valid
-    if (isNaN(dateObj.getTime())) {
-      return 'Invalid date'
+    if (task.dueDate) {
+      const dateObj = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate)
+      
+      if (isNaN(dateObj.getTime())) {
+        return 'Invalid date'
+      }
+      
+      const hour = dateObj.getHours()
+      const minute = dateObj.getMinutes()
+      
+      // Format time based on whether it's on the hour or has minutes
+      const time = minute === 0 
+        ? dateObj.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+        : dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+      
+      // Simulate different repeat patterns based on task priority and time
+      if (task.priority === 'high') {
+        return `Daily at ${time}`
+      } else if (task.priority === 'medium') {
+        return `Weekly at ${time}`
+      } else {
+        // For low priority tasks, use time of day descriptions
+        if (hour >= 6 && hour < 12) {
+          return 'Daily in the morning'
+        } else if (hour >= 12 && hour < 17) {
+          return 'Daily in the afternoon'
+        } else if (hour >= 17 && hour < 21) {
+          return 'Daily in the evening'
+        } else {
+          return `Daily at ${time}`
+        }
+      }
     }
     
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: dateObj.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-    }).format(dateObj)
+    // For tasks without due dates, create variety based on task properties
+    const taskHash = task.id.length % 4
+    const patterns = [
+      'Daily in the morning',
+      'Weekly at 2pm',
+      'Daily at 9am',
+      'Monthly at 10am'
+    ]
+    
+    return patterns[taskHash] || 'Daily in the morning'
   }
 
   const isOverdue = (task: Task) => {
@@ -107,9 +146,14 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
   }
 
   // Helper function to get relative time
-  const getRelativeTime = (date: Date) => {
+  const getRelativeTime = (date: Date | null | undefined) => {
+    if (!date) return 'Recently'
+    
+    const dateObj = date instanceof Date ? date : new Date(date)
+    if (isNaN(dateObj.getTime())) return 'Recently'
+    
     const now = new Date()
-    const diffInMs = now.getTime() - date.getTime()
+    const diffInMs = now.getTime() - dateObj.getTime()
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
     
@@ -117,7 +161,11 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`
     if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`
     
-    return formatDate(date)
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: dateObj.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+    }).format(dateObj)
   }
 
   return (
@@ -140,24 +188,54 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
             <div className="flex flex-col px-4 py-2 gap-0.5">
               <div className="flex flex-row items-center justify-between">
                 <h1 className={cn(
-                  "font-semibold line-clamp-1 task-title",
+                  "text-sm font-medium line-clamp-1 task-title",
                   task.completed && "line-through text-muted-foreground"
                 )}>
                   {task.title}
                 </h1>
-                <div>
-                  <h1 className="text-xs font-semibold text-foreground flex items-center gap-1 line-clamp-1">
-                    <p className="text-xs font-medium line-clamp-1">
-                      {task.dueDate ? formatDate(new Date(task.dueDate)) : getRelativeTime(task.createdAt)}
-                    </p>
-                    {/* Priority Badge */}
-                    <div className={cn(
-                      "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ml-2",
-                      getPriorityColor(task.priority)
-                    )}>
-                      {task.priority}
+                <div className="flex items-center justify-end gap-2">
+                  {/* Hover Action Icons - Right aligned */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 ml-auto">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6 hover:bg-muted/50"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onTaskEdit(task)
+                      }}
+                    >
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6 hover:bg-muted/50"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Toggle task completion status
+                        toggleComplete(task)
+                      }}
+                    >
+                      {task.completed ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                  
+                  {/* Priority Badge and Date - hidden on hover, right aligned */}
+                  <div className="group-hover:opacity-0 transition-opacity duration-200 ml-auto">
+                    <div className="text-sm text-foreground flex items-center gap-2 line-clamp-1">
+                      {/* Priority Badge */}
+                      <div className={cn(
+                        "inline-flex items-center px-1.5 py-0.5 rounded text-sm border",
+                        getPriorityColor(task.priority)
+                      )}>
+                        {task.priority}
+                      </div>
+                      <p className="text-sm font-medium line-clamp-1 task-description">
+                        {formatRepeatSchedule(task)}
+                      </p>
                     </div>
-                  </h1>
+                  </div>
                 </div>
               </div>
             </div>
@@ -181,31 +259,41 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
                         <Circle className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
                       )}
                     </Button>
-                    <p className={cn(
-                      "text-muted-foreground line-clamp-1 task-description",
-                      task.completed && "line-through"
-                    )}>
-                      {task.description || "No description"}
-                    </p>
+                    <div className="flex flex-col gap-1">
+                      <p className={cn(
+                        "text-sm text-muted-foreground line-clamp-1 task-description",
+                        task.completed && "line-through"
+                      )}>
+                        {task.description || "No description"}
+                      </p>
+                      {task.subtasks && task.subtasks.length > 0 && (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground task-description">
+                          <span>•</span>
+                          <span>
+                            {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks completed
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     {/* Status Indicators */}
                     {overdue && (
-                      <span className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                      <span className="text-sm text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-950 px-1.5 py-0.5 rounded task-description">
                         Overdue
                       </span>
                     )}
                     {dueSoon && !overdue && (
-                      <span className="text-[10px] font-medium text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                      <span className="text-sm text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-950 px-1.5 py-0.5 rounded task-description">
                         Due Soon
                       </span>
                     )}
-                    <p className="line-clamp-1 text-[10px]">
+                    <p className="line-clamp-1 text-sm task-description">
                       {getRelativeTime(task.createdAt)}
                     </p>
                     {!task.completed && (
                       <div className="w-[14px] h-full flex items-center justify-center">
-                        <div className="rounded-full bg-blue-400 size-1.5"></div>
+                        <div className="rounded-full bg-primary size-1.5"></div>
                       </div>
                     )}
                     {/* Actions Menu */}

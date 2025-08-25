@@ -7,10 +7,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  // Disable Next.js development indicator/toolbar
+  // Configure development indicators
   devIndicators: {
-    buildActivity: false,
-    buildActivityPosition: 'bottom-right'
+    position: 'bottom-right'
   },
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
