@@ -38,6 +38,11 @@ interface Task {
   dueDate?: Date
   categoryId?: string
   subtasks?: Subtask[]
+  // Recurring task fields
+  isRecurring?: boolean
+  recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'custom'
+  recurringInterval?: number
+  recurringEndDate?: Date
 }
 
 interface TaskFormProps {
@@ -63,6 +68,11 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     dueDate: '',
     categoryId: '',
     subtasks: [] as Subtask[],
+    // Recurring task fields
+    isRecurring: false,
+    recurringPattern: 'daily' as 'daily' | 'weekly' | 'monthly' | 'custom',
+    recurringInterval: 1,
+    recurringEndDate: '',
     // AI Enhancement fields
     aiEnhanced: false,
     aiEnhancedTitle: '',
@@ -80,6 +90,8 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
   const [aiEnhancement, setAiEnhancement] = useState<TaskEnhancement | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
+  const [rewordLoading, setRewordLoading] = useState(false)
+  const [rewordError, setRewordError] = useState<string | null>(null)
 
   // Populate form when editing
   useEffect(() => {
@@ -91,6 +103,11 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         categoryId: task.categoryId || '',
         subtasks: task.subtasks || [],
+        // Recurring task fields
+        isRecurring: task.isRecurring || false,
+        recurringPattern: task.recurringPattern || 'daily',
+        recurringInterval: task.recurringInterval || 1,
+        recurringEndDate: task.recurringEndDate ? new Date(task.recurringEndDate).toISOString().split('T')[0] : '',
         // AI Enhancement fields
         aiEnhanced: false,
         aiEnhancedTitle: '',
@@ -161,13 +178,43 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     
     if (!validateForm()) return
     
-    const taskData = {
+    // Build clean task data without undefined values
+    const taskData: any = {
       title: formData.title.trim(),
-      description: formData.description.trim() || undefined,
       priority: formData.priority,
-      dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
-      categoryId: formData.categoryId || undefined,
-      subtasks: formData.subtasks.filter(subtask => subtask.title.trim() !== '')
+    }
+
+    // Only add optional fields if they have valid values
+    if (formData.description && formData.description.trim()) {
+      taskData.description = formData.description.trim()
+    }
+    
+    if (formData.dueDate) {
+      taskData.dueDate = new Date(formData.dueDate)
+    }
+    
+    if (formData.categoryId && formData.categoryId.trim()) {
+      taskData.categoryId = formData.categoryId.trim()
+    }
+    
+    // Only add subtasks if there are valid ones
+    const validSubtasks = formData.subtasks.filter(subtask => subtask.title.trim() !== '')
+    if (validSubtasks.length > 0) {
+      taskData.subtasks = validSubtasks
+    }
+    
+    // Add recurring task fields if enabled
+    if (formData.isRecurring) {
+      taskData.isRecurring = true
+      taskData.recurringPattern = formData.recurringPattern
+      
+      if (formData.recurringInterval && formData.recurringInterval > 0) {
+        taskData.recurringInterval = formData.recurringInterval
+      }
+      
+      if (formData.recurringEndDate) {
+        taskData.recurringEndDate = new Date(formData.recurringEndDate)
+      }
     }
     
     onSubmit(taskData)
@@ -421,65 +468,112 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     setAiEnhancement(null)
   }
 
+  const handleAIReword = async () => {
+    if (!formData.title.trim()) {
+      setRewordError('Please enter a task title first')
+      return
+    }
+
+    setRewordError(null)
+    setRewordLoading(true)
+    
+    try {
+      // Prepare subtasks for API call
+      const validSubtasks = formData.subtasks
+        .filter(subtask => subtask.title.trim() !== '')
+        .map(subtask => subtask.title.trim())
+
+      const response = await fetch('/api/ai/tasks/reword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description || undefined,
+          subtasks: validSubtasks.length > 0 ? validSubtasks : undefined,
+          context: {
+            priority: formData.priority,
+          }
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to reword task')
+      }
+
+      const rewordedData = await response.json()
+      
+      // Update form fields with reworded content
+      const updates: any = {
+        title: rewordedData.title,
+      }
+
+      if (rewordedData.description && rewordedData.description.trim()) {
+        updates.description = rewordedData.description
+      }
+
+      // Update subtasks if reworded versions were provided
+      if (rewordedData.subtasks && rewordedData.subtasks.length > 0) {
+        const rewordedSubtasks = rewordedData.subtasks.map((title: string, index: number) => {
+          const existingSubtask = formData.subtasks[index]
+          return {
+            id: existingSubtask?.id || Math.random().toString(36).substring(2) + Date.now().toString(36),
+            title,
+            completed: existingSubtask?.completed || false
+          }
+        })
+        updates.subtasks = rewordedSubtasks
+      }
+
+      setFormData(prev => ({ ...prev, ...updates }))
+      
+    } catch (error) {
+      console.error('Failed to reword task:', error)
+      setRewordError(error instanceof Error ? error.message : 'Failed to reword task. Please try again.')
+    } finally {
+      setRewordLoading(false)
+    }
+  }
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto glass border-glass">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            {task ? 'Edit Task' : 'Create New Task'}
+      <DialogContent 
+        className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto border border-border shadow-xl task-form-modal"
+      >
+        <DialogHeader className="pb-4 border-b border-border">
+          <DialogTitle className="flex items-center justify-between text-lg font-semibold">
+            {task ? task.title : 'Create New Task'}
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-6 w-6 p-0 hover:bg-white/10"
+              className="h-8 w-8 p-0 hover:bg-muted rounded-full"
             >
               <X className="h-4 w-4" />
             </Button>
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium">
-              Title *
+            <Label htmlFor="title" className="text-sm font-medium text-muted-foreground">
+              Task Title
             </Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => updateField('title', e.target.value)}
-              placeholder="Enter task title..."
-              className={`glass border-glass ${errors.title ? 'border-red-500' : ''}`}
+              placeholder="What needs to be done?"
+              className={`border-0 bg-muted/30 text-base px-3 py-2 focus-visible:ring-1 focus-visible:ring-primary ${errors.title ? 'ring-1 ring-red-500' : ''}`}
             />
             {errors.title && (
-              <p className="text-xs text-red-500">{errors.title}</p>
-            )}
-            
-            {/* AI Enhancement Button */}
-            {formData.title.trim() && (
-              <div className="mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAIEnhance}
-                  disabled={aiLoading}
-                  className="text-primary border-primary/20 hover:bg-primary/5"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {aiLoading ? 'Enhancing...' : '✨ AI Enhance'}
-                </Button>
-                {aiError && (
-                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md dark:bg-red-950 dark:border-red-800">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-red-700 dark:text-red-300">
-                        {aiError}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.title}
+              </p>
             )}
           </div>
 
@@ -494,19 +588,53 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
             />
           )}
 
+
+          {/* AI Reword Error Messages */}
+          {rewordError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {rewordError}
+              </p>
+            </div>
+          )}
+
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium">
-              Description
+            <Label htmlFor="description" className="text-sm font-medium text-muted-foreground">
+              Description (Optional)
             </Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => updateField('description', e.target.value)}
-              placeholder="Add more details about this task..."
+              placeholder="Add more details..."
               rows={3}
-              className="glass border-glass resize-none"
+              className="border-0 bg-muted/30 resize-none focus-visible:ring-1 focus-visible:ring-primary"
             />
+          </div>
+
+          {/* AI Reword Button */}
+          <div className="flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAIReword}
+              disabled={rewordLoading || !formData.title.trim()}
+              className="flex items-center gap-2 text-xs bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
+              {rewordLoading ? (
+                <>
+                  <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                  Rewording...
+                </>
+              ) : (
+                <>
+                  ✍️ AI Reword
+                </>
+              )}
+            </Button>
           </div>
 
           {/* Subtasks */}
@@ -611,6 +739,87 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
             )}
           </div>
 
+          {/* Recurring Task Section */}
+          <div className="space-y-3 p-4 bg-muted/20 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Task Frequency</Label>
+              <div className="flex items-center space-x-2">
+                <input
+                  id="isRecurring"
+                  type="checkbox"
+                  checked={formData.isRecurring}
+                  onChange={(e) => updateField('isRecurring', e.target.checked)}
+                  className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                />
+                <Label htmlFor="isRecurring" className="text-sm cursor-pointer">
+                  Make this a recurring task
+                </Label>
+              </div>
+            </div>
+
+            {!formData.isRecurring && (
+              <p className="text-xs text-muted-foreground">
+                This is a one-time task that will be completed once.
+              </p>
+            )}
+
+            {formData.isRecurring && (
+              <div className="space-y-3 pt-2 border-t border-border/50">
+                {/* Recurrence Pattern */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Repeat Pattern</Label>
+                  <Select
+                    value={formData.recurringPattern}
+                    onValueChange={(value) => updateField('recurringPattern', value)}
+                  >
+                    <SelectTrigger className="glass border-glass">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Custom Interval */}
+                {formData.recurringPattern === 'custom' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Repeat Every</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={formData.recurringInterval}
+                        onChange={(e) => updateField('recurringInterval', parseInt(e.target.value) || 1)}
+                        className="glass border-glass w-20"
+                      />
+                      <span className="text-sm text-muted-foreground">days</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* End Date (Optional) */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">End Date (Optional)</Label>
+                  <Input
+                    type="date"
+                    value={formData.recurringEndDate}
+                    onChange={(e) => updateField('recurringEndDate', e.target.value)}
+                    className="glass border-glass"
+                    min={getCurrentUserDate()}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to repeat indefinitely
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Time (if extracted) */}
           {formData.extractedTime && (
             <div className="space-y-2">
@@ -693,21 +902,21 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
           )}
 
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6 border-t border-border">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={onClose}
-              className="flex-1 glass border-glass hover:bg-white/5"
+              className="flex-1 h-10"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 h-10 bg-primary hover:bg-primary/90"
               disabled={!formData.title.trim()}
             >
-              {task ? 'Update Task' : 'Create Task'}
+              {task ? 'Save Changes' : 'Create Task'}
             </Button>
           </div>
         </form>

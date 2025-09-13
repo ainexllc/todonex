@@ -1933,8 +1933,10 @@ code, pre, .grok-mono {
 /* Section container improvements */
 .section-container {
   background: linear-gradient(135deg, 
-    hsl(var(--card) / 0.6) 0%, 
-    hsl(var(--card) / 0.4) 100%);
+    rgba(219, 234, 254, 0.8) 0%,
+    rgba(237, 233, 254, 0.6) 35%,
+    rgba(243, 232, 255, 0.5) 70%,
+    rgba(254, 226, 226, 0.4) 100%);
   border: 1px solid hsl(var(--border) / 0.25);
   box-shadow: 
     0 2px 4px -1px hsl(var(--glass-shadow) / 0.05),
@@ -1946,8 +1948,10 @@ code, pre, .grok-mono {
 
 .dark .section-container {
   background: linear-gradient(135deg, 
-    hsl(var(--card) / 0.7) 0%, 
-    hsl(var(--card) / 0.5) 100%);
+    rgba(30, 58, 138, 0.3) 0%,
+    rgba(91, 33, 182, 0.2) 35%,
+    rgba(124, 58, 237, 0.15) 70%,
+    rgba(190, 18, 60, 0.1) 100%);
   box-shadow: 
     0 2px 4px -1px hsl(var(--glass-shadow) / 0.1),
     0 1px 2px -1px hsl(var(--glass-shadow) / 0.06),
@@ -2003,4 +2007,31 @@ code, pre, .grok-mono {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
+}
+
+/* Custom task list typography overrides */
+.task-title-custom {
+  font-size: 14px !important;
+  font-weight: 550 !important;
+  line-height: 1.4 !important;
+}
+
+.task-desc-custom {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  color: #6B7280 !important; /* gray-500 */
+}
+
+.dark .task-desc-custom {
+  color: #9CA3AF !important; /* gray-400 */
+}
+
+/* Task form modal background fix */
+.task-form-modal {
+  background-color: white !important;
+}
+
+.dark .task-form-modal {
+  background-color: black !important;
 }

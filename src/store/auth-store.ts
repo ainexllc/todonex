@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { User as FirebaseUser } from 'firebase/auth'
+import { User as FirebaseUser, signOut as firebaseSignOut } from 'firebase/auth'
 import { User, UserPreferences } from '@/types'
+import { auth } from '@/lib/firebase'
 
 interface AuthState {
   // State
@@ -17,6 +18,7 @@ interface AuthState {
   setInitialized: (initialized: boolean) => void
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void
   logout: () => void
+  signOut: () => Promise<void>
 }
 
 const defaultPreferences: UserPreferences = {
@@ -73,6 +75,29 @@ export const useAuthStore = create<AuthState>()(
         loading: false,
         initialized: true 
       }),
+
+      signOut: async () => {
+        try {
+          set({ loading: true })
+          
+          // Sign out from Firebase
+          await firebaseSignOut(auth)
+          
+          // Clear local state
+          set({ 
+            user: null, 
+            firebaseUser: null, 
+            loading: false,
+            initialized: true 
+          })
+          
+          console.log('Successfully signed out')
+        } catch (error) {
+          console.error('Error signing out:', error)
+          set({ loading: false })
+          throw error
+        }
+      },
     }),
     {
       name: 'auth-store',

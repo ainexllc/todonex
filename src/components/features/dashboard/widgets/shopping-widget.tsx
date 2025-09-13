@@ -32,7 +32,7 @@ export function ShoppingWidget() {
   useEffect(() => {
     if (!user) return
     
-    const unsubscribe = subscribeToUserDocuments<ShoppingItem>('shopping', (allItems) => {
+    const unsubscribe = subscribeToUserDocuments<ShoppingItem>('shoppingLists', (allItems) => {
       // Show only pending items, limit to 6 most recent
       const pendingItems = allItems
         .filter(item => !item.purchased)
@@ -49,7 +49,7 @@ export function ShoppingWidget() {
     if (!isOnline()) return
     
     try {
-      await updateDocument('shopping', itemId, { purchased })
+      await updateDocument('shoppingLists', itemId, { purchased })
       trackFeatureUsage('shopping', purchased ? 'purchase' : 'unpurchase')
     } catch (error) {
       console.error('Failed to update shopping item:', error)

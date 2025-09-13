@@ -60,9 +60,9 @@ export default function ShoppingPage() {
   useEffect(() => {
     if (!user) return
     
-    const unsubscribe = subscribeToUserDocuments<ShoppingItem>('shopping', (newItems) => {
+    const unsubscribe = subscribeToUserDocuments<ShoppingItem>('shoppingLists', (newItems) => {
       setItems(newItems)
-    }, 'updatedAt')
+    }, 'lastUpdated')
     
     return unsubscribe
   }, [user])
@@ -73,7 +73,7 @@ export default function ShoppingPage() {
     if (!user || !online) return
 
     try {
-      await createDocument<ShoppingItem>('shopping', generateId(), {
+      await createDocument<ShoppingItem>('shoppingLists', generateId(), {
         ...itemData,
         purchased: false
       })
@@ -89,7 +89,7 @@ export default function ShoppingPage() {
     if (!online) return
     
     try {
-      await updateDocument('shopping', id, updates)
+      await updateDocument('shoppingLists', id, updates)
       
       if (updates.purchased !== undefined) {
         trackFeatureUsage('shopping', updates.purchased ? 'purchase' : 'unpurchase')
@@ -105,7 +105,7 @@ export default function ShoppingPage() {
     if (!online) return
     
     try {
-      await deleteDocument('shopping', id)
+      await deleteDocument('shoppingLists', id)
       trackFeatureUsage('shopping', 'delete')
     } catch (error) {
       console.error('Failed to delete shopping item:', error)
@@ -129,7 +129,7 @@ export default function ShoppingPage() {
     
     try {
       await Promise.all(
-        purchasedItems.map(item => deleteDocument('shopping', item.id))
+        purchasedItems.map(item => deleteDocument('shoppingLists', item.id))
       )
       trackFeatureUsage('shopping', 'clear-purchased')
     } catch (error) {

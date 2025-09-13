@@ -38,9 +38,10 @@ interface TaskListProps {
   onTaskDelete: (id: string) => void
   onTaskEdit: (task: Task) => void
   onTaskSelect: (task: Task) => void
+  onTaskView: (task: Task) => void
 }
 
-export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, onTaskEdit, onTaskSelect }: TaskListProps) {
+export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, onTaskEdit, onTaskSelect, onTaskView }: TaskListProps) {
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set())
 
   const toggleExpanded = (taskId: string) => {
@@ -129,7 +130,17 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
     if (!task.dueDate || task.completed) return false
     const dueDate = new Date(task.dueDate)
     if (isNaN(dueDate.getTime())) return false
-    return dueDate < new Date()
+    
+    // Get today's date at midnight for accurate day comparison
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    // Get due date at midnight
+    const dueDateMidnight = new Date(dueDate)
+    dueDateMidnight.setHours(0, 0, 0, 0)
+    
+    // Overdue if due date was yesterday or earlier
+    return dueDateMidnight < today
   }
 
   const isDueSoon = (task: Task) => {
@@ -179,176 +190,127 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
           <div
             key={task.id}
             className={cn(
-              "group w-full flex flex-col py-0 rounded-3xl task-card cursor-pointer relative transition-all duration-150",
+              "group w-full rounded-lg bg-gradient-to-r from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30 border border-primary/20 cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg",
               task.completed && "opacity-60",
               isSelected ? "border-primary bg-primary/5" : ""
             )}
-            onClick={() => onTaskSelect(task)}
+            onClick={() => onTaskView(task)}
           >
-            <div className="flex flex-col px-4 py-2 gap-0.5">
-              <div className="flex flex-row items-center justify-between">
-                <h1 className={cn(
-                  "text-sm font-medium line-clamp-1 task-title",
+            <div className="p-4 space-y-2">
+              {/* Task Title */}
+              <div className="flex items-center justify-between">
+                <div className={cn(
+                  "text-foreground line-clamp-1 flex-1 mr-3 task-title-custom",
                   task.completed && "line-through text-muted-foreground"
                 )}>
                   {task.title}
-                </h1>
-                <div className="flex items-center justify-end gap-2">
-                  {/* Hover Action Icons - Right aligned */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 ml-auto">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-1 h-6 w-6 hover:bg-muted/50"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onTaskEdit(task)
-                      }}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-1 h-6 w-6 hover:bg-muted/50"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        // Toggle task completion status
-                        toggleComplete(task)
-                      }}
-                    >
-                      {task.completed ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
-                    </Button>
-                  </div>
-                  
-                  {/* Priority Badge and Date - hidden on hover, right aligned */}
-                  <div className="group-hover:opacity-0 transition-opacity duration-200 ml-auto">
-                    <div className="text-sm text-foreground flex items-center gap-2 line-clamp-1">
-                      {/* Priority Badge */}
-                      <div className={cn(
-                        "inline-flex items-center px-1.5 py-0.5 rounded text-sm border",
-                        getPriorityColor(task.priority)
-                      )}>
-                        {task.priority}
-                      </div>
-                      <p className="text-sm font-medium line-clamp-1 task-description">
-                        {formatRepeatSchedule(task)}
-                      </p>
-                    </div>
-                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {/* Edit Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-1 h-6 w-6 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onTaskEdit(task)
+                    }}
+                    title="Edit task"
+                  >
+                    <Edit2 className="h-3 w-3" />
+                  </Button>
+
+                  {/* Complete Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-1 h-6 w-6 hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950 dark:hover:text-green-400"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onTaskUpdate(task.id, { completed: !task.completed })
+                    }}
+                    title={task.completed ? "Mark as pending" : "Mark as complete"}
+                  >
+                    {task.completed ? (
+                      <Circle className="h-3 w-3" />
+                    ) : (
+                      <CheckCircle2 className="h-3 w-3" />
+                    )}
+                  </Button>
+
+                  {/* Delete Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-1 h-6 w-6 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onTaskDelete(task.id)
+                    }}
+                    title="Delete task"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </div>
-            </div>
-            <div className="border-t-[0.5px]">
-              <div className="w-full">
-                <div className="flex-nowrap px-4 pb-2 pt-1.5 flex items-center justify-between w-full text-sm h-full gap-0.5">
-                  <div className="flex items-center gap-1.5">
-                    {/* Completion Toggle */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-0 h-4 w-4 rounded-full hover:bg-muted transition-all duration-150 flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleComplete(task)
-                      }}
-                    >
-                      {task.completed ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-600" />
-                      ) : (
-                        <Circle className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
-                      )}
-                    </Button>
-                    <div className="flex flex-col gap-1">
-                      <p className={cn(
-                        "text-sm text-muted-foreground line-clamp-1 task-description",
-                        task.completed && "line-through"
-                      )}>
-                        {task.description || "No description"}
-                      </p>
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground task-description">
-                          <span>•</span>
-                          <span>
-                            {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks completed
-                          </span>
-                        </div>
-                      )}
-                    </div>
+
+              {/* Separator Line */}
+              <div className="h-0.5 bg-border w-full"></div>
+
+              {/* Task Description */}
+              {task.description && (
+                <p className={cn(
+                  "text-gray-500 dark:text-gray-400 line-clamp-2 task-desc-custom",
+                  task.completed && "line-through"
+                )}>
+                  {task.description}
+                </p>
+              )}
+
+              {/* Task Meta Information */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  {/* Completion Status */}
+                  <div className="flex items-center gap-1">
+                    {task.completed ? (
+                      <CheckCircle2 className="h-3 w-3 text-green-600" />
+                    ) : (
+                      <Circle className="h-3 w-3" />
+                    )}
+                    <span>{task.completed ? 'Completed' : 'Pending'}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    {/* Status Indicators */}
-                    {overdue && (
-                      <span className="text-sm text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-950 px-1.5 py-0.5 rounded task-description">
-                        Overdue
-                      </span>
-                    )}
-                    {dueSoon && !overdue && (
-                      <span className="text-sm text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-950 px-1.5 py-0.5 rounded task-description">
-                        Due Soon
-                      </span>
-                    )}
-                    <p className="line-clamp-1 text-sm task-description">
-                      {getRelativeTime(task.createdAt)}
-                    </p>
-                    {!task.completed && (
-                      <div className="w-[14px] h-full flex items-center justify-center">
-                        <div className="rounded-full bg-primary size-1.5"></div>
-                      </div>
-                    )}
-                    {/* Actions Menu */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onTaskEdit(task)
-                          }}
-                        >
-                          <Edit2 className="h-4 w-4 mr-2" />
-                          Edit Task
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleComplete(task)
-                          }}
-                        >
-                          {task.completed ? (
-                            <>
-                              <Circle className="h-4 w-4 mr-2" />
-                              Mark Pending
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className="h-4 w-4 mr-2" />
-                              Mark Complete
-                            </>
-                          )}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onTaskDelete(task.id)
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Task
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  
+                  {/* Subtasks Count */}
+                  {task.subtasks && task.subtasks.length > 0 && (
+                    <span>
+                      • {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks
+                    </span>
+                  )}
+                </div>
+
+                {/* Due Date or Created Time */}
+                <div className="flex items-center gap-2">
+                  {overdue && (
+                    <span className="text-red-600 bg-red-100 dark:bg-red-950 px-1.5 py-0.5 rounded">
+                      Overdue
+                    </span>
+                  )}
+                  {dueSoon && !overdue && (
+                    <span className="text-orange-600 bg-orange-100 dark:bg-orange-950 px-1.5 py-0.5 rounded">
+                      Due Soon
+                    </span>
+                  )}
+                  <span>
+                    {task.dueDate 
+                      ? new Date(task.dueDate).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: new Date(task.dueDate).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                        })
+                      : 'No due date'
+                    }
+                  </span>
                 </div>
               </div>
             </div>
