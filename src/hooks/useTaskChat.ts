@@ -142,7 +142,7 @@ export function useTaskChat(): UseTaskChatResult {
         },
         body: JSON.stringify({
           message,
-          userId: user.uid,
+          userId: user.id,
           conversationHistory: messages.slice(-10), // Last 10 messages for context
           existingTaskLists: taskLists
         }),

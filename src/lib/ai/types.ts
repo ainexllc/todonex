@@ -1,5 +1,8 @@
 import { AIModel } from './anthropic-client'
 
+// Re-export AIModel for cache
+export type { AIModel }
+
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system'
   content: string

@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Build context from existing task lists
-    const taskContext = existingTaskLists?.length > 0 
-      ? `\n\nCurrent Task Lists:\n${existingTaskLists.map(list => 
-          `- ${list.title} (${list.tasks.length} tasks):\n${list.tasks.map(task => 
+    const taskContext = existingTaskLists?.length > 0
+      ? `\n\nCurrent Task Lists:\n${existingTaskLists.map((list: TaskList) =>
+          `- ${list.title} (${list.tasks.length} tasks):\n${list.tasks.map((task: Task) =>
             `  * ${task.title}${task.completed ? ' ✓' : ''}${task.priority !== 'medium' ? ` [${task.priority}]` : ''}`
           ).join('\n')}`
         ).join('\n')}`
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Build conversation context
     const conversationContext = conversationHistory?.length > 0
-      ? `\n\nRecent conversation:\n${conversationHistory.slice(-5).map(msg => 
+      ? `\n\nRecent conversation:\n${conversationHistory.slice(-5).map((msg: ChatMessage) =>
           `${msg.role}: ${msg.content}`
         ).join('\n')}`
       : ''
