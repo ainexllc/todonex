@@ -3,24 +3,18 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth-store'
-import { useAdaptiveStore } from '@/store/adaptive-store'
-import { Sidebar } from './Sidebar'
-import { MobileNavigation } from './mobile-navigation'
-import { cn } from '@/lib/utils'
 
 interface MainLayoutProps {
   children: React.ReactNode
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { 
+  const {
     user,
     firebaseUser,
     loading,
-    initialized 
+    initialized
   } = useAuthStore()
-  const { trackFeatureUsage } = useAdaptiveStore()
-  const [isMobile, setIsMobile] = useState(false)
   const [emergencyBypass, setEmergencyBypass] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -39,35 +33,18 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [initialized, loading])
 
-  // Handle responsive design
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // Track app launch when user is available
-  useEffect(() => {
-    if (user && initialized) {
-      trackFeatureUsage('app', 'launch')
-    }
-  }, [user, initialized, trackFeatureUsage])
 
   // Handle authentication redirects
   useEffect(() => {
     if (initialized && !loading) {
       const isAuthPage = pathname?.startsWith('/auth')
-      
-      if (!firebaseUser && !isAuthPage) {
-        router.push('/auth')
-      } else if (firebaseUser && isAuthPage) {
+      const isPublicPage = pathname === '/' || pathname === '/landing' // Allow root and landing to be public
+
+      // Only redirect to root if user is trying to access auth pages while authenticated
+      if (firebaseUser && isAuthPage) {
         router.push('/')
       }
+      // No longer redirect unauthenticated users away from protected pages - let each page handle its own auth state
     }
   }, [firebaseUser, initialized, loading, pathname, router])
 
@@ -104,24 +81,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Desktop Sidebar */}
-      {!isMobile && (
-        <Sidebar />
-      )}
-      
-      {/* Main Content */}
-      <main className={cn(
-        "flex-1 overflow-auto page-transition",
-        isMobile && "pb-16" // Mobile bottom nav height
-      )}>
-        {children}
-      </main>
-      
-      {/* Mobile Navigation */}
-      {isMobile && (
-        <MobileNavigation />
-      )}
+    <div className="min-h-dvh bg-background flex flex-col">
+      {children}
     </div>
   )
 }

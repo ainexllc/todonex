@@ -178,22 +178,12 @@ class TemplateCache {
   }
 
   private initializeCommonTemplates(): void {
-    // Common task creation templates
+    // Task creation templates
     this.templates.set('create_simple_task', 'Create a task: {input}. Format: Title only, no description needed.')
     this.templates.set('prioritize_tasks', 'Rank these tasks by priority (high/medium/low): {input}')
     this.templates.set('suggest_due_date', 'Suggest a realistic due date for: {input}')
-    
-    // Recipe templates
-    this.templates.set('quick_recipe', 'Suggest a quick recipe using: {input}. Keep it under 30 minutes.')
-    this.templates.set('ingredient_substitute', 'What can I use instead of {input} in cooking?')
-    
-    // Shopping templates
-    this.templates.set('categorize_items', 'Group these shopping items by store section: {input}')
-    this.templates.set('estimate_quantity', 'How much {input} should I buy for a family of 4?')
-    
-    // Note templates
-    this.templates.set('extract_tags', 'Suggest 3-5 tags for this note: {input}')
-    this.templates.set('generate_title', 'Create a concise title for: {input}')
+    this.templates.set('break_down_task', 'Break down this complex task into subtasks: {input}')
+    this.templates.set('estimate_duration', 'Estimate how long this task might take: {input}')
   }
 
   get(templateName: string, input: string): string | null {
@@ -218,19 +208,18 @@ export const templateCache = new TemplateCache()
 
 // Utility functions
 export function shouldCache(featureType: string, taskType: string): boolean {
-  // Don't cache sensitive data
-  if (featureType === 'bills' || featureType === 'financial') {
+  // Only cache task-related operations
+  if (featureType !== 'tasks' && featureType !== 'general') {
     return false
   }
 
-  // Cache common operations
+  // Cache common task operations
   const cacheableTypes = [
     'create_task',
-    'categorize',
+    'prioritize',
     'suggest',
-    'extract_tags',
-    'generate_title',
-    'simple_recipe'
+    'break_down',
+    'estimate'
   ]
 
   return cacheableTypes.some(type => taskType.includes(type))
@@ -239,10 +228,6 @@ export function shouldCache(featureType: string, taskType: string): boolean {
 export function getCacheDuration(featureType: string): number {
   const durations: Record<string, number> = {
     tasks: 60,      // 1 hour
-    recipes: 240,   // 4 hours
-    shopping: 30,   // 30 minutes
-    notes: 120,     // 2 hours
-    calendar: 60,   // 1 hour
     general: 30,    // 30 minutes
   }
 

@@ -396,7 +396,7 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     } else if (lowerTitle.includes('meeting') || lowerTitle.includes('call')) {
       return [
         'Prepare agenda and materials',
-        'Send calendar invites',
+        'Set meeting agenda',
         'Conduct meeting/call',
         'Follow up with action items'
       ]

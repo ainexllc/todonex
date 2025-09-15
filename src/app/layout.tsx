@@ -19,9 +19,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NextTaskPro - Your Adaptive Home Management Hub",
-  description: "An intelligent home management platform that adapts to your family's needs. Track tasks, bills, recipes, shopping lists and more.",
-  keywords: ["home management", "family organizer", "task management", "bill tracking", "recipe manager"],
+  title: "NextTaskPro - Intelligent Task Management",
+  description: "An intelligent task management platform powered by AI. Organize, prioritize, and complete your tasks with smart assistance.",
+  keywords: ["task management", "productivity", "AI assistant", "task organization", "smart planning"],
   authors: [{ name: "NextTaskPro Team" }],
   creator: "NextTaskPro",
   publisher: "NextTaskPro",

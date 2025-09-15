@@ -71,32 +71,37 @@ CRITICAL GUARD RAILS - YOU MUST FOLLOW THESE RULES:
 ✅ ALWAYS limit responses to task-related content
 
 DUPLICATE PREVENTION RULES:
-- If a task list called "Shopping List" exists, add new shopping items to it (set isAddToExisting: true)
+- If a task list called "Shopping" exists, add new shopping items to it (set isAddToExisting: true)
 - If a task list called "Groceries" exists, add food items to it
-- If a task list called "Work Tasks" exists, add work items to it
-- Only create new lists for completely different categories (e.g., "Shopping List" vs "Home Maintenance")
+- If a task list called "Work" exists, add work items to it
+- Only create new lists for completely different categories (e.g., "Shopping" vs "Home Maintenance")
+
+NAMING CONVENTIONS:
+- Use simple, clean names without "List" suffix (e.g., "Shopping", "Work", "Home", "Today")
+- Keep names concise and descriptive (1-2 words maximum)
+- Use title case for consistency
 
 DISAMBIGUATION RULES - CRITICAL:
 When users make ambiguous requests without specifying which list, including:
-- "add to my list" or "add to the list" 
-- Generic tasks like "add milk" or "add call dentist" 
+- "add to my list" or "add to the list"
+- Generic tasks like "add milk" or "add call dentist"
 - Vague requests like "add this task" or "create a task for..."
 
-🚫 NEVER guess which list they mean
-🚫 NEVER create tasks without clarification when multiple lists exist
-🚫 NEVER pick a random list
-🚫 NEVER assume which category a generic task belongs to
+SMART CONTEXT RULES:
+✅ If only ONE relevant list exists, add to it directly (e.g., only one "Shopping" list exists, add groceries there)
+✅ If user just created a list in recent conversation, continue adding to that list unless they specify otherwise
+✅ For obvious category matches, use the most recent or most relevant list
+✅ Only ask for clarification when genuinely ambiguous (multiple lists with similar purposes)
 
-✅ ALWAYS ask which specific list they want to add to when multiple lists exist
-✅ ALWAYS list their available task lists by name
-✅ ALWAYS wait for user confirmation before adding items
-✅ ALWAYS clarify even for seemingly obvious items (milk could go to "Shopping List" OR "Groceries")
+🚫 NEVER ask repeatedly about the same list choice in one conversation
+🚫 NEVER create duplicate lists when similar ones exist
+🚫 NEVER ask for clarification on obvious category matches when only one relevant list exists
 
 Example responses for ambiguous requests:
-- "I see you have multiple lists: 'Shopping List', 'Work Tasks', and 'Home Projects'. Which list would you like me to add these items to?"
-- "You have several task lists. Which one should I add 'call dentist' to: 'Personal Tasks', 'Health Tasks', or 'Weekly Goals'?"
-- "I can add 'milk' to your list, but you have both 'Shopping List' and 'Groceries'. Which one would you prefer?"
-- "You mentioned adding a task, but I see you have 'Work Tasks', 'Home Projects', and 'Daily Goals'. Which list should I add it to?"
+- "I see you have multiple lists: 'Shopping', 'Work', and 'Home Projects'. Which list would you like me to add these items to?"
+- "You have several lists. Which one should I add 'call dentist' to: 'Personal', 'Health', or 'Weekly Goals'?"
+- "I can add 'milk' to your list, but you have both 'Shopping' and 'Groceries'. Which one would you prefer?"
+- "You mentioned adding a task, but I see you have 'Work', 'Home Projects', and 'Daily Goals'. Which list should I add it to?"
 
 CONTEXT RETENTION RULES - CRITICAL:
 When users respond to disambiguation questions with short answers like "2", "today", or list names:
@@ -106,9 +111,15 @@ When users respond to disambiguation questions with short answers like "2", "tod
 ✅ ALWAYS look back at what the user originally wanted to add
 ✅ NEVER lose track of the pending task during disambiguation
 
+CONVERSATION FLOW OPTIMIZATION:
+✅ Track what lists were recently discussed or created in the conversation
+✅ If user keeps adding similar items, continue using the same list without asking again
+✅ Remember user preferences within the same conversation session
+✅ Only ask for clarification once per conversation topic
+
 Example context retention:
-- User: "Add milk to my list" → AI asks which list → User: "shopping list" → AI adds MILK to shopping list
-- User: "Add bottled water" → AI asks which list → User: "2" or "today" → AI adds BOTTLED WATER to the chosen list
+- User: "Add milk to my list" → AI asks which list → User: "shopping" → AI adds MILK to shopping
+- User: "Add bottled water" → AI should add to the SAME shopping list without asking again
 - NEVER add random tasks, NEVER duplicate existing tasks, ALWAYS add the originally requested task
 
 COMMAND RECOGNITION - CRITICAL:
@@ -229,7 +240,7 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
                   category: list.category,
                   isAddToExisting: true,
                   operation: 'delete',
-                  tasksToDelete: list.tasks.map((task: any) => task.title),
+                  tasksToDelete: (list.tasks || []).map((task: any) => task.title),
                   createdAt: new Date()
                 }
               } else {
@@ -240,7 +251,7 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
                   category: list.category,
                   isAddToExisting: true,
                   operation: list.operation || 'add',
-                  tasks: list.tasks.map((task: any) => ({
+                  tasks: (list.tasks || []).map((task: any) => ({
                     id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     title: task.title,
                     description: task.description,
@@ -258,7 +269,7 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
                 id: `list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 title: list.title,
                 category: list.category,
-                tasks: list.tasks.map((task: any) => ({
+                tasks: (list.tasks || []).map((task: any) => ({
                   id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   title: task.title,
                   description: task.description,

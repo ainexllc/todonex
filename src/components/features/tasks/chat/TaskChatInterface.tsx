@@ -94,6 +94,10 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     setSelectedTaskListId(null)
   }
 
+  const handleDeleteTaskList = async (taskListId: string) => {
+    await deleteTaskList(taskListId)
+  }
+
   // Show centered input when there are no active messages (regardless of task lists)
   if (messages.length === 0) {
     return (
@@ -103,30 +107,29 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           taskLists={taskLists}
           selectedTaskListId={selectedTaskListId}
           onTaskListSelect={handleTaskListSelect}
-          onCreateNew={() => router.push('/tasks/new')}
-          onTaskListDelete={deleteTaskList}
+          onTaskListDelete={handleDeleteTaskList}
           className="flex-shrink-0"
         />
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="flex-1 flex flex-col bg-gray-900">
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-2xl">
               {/* Compact Instructions Above Input */}
-              <div className="text-center mb-6">
-                <p className="text-xs text-muted-foreground mb-2">
+              <div className="text-center mb-4">
+                <p className="text-xs text-gray-400 mb-2">
                   Create and manage tasks with natural language
                 </p>
-                <div className="flex flex-wrap gap-1.5 justify-center text-[10px] text-muted-foreground">
+                <div className="flex flex-wrap gap-1 justify-center text-[10px] text-gray-400">
                   {[
-                    "Create shopping list",
+                    "Set daily goals",
                     "Plan morning routine",
                     "Organize by priority"
                   ].map((example, index) => (
                     <button
                       key={index}
                       onClick={() => handleSubmit(example)}
-                      className="px-2 py-0.5 text-[10px] bg-primary/10 hover:bg-primary/20 text-primary rounded-full border border-primary/20 transition-colors"
+                      className="px-2 py-1 text-[10px] bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 rounded-full border border-gray-700 transition-colors"
                       disabled={loading}
                     >
                       {example}
@@ -159,30 +162,29 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         taskLists={taskLists}
         selectedTaskListId={selectedTaskListId}
         onTaskListSelect={handleTaskListSelect}
-        onCreateNew={() => router.push('/tasks/new')}
-        onTaskListDelete={deleteTaskList}
+        onTaskListDelete={handleDeleteTaskList}
         className="flex-shrink-0"
       />
       
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-gray-900">
         {/* Scrollable Chat area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
               message={message}
-              onTaskAction={(action, taskId, data) => {
+              onTaskAction={async (action, taskId, data) => {
                 // Handle task actions
                 switch (action) {
                   case 'create':
-                    createTaskList(data.title, data.tasks)
+                    await createTaskList(data.title, data.tasks)
                     break
                   case 'update':
-                    updateTaskList(taskId, data)
+                    await updateTaskList(taskId, data)
                     break
                   case 'delete':
-                    deleteTaskList(taskId)
+                    await deleteTaskList(taskId)
                     break
                 }
               }}
@@ -197,16 +199,16 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           )}
           
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+              <p className="text-sm text-red-300">{error}</p>
             </div>
           )}
-          
+
           <div ref={chatEndRef} />
         </div>
 
         {/* Bottom input field */}
-        <div className="flex-shrink-0 border-t border-border p-4 bg-background/95 backdrop-blur-sm">
+        <div className="flex-shrink-0 border-t border-gray-800 p-4 bg-gray-950/95 backdrop-blur-sm">
           <ChatInput
             value={inputValue}
             onChange={handleInputChange}
@@ -223,26 +225,26 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         taskList={selectedTaskList}
         isOpen={showTaskListModal}
         onClose={handleCloseTaskListModal}
-        onTaskUpdate={(taskId, updates) => {
+        onTaskUpdate={async (taskId, updates) => {
           // Update task in the selected task list
           if (selectedTaskList) {
-            updateTaskList(selectedTaskList.id, {
+            await updateTaskList(selectedTaskList.id, {
               tasks: selectedTaskList.tasks.map((task: any) =>
                 task.id === taskId ? { ...task, ...updates } : task
               )
             })
           }
         }}
-        onTaskDelete={(taskId) => {
+        onTaskDelete={async (taskId) => {
           // Remove task from the selected task list
           if (selectedTaskList) {
-            updateTaskList(selectedTaskList.id, {
+            await updateTaskList(selectedTaskList.id, {
               tasks: selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
             })
           }
         }}
-        onTaskListDelete={(taskListId) => {
-          deleteTaskList(taskListId)
+        onTaskListDelete={async (taskListId) => {
+          await deleteTaskList(taskListId)
         }}
       />
     </div>

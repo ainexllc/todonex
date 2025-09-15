@@ -32,8 +32,6 @@ const defaultPreferences: UserPreferences = {
     push: true,
     sms: false,
     taskReminders: true,
-    billReminders: true,
-    subscriptionAlerts: true,
   },
   dataSync: 'wifi-only'
 }

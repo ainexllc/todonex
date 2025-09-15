@@ -47,9 +47,15 @@ firebase deploy --only firestore:rules --project nexttaskpro
 
 ## 🏗️ Development Environment
 ### Required Services Running:
-- **Dev Server**: `npm run dev -- --port 3002`
+- **Dev Server**: `npm run dev` (ALWAYS port 3000, run in background)
 - **Firebase Project**: Connected to `nexttaskpro`
-- **Playwright**: Uses port 3002 for E2E testing
+- **Playwright**: Uses port 3000 for E2E testing
+
+### Development Server Rules:
+- **ALWAYS** use port 3000 (default Next.js port)
+- **ALWAYS** run `npm run dev` in the background
+- **NEVER** start servers on other ports (3001, 3002, etc.)
+- **RESTART**: Always use `npm run dev` on port 3000
 
 ### Key Files and Locations:
 - **Firebase Config**: `/src/lib/firebase.ts`

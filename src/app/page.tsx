@@ -1,175 +1,180 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { QuickInput } from '@/components/home/QuickInput'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { TaskChatInterface } from '@/components/features/tasks/chat/TaskChatInterface'
 import { useAuthStore } from '@/store/auth-store'
-import { useAdaptiveStore } from '@/store/adaptive-store'
-import { createDocument } from '@/lib/firebase-data'
+import { AuthForm } from '@/components/features/auth/auth-form'
+import { Card } from '@/components/ui/card'
+import { Sparkles, Brain, Users, Zap, CheckCircle, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Recent activity mock data - replace with real data
-const recentActivity = [
-  { id: '1', type: 'task', title: 'Review project proposal', time: '2 hours ago' },
-  { id: '2', type: 'note', title: 'Meeting notes - Q4 planning', time: '5 hours ago' },
-  { id: '3', type: 'expense', title: 'Lunch with client', time: 'Yesterday' },
-]
-
 export default function HomePage() {
-  const [isProcessing, setIsProcessing] = useState(false)
-  const { user } = useAuthStore()
-  const { trackFeatureUsage } = useAdaptiveStore()
-  const router = useRouter()
+  const { user, loading, initialized } = useAuthStore()
+  const searchParams = useSearchParams()
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const initialMode = searchParams?.get('mode') as 'signin' | 'signup' || 'signin'
 
-  const handleQuickInput = async (input: string, type: string) => {
-    if (!user) return
+  const features = [
+    {
+      icon: Brain,
+      title: 'AI-Powered Task Creation',
+      description: 'Describe your tasks in natural language and watch AI create perfectly organized, actionable lists.',
+      gradient: 'from-blue-500 to-purple-600',
+    },
+    {
+      icon: Zap,
+      title: 'Smart Prioritization',
+      description: 'Our AI automatically detects and assigns priorities based on urgency and importance.',
+      gradient: 'from-purple-500 to-pink-600',
+    },
+    {
+      icon: Users,
+      title: 'Family Collaboration',
+      description: 'Share tasks with family members and keep everyone organized and accountable.',
+      gradient: 'from-green-500 to-blue-600',
+    },
+  ]
 
-    setIsProcessing(true)
-    
-    try {
-      // Process the input based on type
-      switch (type) {
-        case 'task':
-          // Create a task
-          await createDocument('tasks', generateId(), {
-            title: input,
-            completed: false,
-            priority: 'medium',
-            description: `Created via quick input`
-          })
-          trackFeatureUsage('quick-input', 'task_created')
-          router.push('/tasks')
-          break
-          
-        case 'note':
-          // Create a note
-          await createDocument('notes', generateId(), {
-            title: input,
-            content: '',
-            tags: []
-          })
-          trackFeatureUsage('quick-input', 'note_created')
-          router.push('/notes')
-          break
-          
-        case 'reminder':
-          // Create a reminder/task with due date
-          const tomorrow = new Date()
-          tomorrow.setDate(tomorrow.getDate() + 1)
-          
-          await createDocument('tasks', generateId(), {
-            title: input,
-            completed: false,
-            priority: 'high',
-            dueDate: tomorrow,
-            description: `Reminder created via quick input`
-          })
-          trackFeatureUsage('quick-input', 'reminder_created')
-          router.push('/tasks')
-          break
-          
-        case 'expense':
-          // Create an expense entry
-          await createDocument('expenses', generateId(), {
-            description: input,
-            amount: 0,
-            category: 'general',
-            date: new Date()
-          })
-          trackFeatureUsage('quick-input', 'expense_created')
-          router.push('/bills')
-          break
-          
-        default:
-          // General AI processing - route to most likely feature
-          if (input.toLowerCase().includes('remind') || input.toLowerCase().includes('due')) {
-            await handleQuickInput(input, 'reminder')
-          } else if (input.toLowerCase().includes('note') || input.toLowerCase().includes('write')) {
-            await handleQuickInput(input, 'note')
-          } else if (input.toLowerCase().includes('cost') || input.toLowerCase().includes('spend')) {
-            await handleQuickInput(input, 'expense')
-          } else {
-            await handleQuickInput(input, 'task')
-          }
-          break
-      }
-    } catch (error) {
-      console.error('Failed to process quick input:', error)
-    } finally {
-      setIsProcessing(false)
-    }
+  const testimonial = {
+    text: "NextTaskPro transformed how I manage my daily tasks. The AI understands exactly what I need!",
+    author: "Sarah Chen",
+    role: "Project Manager",
+    rating: 5,
   }
 
-  const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36)
+  // Auto-rotate features
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % features.length)
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [])
 
-  return (
-    <div 
-      className="max-w-[50rem] px-5 pt-20 @sm:pt-18 mx-auto w-full flex flex-col h-full pb-4 transition-all duration-300" 
-      style={{ maskImage: 'linear-gradient(black 85%, transparent 100%)' }}
-    >
-      <div className="min-h-screen flex flex-col">
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col justify-center py-12">
-          <div className="w-full">
-            
-            {/* Welcome Message */}
-            <div className="text-center mb-12">
-              <h1 className="text-2xl font-semibold text-foreground mb-4">
-                Welcome back, {user?.displayName?.split(' ')[0] || 'there'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                What would you like to accomplish today?
-              </p>
+  // Show loading state during auth store hydration
+  if (!initialized || loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    )
+  }
+
+  // Show auth interface for unauthenticated users on root path
+  if (!user) {
+    return (
+      <div className="dark min-h-screen bg-gray-950 flex">
+        {/* Left Side - Features Showcase */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800">
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute top-20 left-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col justify-center p-12 text-white">
+            <div className="max-w-md">
+              {/* Logo */}
+              <div className="flex items-center space-x-3 mb-12">
+                <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold">NextTaskPro</span>
+              </div>
+
+              {/* Feature Carousel */}
+              <div className="space-y-8">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon
+                  const isActive = currentSlide === index
+
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        "transition-all duration-700",
+                        isActive ? "opacity-100 translate-x-0" : "opacity-40 translate-x-4"
+                      )}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500",
+                          isActive
+                            ? "bg-white/20 backdrop-blur-sm scale-110"
+                            : "bg-white/10"
+                        )}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold mb-2">
+                            {feature.title}
+                          </h3>
+                          <p className="text-white/80 leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Indicators */}
+              <div className="flex space-x-2 mt-12">
+                {features.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      currentSlide === index ? "bg-white w-8" : "bg-white/40"
+                    )}
+                  />
+                ))}
+              </div>
+
+              {/* Testimonial */}
+              <Card className="mt-12 bg-white/10 backdrop-blur-sm border-white/20 text-white">
+                <div className="p-6">
+                  <div className="flex space-x-1 mb-3">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <blockquote className="text-sm mb-4 italic">
+                    "{testimonial.text}"
+                  </blockquote>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-medium">
+                      {testimonial.author[0]}
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm">{testimonial.author}</div>
+                      <div className="text-white/60 text-xs">{testimonial.role}</div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
-
-            {/* Centered Quick Input */}
-            <div className="mb-16">
-              <QuickInput 
-                onSubmit={handleQuickInput}
-                placeholder="What would you like to track today?"
-              />
-            </div>
-
           </div>
         </div>
 
-        {/* Recent Activity Section */}
-        {recentActivity.length > 0 && (
-          <div className="border-t border-border bg-muted/30">
-            <div className="w-full py-8">
-              <h2 className="text-sm font-semibold text-foreground mb-4">
-                Recent Activity
-              </h2>
-              <div className="grid gap-3">
-                {recentActivity.slice(0, 3).map((item) => (
-                  <div
-                    key={item.id}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-lg",
-                      "grok-elevation hover:border-primary/30 cursor-pointer"
-                    )}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        item.type === 'task' ? 'bg-blue-500' :
-                        item.type === 'note' ? 'bg-green-500' :
-                        item.type === 'expense' ? 'bg-orange-500' : 'bg-gray-500'
-                      )} />
-                      <span className="text-xs font-medium text-foreground">
-                        {item.title}
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {item.time}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+        {/* Right Side - Auth Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-12 bg-gray-900">
+          <div className="w-full max-w-md">
+            <AuthForm mode={initialMode} />
           </div>
-        )}
+        </div>
       </div>
+    )
+  }
+
+  // Show authenticated task interface
+  return (
+    <div className="dark h-screen flex flex-col overflow-hidden bg-gray-950 text-white">
+      <TaskChatInterface className="flex-1" />
     </div>
   )
 }

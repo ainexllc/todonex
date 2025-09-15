@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { FeatureType } from './types'
+import { FeatureType, DEFAULT_FEATURE_CONFIG } from './types'
 
 interface AIContextType {
   isEnabled: boolean
@@ -34,11 +34,6 @@ const defaultUsage: AIUsageStats = {
   dailyCost: 0,
   featureUsage: {
     tasks: { requests: 0, cost: 0, tokens: 0 },
-    recipes: { requests: 0, cost: 0, tokens: 0 },
-    shopping: { requests: 0, cost: 0, tokens: 0 },
-    bills: { requests: 0, cost: 0, tokens: 0 },
-    notes: { requests: 0, cost: 0, tokens: 0 },
-    calendar: { requests: 0, cost: 0, tokens: 0 },
     general: { requests: 0, cost: 0, tokens: 0 },
   },
   lastReset: new Date(),
@@ -62,21 +57,36 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     if (savedUsage) {
       try {
         const parsed = JSON.parse(savedUsage)
-        
+
+        // Harden featureUsage by merging with default and filtering to allowed keys
+        const allowedFeatureTypes: FeatureType[] = ['tasks', 'general']
+        const hardenedFeatureUsage = {
+          ...defaultUsage.featureUsage,
+          ...Object.fromEntries(
+            Object.entries(parsed.featureUsage || {}).filter(
+              ([key]) => allowedFeatureTypes.includes(key as FeatureType)
+            )
+          )
+        }
+
         // Check if we need to reset daily stats (new day)
         const lastReset = new Date(parsed.lastReset)
         const now = new Date()
         const isNewDay = now.toDateString() !== lastReset.toDateString()
-        
+
         if (isNewDay) {
           setUsage({
             ...parsed,
             dailyRequests: 0,
             dailyCost: 0,
+            featureUsage: hardenedFeatureUsage,
             lastReset: now,
           })
         } else {
-          setUsage(parsed)
+          setUsage({
+            ...parsed,
+            featureUsage: hardenedFeatureUsage,
+          })
         }
       } catch {
         // Invalid saved data, use defaults
@@ -113,6 +123,9 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
   // Track usage
   const trackUsage = useCallback((feature: FeatureType, cost: number, tokensUsed: number) => {
     setUsage(prev => {
+      // Safe fallback for missing feature usage
+      const currentFeatureUsage = prev.featureUsage[feature] || { requests: 0, cost: 0, tokens: 0 }
+
       const updated = {
         ...prev,
         totalRequests: prev.totalRequests + 1,
@@ -123,9 +136,9 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
         featureUsage: {
           ...prev.featureUsage,
           [feature]: {
-            requests: prev.featureUsage[feature].requests + 1,
-            cost: prev.featureUsage[feature].cost + cost,
-            tokens: prev.featureUsage[feature].tokens + tokensUsed,
+            requests: currentFeatureUsage.requests + 1,
+            cost: currentFeatureUsage.cost + cost,
+            tokens: currentFeatureUsage.tokens + tokensUsed,
           },
         },
       }
@@ -176,8 +189,9 @@ export function useAIFeature(feature: FeatureType) {
 
   const canUseAI = isEnabled && isAvailable
 
-  // Check daily limits (basic rate limiting)
-  const dailyLimit = 100 // Adjust based on pricing tier
+  // Check daily limits using feature configs
+  const featureConfig = DEFAULT_FEATURE_CONFIG[feature]
+  const dailyLimit = featureConfig?.maxDailyRequests || 100
   const hasReachedLimit = usage.dailyRequests >= dailyLimit
 
   const makeRequest = useCallback(async (
@@ -238,13 +252,17 @@ export function AIStatusIndicator() {
     )
   }
 
+  // Calculate total daily limit from all features
+  const totalDailyLimit = Object.values(DEFAULT_FEATURE_CONFIG)
+    .reduce((sum, config) => sum + config.maxDailyRequests, 0)
+
   return (
     <div className="flex items-center gap-2 text-xs">
       <div className={`w-2 h-2 rounded-full ${
         isAvailable ? 'bg-green-500' : 'bg-red-500'
       }`} />
       <span className="text-muted-foreground">
-        AI {isAvailable ? 'Ready' : 'Unavailable'} • {usage.dailyRequests}/100 today
+        AI {isAvailable ? 'Ready' : 'Unavailable'} • {usage.dailyRequests}/{totalDailyLimit} today
       </span>
     </div>
   )

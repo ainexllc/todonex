@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ListTodo, Trash2, Edit3 } from 'lucide-react'
+import { DeleteDialog } from '@/components/ui/delete-dialog'
+import { ListTodo, Trash2, Edit3, User, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useAuthStore } from '@/store/auth-store'
 
 interface Task {
   id: string
@@ -29,20 +32,23 @@ interface TaskListSidebarProps {
   taskLists: TaskList[]
   selectedTaskListId: string | null
   onTaskListSelect: (taskList: TaskList | null) => void
-  onCreateNew: () => void
   onTaskListDelete: (taskListId: string) => void
   className?: string
 }
 
-export function TaskListSidebar({ 
-  taskLists, 
+export function TaskListSidebar({
+  taskLists,
   selectedTaskListId,
   onTaskListSelect,
-  onCreateNew,
   onTaskListDelete,
-  className 
+  className
 }: TaskListSidebarProps) {
-  
+  const { user } = useAuthStore()
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    taskList: TaskList | null
+  }>({ isOpen: false, taskList: null })
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
@@ -50,6 +56,13 @@ export function TaskListSidebar({
       case 'low': return 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-300'
     }
+  }
+
+  const getUserInitials = (name: string, email: string) => {
+    if (name && name.trim()) {
+      return name.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2)
+    }
+    return email.charAt(0).toUpperCase()
   }
 
   const handleTaskListClick = (taskList: TaskList) => {
@@ -64,9 +77,17 @@ export function TaskListSidebar({
 
   const handleDeleteTaskList = (e: React.MouseEvent, taskList: TaskList) => {
     e.stopPropagation()
-    if (window.confirm(`Are you sure you want to delete "${taskList.title}"? This action cannot be undone.`)) {
-      onTaskListDelete(taskList.id)
+    setDeleteDialog({ isOpen: true, taskList })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (deleteDialog.taskList) {
+      await onTaskListDelete(deleteDialog.taskList.id)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, taskList: null })
   }
 
   const pendingTasks = taskLists.reduce((total, list) => 
@@ -77,49 +98,33 @@ export function TaskListSidebar({
   )
 
   return (
-    <div className={cn("w-80 bg-background border-r border-border flex flex-col", className)}>
+    <div className={cn("w-80 bg-gray-950 border-r border-gray-800 flex flex-col", className)}>
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-foreground">Task Lists</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCreateNew}
-            className="h-8 w-8 p-0 hover:bg-muted/50"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+      <div className="p-3 border-b border-gray-800">
+        <div className="mb-2">
+          <h2 className="text-sm font-semibold text-white">My Lists</h2>
         </div>
-        
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
-            <div className="font-semibold text-foreground">{pendingTasks}</div>
-            <div className="text-muted-foreground">Pending</div>
+          <div className="bg-gray-800/80 rounded-lg p-2 text-center">
+            <div className="font-semibold text-white">{pendingTasks}</div>
+            <div className="text-gray-400">Pending</div>
           </div>
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
-            <div className="font-semibold text-green-600">{completedTasks}</div>
-            <div className="text-muted-foreground">Completed</div>
+          <div className="bg-gray-800/80 rounded-lg p-2 text-center">
+            <div className="font-semibold text-green-400">{completedTasks}</div>
+            <div className="text-gray-400">Completed</div>
           </div>
         </div>
       </div>
 
       {/* Task Lists */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {taskLists.length === 0 ? (
-          <div className="text-center py-8">
-            <ListTodo className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-4">No task lists yet</p>
-            <Button
-              onClick={onCreateNew}
-              variant="outline"
-              size="sm"
-              className="w-full"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First List
-            </Button>
+          <div className="text-center py-6">
+            <ListTodo className="h-10 w-10 mx-auto mb-2 text-gray-500" />
+            <p className="text-sm text-gray-300 mb-2">No lists yet</p>
+            <p className="text-xs text-gray-500">Use the chat to create your first list</p>
           </div>
         ) : (
           <>
@@ -132,84 +137,60 @@ export function TaskListSidebar({
                 <Card
                   key={taskList.id}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-md",
-                    isSelected 
-                      ? "ring-2 ring-primary bg-primary/5" 
-                      : "hover:bg-muted/30"
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-900 border-gray-800 overflow-hidden",
+                    isSelected
+                      ? "ring-2 ring-blue-500 bg-gray-800"
+                      : "hover:bg-gray-800/70"
                   )}
                   onClick={() => handleTaskListClick(taskList)}
                 >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-sm font-semibold truncate">
-                          {taskList.title}
-                        </CardTitle>
-                        {taskList.category && (
-                          <Badge variant="outline" className="mt-1 text-xs">
-                            {taskList.category}
-                          </Badge>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleDeleteTaskList(e, taskList)}
-                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 transition-opacity"
-                        title="Delete task list"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                  <div className="bg-gray-800 px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      <CardTitle className="text-[10px] font-semibold truncate text-white">
+                        {taskList.title}
+                      </CardTitle>
                     </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <div className="space-y-2">
-                      {/* Task counts */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{taskList.tasks.length} tasks</span>
-                        <div className="flex gap-2">
-                          {pendingCount > 0 && (
-                            <span className="text-orange-600">{pendingCount} pending</span>
-                          )}
-                          {completedCount > 0 && (
-                            <span className="text-green-600">{completedCount} done</span>
-                          )}
-                        </div>
-                      </div>
-                      
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDeleteTaskList(e, taskList)}
+                      className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-opacity"
+                      title="Delete task list"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  <CardContent className="p-3">
+                    <div className="space-y-1.5">
                       {/* Recent tasks preview */}
                       {taskList.tasks.length > 0 && (
                         <div className="space-y-1">
                           {taskList.tasks.slice(0, 2).map((task) => (
-                            <div 
+                            <div
                               key={task.id}
-                              className="flex items-center gap-2 text-xs"
+                              className="flex items-center gap-2 text-xs pb-1"
                             >
                               <div className={cn(
-                                "h-2 w-2 rounded-full",
-                                task.completed ? "bg-green-500" : "bg-orange-500"
+                                "h-1.5 w-1.5 rounded-full",
+                                task.completed ? "bg-green-400" : "bg-orange-400"
                               )} />
                               <span className={cn(
-                                "truncate",
-                                task.completed && "line-through text-muted-foreground"
+                                "truncate text-gray-300",
+                                task.completed && "line-through text-gray-500"
                               )}>
                                 {task.title}
                               </span>
                             </div>
                           ))}
                           {taskList.tasks.length > 2 && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-gray-500 pl-3.5 pb-1">
                               +{taskList.tasks.length - 2} more tasks
                             </div>
                           )}
                         </div>
                       )}
-                      
-                      {/* Created date */}
-                      <div className="text-xs text-muted-foreground pt-1 border-t border-border">
-                        Created {format(taskList.createdAt, 'MMM d')}
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -220,16 +201,50 @@ export function TaskListSidebar({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-border">
-        <Button
-          onClick={onCreateNew}
-          className="w-full"
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Task List
-        </Button>
+      <div className="p-3 border-t border-gray-800">
+        {user && (
+          <div className="flex items-center space-x-3 mb-2">
+            {/* Profile Picture or Avatar */}
+            <div className="relative">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName || 'User'}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                  {getUserInitials(user.displayName || '', user.email || '')}
+                </div>
+              )}
+            </div>
+
+            {/* User Info */}
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-white truncate">
+                {user.displayName || user.email?.split('@')[0] || 'User'}
+              </div>
+              <div className="text-xs text-gray-500 truncate">
+                {user.email}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center text-xs text-gray-500">
+          Create lists by describing what you want to accomplish
+        </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Task List"
+        description="Are you sure you want to delete this task list? All tasks within this list will be permanently removed. This action cannot be undone."
+        itemName={deleteDialog.taskList?.title}
+      />
     </div>
   )
 }

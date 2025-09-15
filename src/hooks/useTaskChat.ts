@@ -1,8 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAuthStore } from '@/store/auth-store'
 import { useAdaptiveStore } from '@/store/adaptive-store'
+import {
+  createDocument,
+  updateDocument,
+  deleteDocument,
+  subscribeToUserDocuments
+} from '@/lib/firebase-data'
 
 interface Task {
   id: string
@@ -44,30 +50,75 @@ interface UseTaskChatResult {
 
 export function useTaskChat(): UseTaskChatResult {
   const { user } = useAuthStore()
-  const { trackFeatureUsage } = useAdaptiveStore()
+  const { trackTaskUsage } = useAdaptiveStore()
   
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [taskLists, setTaskLists] = useState<TaskList[]>(() => {
-    // Load task lists from localStorage on initialization
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('task-chat-lists')
-        return saved ? JSON.parse(saved) : []
-      } catch {
-        return []
-      }
-    }
-    return []
-  })
+  const [taskLists, setTaskLists] = useState<TaskList[]>([])
 
-  // Save task lists to localStorage whenever they change
-  const saveTaskLists = useCallback((lists: TaskList[]) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('task-chat-lists', JSON.stringify(lists))
+  // Function to reload task lists from Firebase
+  const reloadTaskLists = useCallback(async () => {
+    if (!user) return
+
+    try {
+      const { getUserDocuments } = await import('@/lib/firebase-data')
+      const lists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
+      setTaskLists(lists)
+    } catch (error) {
+      console.log('Error loading task lists:', error)
     }
-  }, [])
+  }, [user])
+
+  // Load Firebase task lists when user is authenticated
+  useEffect(() => {
+    if (!user) {
+      setTaskLists([])
+      return
+    }
+    reloadTaskLists()
+  }, [user, reloadTaskLists])
+
+  // Save task list to Firebase
+  const saveTaskListToFirebase = useCallback(async (taskList: TaskList) => {
+    try {
+      console.log('Saving task list to Firebase:', taskList.title, taskList.id)
+      await createDocument('taskLists', taskList.id, {
+        title: taskList.title,
+        tasks: taskList.tasks,
+        category: taskList.category
+      })
+      console.log('Successfully saved task list to Firebase:', taskList.title)
+      // Reload task lists to update UI
+      await reloadTaskLists()
+    } catch (error) {
+      console.error('Failed to save task list to Firebase:', error)
+    }
+  }, [reloadTaskLists])
+
+  // Update task list in Firebase
+  const updateTaskListInFirebase = useCallback(async (id: string, updates: Partial<TaskList>) => {
+    try {
+      console.log('Updating task list in Firebase:', id, updates)
+      await updateDocument('taskLists', id, updates)
+      console.log('Successfully updated task list in Firebase:', id)
+      // Reload task lists to update UI
+      await reloadTaskLists()
+    } catch (error) {
+      console.error('Failed to update task list in Firebase:', error)
+    }
+  }, [reloadTaskLists])
+
+  // Delete task list from Firebase
+  const deleteTaskListFromFirebase = useCallback(async (id: string) => {
+    try {
+      await deleteDocument('taskLists', id)
+      // Reload task lists to update UI
+      await reloadTaskLists()
+    } catch (error) {
+      console.error('Failed to delete task list from Firebase:', error)
+    }
+  }, [reloadTaskLists])
 
   const sendMessage = useCallback(async (message: string) => {
     if (!user || loading) return
@@ -117,6 +168,7 @@ export function useTaskChat(): UseTaskChatResult {
       
       // Update task lists if new ones were created
       if (data.taskLists && data.taskLists.length > 0) {
+        console.log('Received task lists from AI:', data.taskLists)
         const updatedTaskLists = [...taskLists]
         
         data.taskLists.forEach((newList: any) => {
@@ -151,10 +203,31 @@ export function useTaskChat(): UseTaskChatResult {
         })
         
         setTaskLists(updatedTaskLists)
-        saveTaskLists(updatedTaskLists)
+
+        // Save all changes to Firebase
+        for (const newList of data.taskLists) {
+          try {
+            if (newList.isAddToExisting) {
+              // Update existing list in Firebase
+              const existingIndex = updatedTaskLists.findIndex(list => list.id === newList.id)
+              if (existingIndex !== -1) {
+                await updateTaskListInFirebase(newList.id, {
+                  tasks: updatedTaskLists[existingIndex].tasks
+                })
+              }
+            } else {
+              // Save new list to Firebase (only for add operations)
+              if (newList.operation !== 'delete') {
+                await saveTaskListToFirebase(newList)
+              }
+            }
+          } catch (error) {
+            console.error('Failed to save task list changes to Firebase:', error)
+          }
+        }
       }
 
-      trackFeatureUsage('tasks', 'ai_chat')
+      trackTaskUsage('ai_chat')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to send message'
       setError(errorMessage)
@@ -169,26 +242,18 @@ export function useTaskChat(): UseTaskChatResult {
     } finally {
       setLoading(false)
     }
-  }, [user, messages, taskLists, loading, trackFeatureUsage])
+  }, [user, messages, taskLists, loading, trackTaskUsage])
 
-  const createTaskList = useCallback((title: string, tasks: Task[]) => {
+  const createTaskList = useCallback(async (title: string, tasks: Task[]) => {
     // Check if a task list with the same title already exists
-    const existingList = taskLists.find(list => 
+    const existingList = taskLists.find(list =>
       list.title.toLowerCase() === title.toLowerCase()
     )
-    
+
     if (existingList) {
       // Add tasks to existing list instead of creating a new one
-      const updatedList = {
-        ...existingList,
-        tasks: [...existingList.tasks, ...tasks]
-      }
-      
-      const newTaskLists = taskLists.map(list => 
-        list.id === existingList.id ? updatedList : list
-      )
-      setTaskLists(newTaskLists)
-      saveTaskLists(newTaskLists)
+      const updatedTasks = [...existingList.tasks, ...tasks]
+      await updateTaskListInFirebase(existingList.id, { tasks: updatedTasks })
     } else {
       // Create new task list
       const newTaskList: TaskList = {
@@ -197,25 +262,17 @@ export function useTaskChat(): UseTaskChatResult {
         tasks,
         createdAt: new Date()
       }
-      const newTaskLists = [...taskLists, newTaskList]
-      setTaskLists(newTaskLists)
-      saveTaskLists(newTaskLists)
+      await saveTaskListToFirebase(newTaskList)
     }
-  }, [taskLists, saveTaskLists])
+  }, [taskLists, saveTaskListToFirebase, updateTaskListInFirebase])
 
-  const updateTaskList = useCallback((id: string, updates: Partial<TaskList>) => {
-    const newTaskLists = taskLists.map(list => 
-      list.id === id ? { ...list, ...updates } : list
-    )
-    setTaskLists(newTaskLists)
-    saveTaskLists(newTaskLists)
-  }, [taskLists, saveTaskLists])
+  const updateTaskList = useCallback(async (id: string, updates: Partial<TaskList>) => {
+    await updateTaskListInFirebase(id, updates)
+  }, [updateTaskListInFirebase])
 
-  const deleteTaskList = useCallback((id: string) => {
-    const newTaskLists = taskLists.filter(list => list.id !== id)
-    setTaskLists(newTaskLists)
-    saveTaskLists(newTaskLists)
-  }, [taskLists, saveTaskLists])
+  const deleteTaskList = useCallback(async (id: string) => {
+    await deleteTaskListFromFirebase(id)
+  }, [deleteTaskListFromFirebase])
 
   const resetConversation = useCallback(() => {
     setMessages([])
