@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NextTaskPro Loading Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .loading { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>NextTaskPro Loading Diagnostics</h1>
+    <div id="status"></div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            statusDiv.appendChild(div);
+        }
+        
+        addStatus('Starting NextTaskPro diagnostics...', 'info');
+        
+        // Test Firebase config
+        fetch('http://localhost:3003/_next/static/chunks/app/layout.js')
+            .then(() => addStatus('✅ Next.js app is serving files', 'success'))
+            .catch(() => addStatus('❌ Next.js app not responding', 'error'));
+        
+        // Test main page load
+        setTimeout(() => {
+            fetch('http://localhost:3003/')
+                .then(response => response.text())
+                .then(html => {
+                    if (html.includes('Loading NextTaskPro')) {
+                        addStatus('⚠️ App is showing loading screen (expected behavior)', 'loading');
+                    } else if (html.includes('error')) {
+                        addStatus('❌ Error found in HTML response', 'error');
+                    } else {
+                        addStatus('✅ App loaded successfully', 'success');
+                    }
+                })
+                .catch(err => addStatus(`❌ Failed to fetch main page: ${err.message}`, 'error'));
+        }, 1000);
+        
+        // Check for console errors after a delay
+        setTimeout(() => {
+            addStatus('Open browser console to check for JavaScript errors', 'info');
+            addStatus('Navigate to http://localhost:3003 to test the app', 'info');
+        }, 2000);
+    </script>
+</body>
+</html>

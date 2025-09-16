@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Editing Test</title>
+</head>
+<body>
+    <h1>Task Editing Manual Test</h1>
+    <p>1. Visit <a href="http://localhost:3002/tasks" target="_blank">http://localhost:3002/tasks</a></p>
+    <p>2. Create a test task or find an existing one</p>
+    <p>3. Try the different edit options:</p>
+    <ul>
+        <li>Hover over a task - click the edit icon (pencil)</li>
+        <li>Click the three-dot menu - select "Edit Task"</li>
+        <li>Click on a task to open detail panel - click edit button</li>
+    </ul>
+    <p>4. Verify the edit form opens with existing data pre-filled</p>
+    <p>5. Make changes and save</p>
+    
+    <script>
+        // Auto-open the tasks page
+        setTimeout(() => {
+            window.open('http://localhost:3002/tasks', '_blank');
+        }, 1000);
+    </script>
+</body>
+</html>

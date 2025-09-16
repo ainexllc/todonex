@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- heading "Tasks" [level=1]
+- paragraph: Get started by creating your first task
+- button "Add new"
+- heading "AI Task Assistant" [level=2]
+- text: Smart Creation
+- paragraph: Create tasks naturally using AI. Describe what you want to accomplish, and I'll help organize it into actionable tasks with priorities and due dates.
+- text: AI Task Assistant 100 requests remaining today
+- button "Single Task"
+- button "Multiple Tasks"
+- textbox "Describe a task... (e.g., \"Buy groceries tomorrow at 5pm\")"
+- text: 0/500 characters
+- button "Create Task" [disabled]
+- paragraph:
+  - text: 💡
+  - strong: "Examples:"
+- paragraph: • "Call the dentist to schedule a checkup next week"
+- paragraph: • "Buy ingredients for pasta dinner tomorrow"
+- paragraph: • "Review quarterly budget by Friday"
+- paragraph: "Single Task Examples:"
+- text: "\"Schedule quarterly review meeting\" \"Update project documentation\""
+- paragraph: "Multi-Task Examples:"
+- text: "\"Plan product launch campaign\" \"Set up new employee onboarding\""
+- heading "Welcome to Tasks" [level=2]
+- paragraph: Organize your tasks efficiently with AI assistance. Create tasks naturally, set priorities, and track your progress.
+- heading "Key Features" [level=3]
+- list:
+  - listitem: • AI-powered task creation from natural language
+  - listitem: "• Multiple views: List and My Day focus"
+  - listitem: • Set priorities and due dates with smart suggestions
+  - listitem: • Track completion status and progress
+- heading "AI-Enhanced" [level=3]
+- list:
+  - listitem: • Break down complex projects into subtasks
+  - listitem: • Instant task enhancement and suggestions
+  - listitem: • Smart priority and scheduling recommendations
+  - listitem: • Real-time sync across all your devices
+- text: AI Ready • 0/100 today
+- alert
+```

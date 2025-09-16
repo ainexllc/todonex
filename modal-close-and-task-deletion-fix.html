@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modal Close & Task Deletion Fixes</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .status { padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .success { background: #d1fae5; border: 1px solid #059669; color: #065f46; }
+        .info { background: #dbeafe; border: 1px solid #2563eb; color: #1e40af; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+        .error { background: #fee2e2; border: 1px solid #dc2626; color: #991b1b; }
+        .code { background: #f3f4f6; padding: 12px; border-radius: 6px; font-family: monospace; margin: 10px 0; font-size: 13px; }
+        button { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2563eb; }
+        .test-btn { background: #059669; }
+        .test-btn:hover { background: #047857; }
+        .delete-btn { background: #dc2626; }
+        .delete-btn:hover { background: #b91c1c; }
+        h3 { margin-top: 25px; color: #111827; }
+        ul, ol { padding-left: 20px; }
+        li { margin: 5px 0; }
+        .workflow { background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin: 15px 0; }
+        .workflow h4 { margin: 0 0 10px 0; color: #1e293b; }
+    </style>
+</head>
+<body>
+    <h1>✅ Modal Close & Task Deletion Fixes</h1>
+    
+    <div class="success">
+        <strong>✅ Two Critical Issues Fixed:</strong>
+        <ul>
+            <li><strong>Modal Closing:</strong> Task edit modal now closes after saving</li>
+            <li><strong>Completed Task Deletion:</strong> Completed tasks are automatically deleted permanently</li>
+        </ul>
+    </div>
+
+    <h2>🔧 Issue #1: Modal Not Closing After Save</h2>
+    
+    <div class="error">
+        <strong>❌ Previous Behavior:</strong>
+        <ol>
+            <li>Click task to open edit modal</li>
+            <li>Make changes and click "Save Changes"</li>
+            <li>Task updates but modal stays open ❌</li>
+            <li>User had to manually click "Cancel" or "X" to close</li>
+        </ol>
+    </div>
+
+    <div class="success">
+        <strong>✅ Fixed Behavior:</strong>
+        <ol>
+            <li>Click task to open edit modal</li>
+            <li>Make changes and click "Save Changes"</li>
+            <li>Task updates AND modal automatically closes ✅</li>
+            <li>User immediately sees the updated task in the list</li>
+        </ol>
+    </div>
+
+    <div class="info">
+        <strong>🔧 Technical Fix (tasks/page.tsx):</strong>
+        <div class="code">const handleUpdateTask = async (id: string, updates: Partial&lt;Task&gt;) => {
+  try {
+    // ... update logic ...
+    await updateDocument('tasks', id, cleanUpdates)
+    
+    // Close modal after successful update (when editing from form)
+    if (editingTask && editingTask.id === id) {
+      handleCloseForm() // ✅ Auto-close modal
+    }
+    
+    // ... rest of logic ...
+  } catch (error) {
+    console.error('Failed to update task:', error)
+  }
+}</div>
+    </div>
+
+    <h2>🗑️ Issue #2: Completed Tasks Should Be Deleted</h2>
+    
+    <div class="warning">
+        <strong>⚠️ Previous Behavior:</strong>
+        <ul>
+            <li>Mark task as completed → Task stays in list forever</li>
+            <li>Completed tasks accumulated over time</li>
+            <li>UI becomes cluttered with old completed tasks</li>
+            <li>No way to permanently remove completed items</li>
+        </ul>
+    </div>
+
+    <div class="success">
+        <strong>✅ New Behavior:</strong>
+        <ul>
+            <li>Mark task as completed → Task shows as completed briefly</li>
+            <li>After 500ms delay → Task is permanently deleted from database</li>
+            <li>Clean task list with only active/pending tasks</li>
+            <li>Better performance with fewer database records</li>
+        </ul>
+    </div>
+
+    <div class="workflow">
+        <h4>🔄 Completion Workflow:</h4>
+        <ol>
+            <li><strong>User clicks completion checkbox</strong> → Task marked as completed</li>
+            <li><strong>Visual feedback</strong> → Task shows green checkmark (500ms)</li>
+            <li><strong>Automatic deletion</strong> → Task permanently removed from Firestore</li>
+            <li><strong>UI update</strong> → Task disappears from list</li>
+        </ol>
+    </div>
+
+    <div class="info">
+        <strong>🔧 Technical Implementation:</strong>
+        <div class="code">if (updates.completed !== undefined) {
+  trackFeatureUsage('tasks', updates.completed ? 'complete' : 'uncomplete')
+  
+  // If task is marked as completed, delete it permanently
+  if (updates.completed) {
+    setTimeout(async () => {
+      try {
+        await deleteDocument('tasks', id)
+        console.log(`Completed task deleted: ${id}`)
+      } catch (error) {
+        console.error('Failed to delete completed task:', error)
+      }
+    }, 500) // Small delay to show completion state briefly
+  }
+}</div>
+    </div>
+
+    <h3>✅ Additional Fixes Applied</h3>
+    
+    <div class="success">
+        <strong>🎯 handleCreateTask Also Fixed:</strong>
+        <ul>
+            <li><strong>Create Task Modal:</strong> Now closes automatically after creating new task</li>
+            <li><strong>Consistent Behavior:</strong> Both create and edit modals close after successful submission</li>
+            <li><strong>Better UX:</strong> User immediately sees the new task in the list</li>
+        </ul>
+    </div>
+
+    <div class="code">const handleCreateTask = async (taskData) => {
+  try {
+    // ... creation logic ...
+    await createDocument&lt;Task&gt;('tasks', generateId(), cleanTaskData)
+    
+    // Close modal after successful creation
+    handleCloseForm() // ✅ Auto-close after create too
+    trackFeatureUsage('tasks', 'create')
+  } catch (error) {
+    console.error('Failed to create task:', error)
+  }
+}</div>
+
+    <h2>🧪 Test the Fixes</h2>
+    
+    <div class="info">
+        <strong>📋 Test Checklist:</strong>
+        <ol>
+            <li><strong>Modal Close Test:</strong>
+                <ul>
+                    <li>Click any task to edit → Modal opens</li>
+                    <li>Change title or description → Click "Save Changes"</li>
+                    <li>✅ Modal should close automatically</li>
+                    <li>✅ See updated task in the list</li>
+                </ul>
+            </li>
+            <li><strong>Task Completion Test:</strong>
+                <ul>
+                    <li>Click checkbox to complete a task</li>
+                    <li>✅ Task shows as completed briefly</li>
+                    <li>✅ Task disappears from list (permanently deleted)</li>
+                </ul>
+            </li>
+            <li><strong>Create Task Test:</strong>
+                <ul>
+                    <li>Click "Add Task" → Modal opens</li>
+                    <li>Fill in details → Click "Create Task"</li>
+                    <li>✅ Modal closes automatically</li>
+                    <li>✅ New task appears in the list</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <button class="test-btn" onclick="window.open('http://localhost:3002/tasks', '_blank')">Test Modal & Deletion Fixes</button>
+    
+    <h3>🎯 User Experience Improvements</h3>
+    
+    <div class="success">
+        <strong>✅ What Users Get:</strong>
+        <ul>
+            <li><strong>Seamless Editing:</strong> Click task → Edit → Save → Done (modal closes)</li>
+            <li><strong>Clean Task List:</strong> Completed tasks don't clutter the interface</li>
+            <li><strong>Immediate Feedback:</strong> Actions have clear, immediate results</li>
+            <li><strong>Consistent Behavior:</strong> All modals close after successful operations</li>
+            <li><strong>Better Performance:</strong> Fewer tasks in database = faster loading</li>
+        </ul>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important Notes:</strong>
+        <ul>
+            <li><strong>Permanent Deletion:</strong> Completed tasks are permanently removed (no undo)</li>
+            <li><strong>Brief Delay:</strong> 500ms delay allows users to see completion state</li>
+            <li><strong>Error Handling:</strong> If deletion fails, error is logged but doesn't break UI</li>
+            <li><strong>Offline Support:</strong> Completion/deletion only works when online</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('Modal close and task deletion fixes implemented');
+        console.log('Test: Edit task → Modal should close after save');
+        console.log('Test: Complete task → Task should be deleted permanently');
+    </script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Action Buttons - Complete & Delete</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .status { padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .success { background: #d1fae5; border: 1px solid #059669; color: #065f46; }
+        .info { background: #dbeafe; border: 1px solid #2563eb; color: #1e40af; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+        .demo-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 20px 0; }
+        .demo-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .task-demo { 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            padding: 16px; 
+            margin: 12px 0; 
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            position: relative;
+        }
+        .task-demo:hover { 
+            border-color: #3b82f6; 
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); 
+        }
+        .task-demo:hover .action-buttons { opacity: 1; }
+        .task-demo:hover .priority-badge { opacity: 0; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .task-title { font-weight: 600; margin: 0; flex: 1; margin-right: 12px; }
+        .task-desc { color: #6b7280; font-size: 14px; margin: 8px 0 12px 0; }
+        .task-meta { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 12px; 
+            color: #9ca3af; 
+        }
+        .priority-badge { 
+            background: #fef3c7; 
+            color: #d97706; 
+            padding: 2px 8px; 
+            border-radius: 12px; 
+            font-size: 11px;
+            transition: opacity 0.2s;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .complete-btn {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        .complete-btn:hover {
+            background: #bbf7d0;
+            color: #15803d;
+        }
+        .delete-btn {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+            color: #b91c1c;
+        }
+        .test-btn { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 10px 5px;
+        }
+        .test-btn:hover { background: #2563eb; }
+        h3 { margin-top: 25px; color: #111827; }
+        ul, ol { padding-left: 20px; }
+        li { margin: 5px 0; }
+        .code { background: #f3f4f6; padding: 12px; border-radius: 6px; font-family: monospace; margin: 10px 0; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <h1>✅ Task Action Buttons - Complete & Delete</h1>
+    
+    <div class="success">
+        <strong>✅ New Feature Added:</strong> Each task now has completion and delete buttons that appear on hover
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-section">
+            <h3>🎯 Interactive Demo</h3>
+            <p><em>Hover over tasks to see action buttons</em></p>
+            
+            <div class="task-demo">
+                <div class="task-header">
+                    <h4 class="task-title">Daily Coffee Break</h4>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="action-buttons">
+                            <button class="action-btn complete-btn" title="Mark as complete">✓</button>
+                            <button class="action-btn delete-btn" title="Delete task">🗑</button>
+                        </div>
+                        <div class="priority-badge">medium</div>
+                    </div>
+                </div>
+                <div class="task-desc">Cappuccino fuels your Wednesday hustle!</div>
+                <div class="task-meta">
+                    <span>📅 Daily at 6:00am • ⏳ Pending</span>
+                </div>
+            </div>
+
+            <div class="task-demo">
+                <div class="task-header">
+                    <h4 class="task-title">AI Development News</h4>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="action-buttons">
+                            <button class="action-btn complete-btn" title="Mark as complete">✓</button>
+                            <button class="action-btn delete-btn" title="Delete task">🗑</button>
+                        </div>
+                        <div class="priority-badge" style="background: #fee2e2; color: #dc2626;">high</div>
+                    </div>
+                </div>
+                <div class="task-desc">Gemini, Claude, Grok updates released!</div>
+                <div class="task-meta">
+                    <span>📅 Daily at 8:25am • ⏳ Pending</span>
+                </div>
+            </div>
+
+            <div class="task-demo">
+                <div class="task-header">
+                    <h4 class="task-title">30-Minute Jog</h4>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="action-buttons">
+                            <button class="action-btn complete-btn" title="Mark as complete">✓</button>
+                            <button class="action-btn delete-btn" title="Delete task">🗑</button>
+                        </div>
+                        <div class="priority-badge" style="background: #dcfce7; color: #16a34a;">low</div>
+                    </div>
+                </div>
+                <div class="task-desc">30-min HIIT jogging plan ready!</div>
+                <div class="task-meta">
+                    <span>📅 Daily at 1:20pm • ⏳ Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>🔧 Implementation Details</h3>
+            
+            <div class="success">
+                <strong>✅ Complete Button (Green):</strong>
+                <ul>
+                    <li>Green background with checkmark icon</li>
+                    <li>Toggles task completion status</li>
+                    <li>Completed tasks are auto-deleted (500ms delay)</li>
+                    <li>Tooltip: "Mark as complete" / "Mark as pending"</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>🗑️ Delete Button (Red):</strong>
+                <ul>
+                    <li>Red background with trash icon</li>
+                    <li>Permanently deletes task immediately</li>
+                    <li>Tooltip: "Delete task"</li>
+                    <li>No confirmation dialog (instant delete)</li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <strong>🎨 UX Design:</strong>
+                <ul>
+                    <li><strong>Hover Reveal:</strong> Buttons only appear on task hover</li>
+                    <li><strong>Priority Badge Hide:</strong> Badge fades out on hover</li>
+                    <li><strong>Color Coding:</strong> Green for complete, red for delete</li>
+                    <li><strong>Click Prevention:</strong> Buttons don't trigger edit modal</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h2>💻 Technical Implementation</h2>
+
+    <div class="info">
+        <strong>🔧 Code Structure:</strong>
+        <div class="code">{/* Action Buttons - appear on hover */}
+&lt;div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1"&gt;
+  {/* Complete Button */}
+  &lt;Button
+    className="p-1 h-6 w-6 hover:bg-green-50 hover:text-green-600"
+    onClick={(e) =&gt; {
+      e.stopPropagation()
+      onTaskUpdate(task.id, { completed: !task.completed })
+    }}
+  &gt;
+    {task.completed ? &lt;Circle /&gt; : &lt;CheckCircle2 /&gt;}
+  &lt;/Button&gt;
+
+  {/* Delete Button */}
+  &lt;Button
+    className="p-1 h-6 w-6 hover:bg-red-50 hover:text-red-600"
+    onClick={(e) =&gt; {
+      e.stopPropagation()
+      onTaskDelete(task.id)
+    }}
+  &gt;
+    &lt;Trash2 className="h-3 w-3" /&gt;
+  &lt;/Button&gt;
+&lt;/div&gt;</div>
+    </div>
+
+    <h3>🎯 User Workflow</h3>
+
+    <div class="success">
+        <strong>📱 How It Works:</strong>
+        <ol>
+            <li><strong>Default View:</strong> Task cards show title, description, priority badge</li>
+            <li><strong>Hover State:</strong> Priority badge fades out, action buttons appear</li>
+            <li><strong>Complete Action:</strong> Green button → Mark complete → Auto-delete (500ms)</li>
+            <li><strong>Delete Action:</strong> Red button → Instant permanent deletion</li>
+            <li><strong>Edit Action:</strong> Click anywhere else on card → Edit modal opens</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important Notes:</strong>
+        <ul>
+            <li><strong>Instant Actions:</strong> Both buttons work immediately (no confirmation)</li>
+            <li><strong>Permanent Deletion:</strong> No undo functionality</li>
+            <li><strong>Completed Tasks:</strong> Auto-delete after brief completion display</li>
+            <li><strong>Event Handling:</strong> Buttons use <code>e.stopPropagation()</code> to prevent edit modal</li>
+        </ul>
+    </div>
+
+    <h2>🧪 Test the New Buttons</h2>
+    
+    <div class="info">
+        <strong>📋 Test Checklist:</strong>
+        <ol>
+            <li><strong>Hover Test:</strong> Hover over tasks → Buttons should appear, badge should fade</li>
+            <li><strong>Complete Test:</strong> Click green button → Task completes → Auto-deletes</li>
+            <li><strong>Delete Test:</strong> Click red button → Task deletes immediately</li>
+            <li><strong>Edit Test:</strong> Click task title/description → Edit modal opens</li>
+            <li><strong>Mobile Test:</strong> On touch devices, buttons should work properly</li>
+        </ol>
+    </div>
+
+    <button class="test-btn" onclick="window.open('http://localhost:3002/tasks', '_blank')">Test Action Buttons Live</button>
+
+    <h3>🎨 Visual Design Benefits</h3>
+
+    <div class="success">
+        <strong>✅ UX Improvements:</strong>
+        <ul>
+            <li><strong>Clean Interface:</strong> No button clutter in default view</li>
+            <li><strong>Progressive Disclosure:</strong> Actions appear when needed</li>
+            <li><strong>Clear Affordances:</strong> Color coding indicates action type</li>
+            <li><strong>Smooth Transitions:</strong> 200ms fade animations</li>
+            <li><strong>Accessible:</strong> Proper tooltips and keyboard support</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('Task action buttons demo loaded');
+        console.log('✅ Complete button: Green with checkmark');
+        console.log('🗑️ Delete button: Red with trash icon');
+        console.log('Hover over demo tasks to see buttons in action');
+    </script>
+</body>
+</html>

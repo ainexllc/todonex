@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase undefined Values Fix - Test</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .status { padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .success { background: #d1fae5; border: 1px solid #059669; color: #065f46; }
+        .error { background: #fee2e2; border: 1px solid #dc2626; color: #991b1b; }
+        .info { background: #dbeafe; border: 1px solid #2563eb; color: #1e40af; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+        .code { background: #f3f4f6; padding: 12px; border-radius: 6px; font-family: monospace; margin: 10px 0; }
+        button { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2563eb; }
+        .test-btn { background: #059669; }
+        .test-btn:hover { background: #047857; }
+        h3 { margin-top: 25px; }
+        ul { padding-left: 20px; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>✅ Firebase undefined Values Fix</h1>
+    
+    <div class="error">
+        <strong>❌ Original Error:</strong><br>
+        <code>FirebaseError: Function setDoc() called with invalid data. Unsupported field value: undefined (found in field categoryId in document tasks/...)</code>
+    </div>
+
+    <div class="success">
+        <strong>✅ Problem Fixed:</strong> Cleaned undefined values from task data before sending to Firestore
+    </div>
+
+    <h2>🔧 Root Cause Analysis</h2>
+    
+    <div class="warning">
+        <strong>⚠️ The Problem:</strong>
+        <ul>
+            <li><strong>TaskForm:</strong> Explicitly setting fields to <code>undefined</code></li>
+            <li><strong>Firebase:</strong> Doesn't accept <code>undefined</code> values in documents</li>
+            <li><strong>Update Handler:</strong> Passing all updates without cleaning</li>
+        </ul>
+    </div>
+
+    <h3>📝 Code Changes Made</h3>
+
+    <div class="info">
+        <strong>1. Fixed TaskForm submission (task-form.tsx):</strong>
+        <div class="code">// Before: Sending undefined values
+const taskData = {
+  title: formData.title.trim(),
+  description: formData.description.trim() || undefined, // ❌ undefined
+  categoryId: formData.categoryId || undefined,          // ❌ undefined
+  dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined // ❌ undefined
+}
+
+// After: Only include fields with valid values
+const taskData = {
+  title: formData.title.trim(),
+  priority: formData.priority
+}
+
+// Only add optional fields if they have valid values
+if (formData.description && formData.description.trim()) {
+  taskData.description = formData.description.trim() // ✅ Only if valid
+}
+
+if (formData.dueDate) {
+  taskData.dueDate = new Date(formData.dueDate) // ✅ Only if exists
+}</div>
+    </div>
+
+    <div class="success">
+        <strong>2. Enhanced Update Handler (tasks/page.tsx):</strong>
+        <div class="code">const handleUpdateTask = async (id: string, updates: Partial&lt;Task&gt;) => {
+  // Clean undefined values from updates - Firestore doesn't accept undefined
+  const cleanUpdates: any = {
+    updatedAt: new Date()
+  }
+  
+  // Only add fields that have valid values
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      cleanUpdates[key] = value // ✅ Only valid values
+    }
+  })
+  
+  await updateDocument('tasks', id, cleanUpdates) // ✅ Clean data
+}</div>
+    </div>
+
+    <h3>✅ What's Fixed</h3>
+    
+    <div class="success">
+        <ul>
+            <li><strong>✅ No More undefined Values:</strong> Task form only sends fields with actual values</li>
+            <li><strong>✅ Clean Updates:</strong> Update handler filters out undefined/null/empty values</li>
+            <li><strong>✅ Firestore Compatible:</strong> All data is properly formatted for Firebase</li>
+            <li><strong>✅ Maintains Existing Data:</strong> Empty fields don't overwrite existing values</li>
+            <li><strong>✅ Better Error Handling:</strong> Prevents Firebase validation errors</li>
+        </ul>
+    </div>
+
+    <h3>🧪 Test the Fix</h3>
+    
+    <div class="info">
+        <strong>Test Scenarios to Verify:</strong>
+        <ol>
+            <li><strong>Edit Existing Task:</strong> Should save without errors</li>
+            <li><strong>Empty Description:</strong> Should not cause undefined errors</li>
+            <li><strong>No Due Date:</strong> Should save without dueDate field</li>
+            <li><strong>Empty Category:</strong> Should not include categoryId field</li>
+            <li><strong>Complete Task Update:</strong> All fields should save properly</li>
+        </ol>
+    </div>
+
+    <button class="test-btn" onclick="window.open('http://localhost:3002/tasks', '_blank')">Test Task Editing Now</button>
+    
+    <div class="success">
+        <h3>🎯 Verification Steps:</h3>
+        <ol>
+            <li>Click any task to open edit modal</li>
+            <li>Leave some fields empty (description, category)</li>
+            <li>Save the task</li>
+            <li>✅ Should save successfully without Firebase errors</li>
+            <li>✅ No "undefined field value" errors in console</li>
+        </ol>
+    </div>
+
+    <h3>🔍 Technical Details</h3>
+    
+    <div class="info">
+        <strong>Firebase Requirements:</strong>
+        <ul>
+            <li><strong>No undefined:</strong> Firestore rejects <code>undefined</code> values</li>
+            <li><strong>Null OK:</strong> Can use <code>null</code> to represent empty values</li>
+            <li><strong>Omit Empty:</strong> Better to omit fields entirely if empty</li>
+            <li><strong>Type Consistency:</strong> Fields should maintain consistent types</li>
+        </ul>
+    </div>
+
+    <div class="success">
+        <strong>✅ Fix Strategy:</strong>
+        <ul>
+            <li><strong>Prevention:</strong> Clean data at source (TaskForm)</li>
+            <li><strong>Protection:</strong> Filter data at update handler</li>
+            <li><strong>Validation:</strong> Only send fields with valid values</li>
+            <li><strong>Preservation:</strong> Don't overwrite existing data with empty values</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('Firebase undefined values fix implemented');
+        console.log('Task editing should now save without errors');
+    </script>
+</body>
+</html>
