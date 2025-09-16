@@ -1,41 +1,49 @@
+'use client'
+
+import { useState } from 'react'
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesGrid } from "@/components/landing/features-grid";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { PricingSection } from "@/components/landing/pricing-section";
-import { TestimonialsSection } from "@/components/landing/testimonials";
+import { SimpleFooter } from "@/components/landing/simple-footer";
+import { AuthForm } from "@/components/features/auth/auth-form";
 
 export default function LandingPage() {
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
+
   return (
-    <div className="relative">
-      {/* Background Gradient - Enhanced Blue Shades */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-blue-100/80 to-blue-200/60 dark:from-blue-950/30 dark:via-blue-900/20 dark:to-blue-800/10 -z-10" />
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-gray-900 to-slate-900 text-foreground">
+      <div className="flex min-h-screen">
+        {/* Left Side - Content */}
+        <div className="flex-1 flex flex-col lg:w-1/2">
+          {/* Hero Section */}
+          <HeroSection authMode={authMode} setAuthMode={setAuthMode} />
 
-      {/* Additional Blue Accent Overlays */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-100/30 to-transparent dark:from-blue-950/20 dark:to-transparent -z-10" />
-      <div className="absolute bottom-0 right-0 w-full h-96 bg-gradient-to-t from-blue-50/40 to-transparent dark:from-blue-900/10 dark:to-transparent -z-10" />
+          {/* Features Section */}
+          <section className="flex-1 bg-slate-800/30 backdrop-blur-sm">
+            <FeaturesGrid />
+          </section>
 
-      {/* Hero Section */}
-      <HeroSection />
+          {/* Footer */}
+          <SimpleFooter />
+        </div>
 
-      {/* Features Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-50/70 to-blue-100/50 dark:from-blue-950/15 dark:to-blue-900/10 backdrop-blur-sm">
-        <FeaturesGrid />
-      </section>
+        {/* Right Side - Auth Form */}
+        <div className="hidden lg:flex lg:w-1/2 bg-slate-800/50 backdrop-blur border-l border-slate-700/50">
+          <div className="flex items-center justify-center w-full p-8">
+            <div className="w-full max-w-md">
+              <AuthForm mode={authMode} />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* How It Works Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-100/60 to-blue-200/40 dark:from-blue-900/20 dark:to-blue-800/15">
-        <HowItWorks />
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-50/80 to-blue-100/60 dark:from-blue-950/25 dark:to-blue-900/15 backdrop-blur-sm">
-        <PricingSection />
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-200/40 to-blue-100/60 dark:from-blue-800/10 dark:to-blue-950/20">
-        <TestimonialsSection />
-      </section>
+      {/* Mobile Auth Section */}
+      <div className="lg:hidden bg-slate-800/50 backdrop-blur-sm border-t border-slate-700/50">
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-md mx-auto">
+            <AuthForm mode={authMode} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
