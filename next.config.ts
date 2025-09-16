@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: 'bottom-right'
   },
+  // Optimize images for better performance
+  images: {
+    domains: ['firebasestorage.googleapis.com']
+  },
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
