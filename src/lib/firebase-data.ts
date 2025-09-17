@@ -152,6 +152,16 @@ export async function getUserDocuments<T>(
     const querySnapshot = await getDocs(q)
     const docs = querySnapshot.docs.map(doc => {
       const data = doc.data()
+
+      // Convert nested task dates if this is a taskList document
+      if (data.tasks && Array.isArray(data.tasks)) {
+        data.tasks = data.tasks.map((task: any) => ({
+          ...task,
+          completedAt: task.completedAt ? new Date(task.completedAt) : null,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+        }))
+      }
+
       return {
         ...data,
         id: doc.id,
@@ -190,6 +200,16 @@ export function subscribeToUserDocuments<T>(
   return onSnapshot(q, (querySnapshot) => {
     const items = querySnapshot.docs.map(doc => {
       const data = doc.data()
+
+      // Convert nested task dates if this is a taskList document
+      if (data.tasks && Array.isArray(data.tasks)) {
+        data.tasks = data.tasks.map((task: any) => ({
+          ...task,
+          completedAt: task.completedAt ? new Date(task.completedAt) : null,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+        }))
+      }
+
       return {
         ...data,
         id: doc.id,

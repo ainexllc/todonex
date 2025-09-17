@@ -173,8 +173,15 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     )
                     setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
+                    // Prepare tasks for Firebase (convert Date objects to ISO strings)
+                    const tasksForFirebase = updatedTasks.map((task: any) => ({
+                      ...task,
+                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+                      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
+                    }))
+
                     // Then update Firebase
-                    await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                    await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
                   }
                 }}
                 onTaskDelete={async (taskId) => {
@@ -184,8 +191,15 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     const updatedTasks = selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
                     setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
+                    // Prepare tasks for Firebase (convert Date objects to ISO strings)
+                    const tasksForFirebase = updatedTasks.map((task: any) => ({
+                      ...task,
+                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+                      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
+                    }))
+
                     // Then update Firebase
-                    await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                    await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
                   }
                 }}
                 onTaskListDelete={async (taskListId) => {
@@ -280,8 +294,15 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   )
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
+                  // Prepare tasks for Firebase (convert Date objects to ISO strings)
+                  const tasksForFirebase = updatedTasks.map((task: any) => ({
+                    ...task,
+                    completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+                    dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
+                  }))
+
                   // Then update Firebase
-                  await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                  await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
                 }
               }}
               onTaskDelete={async (taskId) => {
@@ -291,8 +312,15 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   const updatedTasks = selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
+                  // Prepare tasks for Firebase (convert Date objects to ISO strings)
+                  const tasksForFirebase = updatedTasks.map((task: any) => ({
+                    ...task,
+                    completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+                    dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
+                  }))
+
                   // Then update Firebase
-                  await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                  await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
                 }
               }}
               onTaskListDelete={async (taskListId) => {
