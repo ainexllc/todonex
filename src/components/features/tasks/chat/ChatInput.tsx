@@ -77,7 +77,7 @@ export function ChatInput({
             "w-full resize-none border-0 shadow-none focus-visible:ring-0",
             "min-h-[52px] max-h-[120px]",
             "px-5 py-4 pr-14",
-            "text-sm text-white placeholder:text-gray-400",
+            "text-[13px] text-white placeholder:text-gray-400",
             "bg-transparent"
           )}
           rows={1}

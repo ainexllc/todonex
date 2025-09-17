@@ -78,7 +78,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
             ? "bg-primary text-primary-foreground ml-auto"
             : "bg-black text-white"
         )}>
-          <p className="text-xs whitespace-pre-wrap leading-normal">{message.content}</p>
+          <p className="text-[13px] whitespace-pre-wrap leading-normal">{message.content}</p>
         </div>
 
         {/* Task Lists (Assistant only) */}
@@ -90,7 +90,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                 <div className="bg-gray-800 px-3 py-2 rounded-t-xl">
                   <div className="flex items-center gap-2">
                     <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                    <h3 className="font-semibold text-[13px] text-white">{taskList.title}</h3>
+                    <div className="font-semibold text-[13px] text-white">{taskList.title}</div>
                   </div>
                 </div>
                 <CardContent className="p-3 pb-4">
@@ -119,13 +119,13 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
 
                           <div className="flex-1 min-w-0">
                             <p className={cn(
-                              "text-xs font-medium text-white",
+                              "text-[13px] font-medium text-white",
                               task.completed && "line-through text-gray-500"
                             )}>
                               {task.title}
                             </p>
                             {task.description && (
-                              <p className="text-[10px] text-gray-400 truncate">
+                              <p className="text-[13px] text-gray-400 truncate">
                                 {task.description}
                               </p>
                             )}
@@ -142,7 +142,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                             {task.dueDate && (
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3 text-gray-400" />
-                                <span className="text-[10px] text-gray-400">
+                                <span className="text-[13px] text-gray-400">
                                   {formatDueDate(task.dueDate)}
                                 </span>
                               </div>
@@ -151,7 +151,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-gray-400 italic py-3 text-center">
+                      <p className="text-[13px] text-gray-400 italic py-3 text-center">
                         No tasks in this list yet
                       </p>
                     )}
@@ -173,7 +173,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                 key={index}
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs px-3 py-1"
+                className="h-8 text-[13px] px-3 py-1"
                 onClick={() => onTaskAction('suggestion', undefined, suggestion)}
               >
                 {suggestion}

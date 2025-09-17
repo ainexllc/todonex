@@ -146,7 +146,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         </ResizableSidebar>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-900">
+        <div className="flex-1 flex flex-col bg-gray-900 chat-content-area">
           <div className="flex-1 flex flex-col p-4">
             {/* Show selected task list inline at top */}
             {showInlineTaskList && selectedTaskList && (
@@ -188,10 +188,10 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               <div className="w-full max-w-2xl">
                 {/* Compact Instructions Above Input */}
                 <div className="text-center mb-4">
-                  <p className="text-xs text-gray-400 mb-2">
+                  <p className="text-[13px] text-gray-400 mb-2">
                     Create and manage tasks with natural language
                   </p>
-                  <div className="flex flex-wrap gap-1 justify-center text-[10px] text-gray-400">
+                  <div className="flex flex-wrap gap-1 justify-center text-[13px] text-gray-400">
                     {[
                       "Set daily goals",
                       "Plan morning routine",
@@ -200,7 +200,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                       <button
                         key={index}
                         onClick={() => handleSubmit(example)}
-                        className="px-2 py-1 text-[10px] bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 rounded-full border border-gray-700 transition-colors"
+                        className="px-2 py-1 text-[13px] bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 rounded-full border border-gray-700 transition-colors"
                         disabled={loading}
                       >
                         {example}
@@ -246,7 +246,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
       </ResizableSidebar>
       
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-gray-900">
+      <div className="flex-1 flex flex-col bg-gray-900 chat-content-area">
         {/* Scrollable Chat area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {/* Show selected task list inline */}
@@ -315,7 +315,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           
           {error && (
             <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
-              <p className="text-sm text-red-300">{error}</p>
+              <p className="text-[13px] text-red-300">{error}</p>
             </div>
           )}
 

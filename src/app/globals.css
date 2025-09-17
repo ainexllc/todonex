@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
+/* Enforce consistent font sizes in main chat area */
+/* Override any heading tags or default sizes */
+.chat-content-area * {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+/* Allow icons to maintain their sizes */
+.chat-content-area svg {
+  font-size: inherit !important;
+}
+
 /* Universal Sans Text font family for tasks */
 /* Using web fonts as fallback since local fonts might not be available */
 
