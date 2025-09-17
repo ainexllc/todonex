@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/ui/delete-dialog'
-import { ListTodo, Trash2, Edit3, User, List, RefreshCw } from 'lucide-react'
+import { ListTodo, Trash2, Edit3, User, List, RefreshCw, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
@@ -34,6 +34,7 @@ interface TaskListSidebarProps {
   onTaskListSelect: (taskList: TaskList | null) => void
   onTaskListDelete: (taskListId: string) => void
   onRefresh?: () => void
+  onArchiveClick?: () => void
   className?: string
 }
 
@@ -43,6 +44,7 @@ export function TaskListSidebar({
   onTaskListSelect,
   onTaskListDelete,
   onRefresh,
+  onArchiveClick,
   className
 }: TaskListSidebarProps) {
   const { user } = useAuthStore()
@@ -102,17 +104,30 @@ export function TaskListSidebar({
       <div className="border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
         <div className="px-3 py-2 flex items-center justify-between">
           <h2 className="text-[13px] font-medium text-gray-100 tracking-tight">My Lists</h2>
-          {onRefresh && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRefresh}
-              className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
-              title="Refresh lists"
-            >
-              <RefreshCw className="h-3 w-3" />
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {onArchiveClick && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onArchiveClick}
+                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+                title="View archive"
+              >
+                <Archive className="h-3 w-3" />
+              </Button>
+            )}
+            {onRefresh && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRefresh}
+                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+                title="Refresh lists"
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Minimal Stats Bar */}

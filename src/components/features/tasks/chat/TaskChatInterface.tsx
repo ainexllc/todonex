@@ -6,6 +6,7 @@ import { TaskListSidebar } from './TaskListSidebar'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { TaskListView } from './TaskListView'
+import { TaskArchive } from './TaskArchive'
 import { ResizableSidebar } from '@/components/ui/resizable-sidebar'
 import { useTaskChat } from '@/hooks/useTaskChat'
 import { useAuthStore } from '@/store/auth-store'
@@ -23,6 +24,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   const [selectedTaskList, setSelectedTaskList] = useState<any>(null)
   const [showInlineTaskList, setShowInlineTaskList] = useState(false)
   const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null)
+  const [showArchive, setShowArchive] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   
   const {
@@ -124,6 +126,14 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     await deleteTaskList(taskListId)
   }
 
+  const handleArchiveClick = () => {
+    setShowArchive(true)
+  }
+
+  const handleArchiveClose = () => {
+    setShowArchive(false)
+  }
+
   // Show centered input when there are no active messages (regardless of task lists)
   if (messages.length === 0) {
     return (
@@ -141,6 +151,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             onTaskListSelect={handleTaskListSelect}
             onTaskListDelete={handleDeleteTaskList}
             onRefresh={reloadTaskLists}
+            onArchiveClick={handleArchiveClick}
             className="h-full"
           />
         </ResizableSidebar>
@@ -222,6 +233,11 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             </div>
           </div>
         </div>
+
+        {/* Archive Modal */}
+        {showArchive && (
+          <TaskArchive onClose={handleArchiveClose} />
+        )}
       </div>
     )
   }
@@ -241,6 +257,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           selectedTaskListId={selectedTaskListId}
           onTaskListSelect={handleTaskListSelect}
           onTaskListDelete={handleDeleteTaskList}
+          onArchiveClick={handleArchiveClick}
           className="h-full"
         />
       </ResizableSidebar>
@@ -335,6 +352,10 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         </div>
       </div>
 
+      {/* Archive Modal */}
+      {showArchive && (
+        <TaskArchive onClose={handleArchiveClose} />
+      )}
     </div>
   )
 }
