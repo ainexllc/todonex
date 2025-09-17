@@ -51,19 +51,25 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
 
       // Load all task lists from Firebase
       const taskLists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
+      console.log('TaskCompleted: Loaded task lists:', taskLists)
 
       // Extract all completed tasks and flatten them
       const allCompletedTasks: Task[] = []
 
       taskLists.forEach(list => {
+        console.log('TaskCompleted: Processing list:', list.title, 'with tasks:', list.tasks)
         const completedTasks = (list.tasks || [])
-          .filter(task => task.completed)
+          .filter(task => {
+            console.log('TaskCompleted: Task', task.title, 'completed:', task.completed)
+            return task.completed
+          })
           .map(task => ({
             ...task,
             listTitle: list.title,
             // Use completedAt if available, otherwise use today
             completedAt: task.completedAt || new Date()
           }))
+        console.log('TaskCompleted: Found', completedTasks.length, 'completed tasks in list', list.title)
         allCompletedTasks.push(...completedTasks)
       })
 
@@ -94,6 +100,8 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
         }))
         .sort((a, b) => b.date.getTime() - a.date.getTime())
 
+      console.log('TaskCompleted: Total completed tasks found:', allCompletedTasks.length)
+      console.log('TaskCompleted: Day groups:', sortedGroups)
       setDayGroups(sortedGroups)
     } catch (error) {
       console.error('Failed to load completed tasks:', error)

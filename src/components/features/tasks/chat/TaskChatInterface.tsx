@@ -286,12 +286,14 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               taskList={selectedTaskList}
               onClose={handleCloseTaskList}
               onTaskUpdate={async (taskId, updates) => {
+                console.log('TaskChatInterface: Received task update for', taskId, 'with updates:', updates)
                 // Update task in the selected task list
                 if (selectedTaskList) {
                   // First update local state immediately for responsive UI
                   const updatedTasks = selectedTaskList.tasks.map((task: any) =>
                     task.id === taskId ? { ...task, ...updates } : task
                   )
+                  console.log('TaskChatInterface: Updated tasks before Firebase:', updatedTasks)
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                   // Prepare tasks for Firebase (convert Date objects to ISO strings)
@@ -300,9 +302,11 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
                     dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
                   }))
+                  console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
 
                   // Then update Firebase
                   await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                  console.log('TaskChatInterface: Firebase update completed')
                 }
               }}
               onTaskDelete={async (taskId) => {
@@ -318,9 +322,11 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
                     dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
                   }))
+                  console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
 
                   // Then update Firebase
                   await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                  console.log('TaskChatInterface: Firebase update completed')
                 }
               }}
               onTaskListDelete={async (taskListId) => {
