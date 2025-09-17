@@ -1,0 +1,46 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="33.933152">
+<testsuite name="simple-dino-test.spec.ts" timestamp="2025-09-16T18:26:47.700Z" hostname="chromium" tests="1" failures="1" skipped="0" time="30.068" errors="0">
+<testcase name="Dino Account Test - Simple › create or login to Dino account" classname="simple-dino-test.spec.ts" time="30.068">
+<failure message="simple-dino-test.spec.ts:4:7 create or login to Dino account" type="FAILURE">
+<![CDATA[  [chromium] › simple-dino-test.spec.ts:4:7 › Dino Account Test - Simple › create or login to Dino account 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Target page, context or browser has been closed
+
+      65 |
+      66 |     // Go back to homepage to reset
+    > 67 |     await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
+         |                ^
+      68 |
+      69 |     // Click Sign In tab
+      70 |     await page.getByRole('button', { name: 'Sign In' }).click();
+        at /Users/dino/AiFirst/nexttaskpro/tests/simple-dino-test.spec.ts:67:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting test for: dinohorn9@gmail.com
+✅ Homepage loaded
+Sign up attempt failed, trying sign in...
+🔑 Attempting to sign in...
+
+[[ATTACHMENT|simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/video.webm]]
+
+[[ATTACHMENT|simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

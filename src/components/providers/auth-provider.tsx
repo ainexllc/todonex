@@ -16,24 +16,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     console.log('AuthProvider: Starting initialization')
-    
-    // Immediately set loading to true to ensure consistent state
-    setLoading(true)
-    setInitialized(false)
-    
-    // Set a timeout to prevent infinite loading
+
+    // Don't set loading to true immediately - let the store handle initial state
+    // Only set loading during actual Firebase operations
     const timeoutId = setTimeout(() => {
-      console.log('Auth initialization timeout - setting initialized to true')
+      console.log('Auth initialization timeout - forcing completion')
       setLoading(false)
       setInitialized(true)
-    }, 5000) // 5 second timeout
+    }, 3000) // Reduced timeout since we start with initialized: true
 
     console.log('AuthProvider: Setting up Firebase auth listener')
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      clearTimeout(timeoutId) // Clear timeout since auth state changed
-      console.log('AuthProvider: Auth state changed', firebaseUser ? 'User logged in' : 'User logged out')
-      setLoading(true)
+      console.log('AuthProvider: Auth state changed', firebaseUser ? firebaseUser.email : 'User logged out')
+
+      // Only set loading during actual operations
+      if (firebaseUser) {
+        setLoading(true)
+      }
+
       setFirebaseUser(firebaseUser)
 
       if (firebaseUser) {
@@ -112,8 +113,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null)
       }
 
+      // Always mark as initialized once auth state is determined
       setLoading(false)
       setInitialized(true)
+      console.log('AuthProvider: Initialization complete')
     })
 
     return () => {

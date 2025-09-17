@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/ui/delete-dialog'
-import { ListTodo, Trash2, Edit3, User, List } from 'lucide-react'
+import { ListTodo, Trash2, Edit3, User, List, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
@@ -33,6 +33,7 @@ interface TaskListSidebarProps {
   selectedTaskListId: string | null
   onTaskListSelect: (taskList: TaskList | null) => void
   onTaskListDelete: (taskListId: string) => void
+  onRefresh?: () => void
   className?: string
 }
 
@@ -41,6 +42,7 @@ export function TaskListSidebar({
   selectedTaskListId,
   onTaskListSelect,
   onTaskListDelete,
+  onRefresh,
   className
 }: TaskListSidebarProps) {
   const { user } = useAuthStore()
@@ -99,32 +101,47 @@ export function TaskListSidebar({
 
   return (
     <div className={cn("w-80 bg-gray-950 border-r border-gray-800 flex flex-col", className)}>
-      {/* Sidebar Header */}
-      <div className="p-3 border-b border-gray-800">
-        <div className="mb-2">
-          <h2 className="text-sm font-semibold text-white">My Lists</h2>
+      {/* Sidebar Header - Compact Modern Design */}
+      <div className="border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
+        <div className="px-3 py-2 flex items-center justify-between">
+          <h2 className="text-[13px] font-medium text-gray-100 tracking-tight">My Lists</h2>
+          {onRefresh && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+              title="Refresh lists"
+            >
+              <RefreshCw className="h-3 w-3" />
+            </Button>
+          )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-gray-800/80 rounded-lg p-2 text-center">
-            <div className="font-semibold text-white">{pendingTasks}</div>
-            <div className="text-gray-400">Pending</div>
+        {/* Minimal Stats Bar */}
+        <div className="flex items-center gap-3 px-3 pb-2">
+          <div className="flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+            <span className="text-[11px] text-gray-300">
+              <span className="font-medium text-gray-100">{pendingTasks}</span> Pending
+            </span>
           </div>
-          <div className="bg-gray-800/80 rounded-lg p-2 text-center">
-            <div className="font-semibold text-green-400">{completedTasks}</div>
-            <div className="text-gray-400">Completed</div>
+          <div className="flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+            <span className="text-[11px] text-gray-300">
+              <span className="font-medium text-green-400">{completedTasks}</span> Done
+            </span>
           </div>
         </div>
       </div>
 
       {/* Task Lists */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {taskLists.length === 0 ? (
-          <div className="text-center py-6">
-            <ListTodo className="h-10 w-10 mx-auto mb-2 text-gray-500" />
-            <p className="text-sm text-gray-300 mb-2">No lists yet</p>
-            <p className="text-xs text-gray-500">Use the chat to create your first list</p>
+          <div className="text-center py-3">
+            <ListTodo className="h-8 w-8 mx-auto mb-1 text-gray-500" />
+            <p className="text-xs text-gray-300 mb-1">No lists yet</p>
+            <p className="text-[10px] text-gray-500">Use the chat to create your first list</p>
           </div>
         ) : (
           <>
@@ -134,86 +151,100 @@ export function TaskListSidebar({
               const isSelected = selectedTaskListId === taskList.id
               
               return (
-                <Card
+                <div
                   key={taskList.id}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-900 border-gray-800 overflow-hidden",
+                    "group cursor-pointer transition-all duration-150 rounded-sm border overflow-hidden",
                     isSelected
-                      ? "ring-2 ring-blue-500 bg-gray-800"
-                      : "hover:bg-gray-800/70"
+                      ? "border-blue-600/50 bg-gray-900/80 shadow-sm shadow-blue-600/10"
+                      : "border-gray-800/50 bg-gray-900/40 hover:bg-gray-900/60 hover:border-gray-700/50"
                   )}
                   onClick={() => handleTaskListClick(taskList)}
                 >
-                  <div className="bg-gray-800 px-3 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                      <CardTitle className="text-[10px] font-semibold truncate text-white">
+                  <div className="px-2.5 py-1.5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <List className="h-3 w-3 text-gray-500 flex-shrink-0" />
+                      <span className="text-[12px] font-medium truncate text-gray-100">
                         {taskList.title}
-                      </CardTitle>
+                      </span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleDeleteTaskList(e, taskList)}
-                      className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-opacity"
-                      title="Delete task list"
+                      className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm transition-all"
+                      title="Delete list"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-2.5 w-2.5" />
                     </Button>
                   </div>
 
-                  <CardContent className="p-3">
-                    <div className="space-y-1.5">
-                      {/* Recent tasks preview */}
-                      {taskList.tasks.length > 0 && (
-                        <div className="space-y-1">
-                          {taskList.tasks.slice(0, 2).map((task) => (
-                            <div
-                              key={task.id}
-                              className="flex items-center gap-2 text-xs pb-1"
-                            >
-                              <div className={cn(
-                                "h-1.5 w-1.5 rounded-full",
-                                task.completed ? "bg-green-400" : "bg-orange-400"
-                              )} />
-                              <span className={cn(
-                                "truncate text-gray-300",
-                                task.completed && "line-through text-gray-500"
-                              )}>
-                                {task.title}
-                              </span>
-                            </div>
-                          ))}
-                          {taskList.tasks.length > 2 && (
-                            <div className="text-xs text-gray-500 pl-3.5 pb-1">
-                              +{taskList.tasks.length - 2} more tasks
-                            </div>
-                          )}
-                        </div>
+                  {/* Task preview and stats */}
+                  {taskList.tasks.length > 0 && (
+                    <div className="px-2.5 pb-1.5">
+                      <div className="space-y-0.5">
+                        {taskList.tasks.slice(0, 2).map((task) => (
+                          <div
+                            key={task.id}
+                            className="flex items-center gap-1.5 text-[10px]"
+                          >
+                            <div className={cn(
+                              "h-1 w-1 rounded-full flex-shrink-0",
+                              task.completed ? "bg-green-500" : "bg-blue-500"
+                            )} />
+                            <span className={cn(
+                              "truncate",
+                              task.completed ? "text-gray-500 line-through" : "text-gray-400"
+                            )}>
+                              {task.title}
+                            </span>
+                          </div>
+                        ))}
+                        {taskList.tasks.length > 2 && (
+                          <div className="text-[9px] text-gray-500 pl-2.5">
+                            +{taskList.tasks.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Task count bar */}
+                  {taskList.tasks.length > 0 && (
+                    <div className="px-2.5 pb-1.5 flex items-center gap-2 text-[9px]">
+                      {pendingCount > 0 && (
+                        <span className="text-gray-500">
+                          {pendingCount} pending
+                        </span>
+                      )}
+                      {completedCount > 0 && (
+                        <span className="text-green-500/70">
+                          {completedCount} done
+                        </span>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </div>
               )
             })}
           </>
         )}
       </div>
 
-      {/* Sidebar Footer */}
-      <div className="p-3 border-t border-gray-800">
+      {/* Sidebar Footer - Compact */}
+      <div className="px-3 py-2 border-t border-gray-800/50 bg-gray-900/50">
         {user && (
-          <div className="flex items-center space-x-3 mb-2">
+          <div className="flex items-center gap-2">
             {/* Profile Picture or Avatar */}
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
                   alt={user.displayName || 'User'}
-                  className="w-8 h-8 rounded-full"
+                  className="w-5 h-5 rounded-sm"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                <div className="w-5 h-5 rounded-sm bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-[9px] font-medium">
                   {getUserInitials(user.displayName || '', user.email || '')}
                 </div>
               )}
@@ -221,19 +252,15 @@ export function TaskListSidebar({
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-white truncate">
+              <div className="text-[10px] font-medium text-gray-200 truncate">
                 {user.displayName || user.email?.split('@')[0] || 'User'}
               </div>
-              <div className="text-xs text-gray-500 truncate">
+              <div className="text-[9px] text-gray-500 truncate">
                 {user.email}
               </div>
             </div>
           </div>
         )}
-
-        <div className="text-center text-xs text-gray-500">
-          Create lists by describing what you want to accomplish
-        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

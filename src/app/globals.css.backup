@@ -1,8 +1,8 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
 /* Universal Sans Text font family for tasks */
 /* Using web fonts as fallback since local fonts might not be available */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
 @font-face {
   font-family: 'Universal Sans Text';
@@ -1191,7 +1191,7 @@ body {
 .grok-text-4xl { font-size: clamp(28px, 5vw, 36px); line-height: 1.2; }
 
 /* Heading styles with optimal character counts (40-60 chars per line) */
-h1 {
+h1, .grok-h1 {
   font-size: clamp(24px, 4vw, 32px);
   line-height: 1.2;
   font-weight: 600;
@@ -1199,22 +1199,22 @@ h1 {
   max-width: 20ch; /* ~40-60 characters for readability */
 }
 
-h2 {
-  font-size: 22px;
+h2, .grok-h2 {
+  font-size: clamp(20px, 3.5vw, 28px);
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -0.01em;
   max-width: 25ch;
 }
 
-h3 {
-  font-size: clamp(18px, 3vw, 17px);
+h3, .grok-h3 {
+  font-size: clamp(18px, 3vw, 24px);
   line-height: 1.4;
   font-weight: 600;
   max-width: 30ch;
 }
 
-h4 {
+h4, .grok-h4 {
   font-size: clamp(16px, 2.5vw, 20px);
   line-height: 1.5;
   font-weight: 600;
@@ -1222,7 +1222,7 @@ h4 {
 }
 
 /* Body text with optimal line length */
-p {
+p, .grok-text {
   font-size: clamp(14px, 2vw, 16px);
   line-height: 1.6;
   max-width: 65ch; /* Optimal reading width */
@@ -1238,12 +1238,14 @@ code, pre, .grok-mono {
 /* Responsive font adjustments */
 @media (max-width: 575px) {
   body { font-size: 14px; }
-  h1 { font-size: 24px; }
+  h1, .grok-h1 { font-size: 24px; }
+  h2, .grok-h2 { font-size: 20px; }
 }
 
 @media (min-width: 1280px) {
   body { font-size: 16px; }
-  h1 { font-size: 32px; }
+  h1, .grok-h1 { font-size: 32px; }
+  h2, .grok-h2 { font-size: 28px; }
 }
 
 /* ========================================
@@ -1984,8 +1986,4 @@ code, pre, .grok-mono {
 
 .dark .task-form-modal {
   background-color: black !important;
-}
-
-.text-\[12px\] {
-  font-size: 12px;
 }

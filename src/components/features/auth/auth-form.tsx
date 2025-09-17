@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  signInWithEmailAndPassword, 
+import {
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth'
@@ -11,6 +11,7 @@ import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { signInWithGoogle } from '@/lib/auth'
 import { useAuthStore } from '@/store/auth-store'
+import { useAuthRedirect } from '@/hooks/use-auth-redirect'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Mail, Lock, User, Chrome, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react'
@@ -36,6 +37,9 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
   
   const router = useRouter()
   const { setUser } = useAuthStore()
+
+  // Use centralized authentication redirect hook
+  useAuthRedirect()
 
   // Validation functions
   const validateEmail = (email: string) => {
@@ -155,13 +159,9 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         setUser(userDoc)
       }
 
-      // Show success message before redirect
+      // Show success message
       setSuccess(mode === 'signin' ? 'Welcome back!' : 'Account created successfully!')
-
-      // Small delay to show success message
-      setTimeout(() => {
-        router.push('/')
-      }, 1000)
+      console.log('Email auth success - auth redirect hook will handle navigation')
     } catch (err: any) {
       setError(err.message || 'An error occurred')
     } finally {
@@ -174,8 +174,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
     setError('')
 
     try {
+      console.log('Starting Google auth...')
       const result = await signInWithGoogle()
-      
+      console.log('Google auth result:', { user: !!result.user, error: result.error })
+
       if (result.user && !result.error) {
         // Create or update user document
         const userDoc = {
@@ -202,16 +204,17 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
           lastLoginAt: new Date()
         }
 
+        console.log('Creating/updating user document in Firestore...')
         await setDoc(doc(db, 'users', result.user.uid), userDoc, { merge: true })
         setUser(userDoc)
+
+        console.log('Google auth success - auth redirect hook will handle navigation')
         setSuccess('Successfully signed in with Google!')
-        setTimeout(() => {
-          router.push('/')
-        }, 1000)
       } else {
         setError(result.error || 'Google sign-in failed')
       }
     } catch (err: any) {
+      console.error('Google auth error:', err)
       setError(err.message || 'An error occurred during Google sign-in')
     } finally {
       setLoading(false)

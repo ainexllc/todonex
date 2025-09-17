@@ -73,35 +73,35 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
       )}>
         {/* Message content */}
         <div className={cn(
-          "rounded-2xl px-4 py-3 mb-3",
+          "rounded-xl px-3 py-2 mb-2",
           isUser
             ? "bg-primary text-primary-foreground ml-auto"
             : "bg-black text-white"
         )}>
-          <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+          <p className="text-xs whitespace-pre-wrap leading-normal">{message.content}</p>
         </div>
 
         {/* Task Lists (Assistant only) */}
         {isAssistant && message.taskLists && message.taskLists.length > 0 && (
-          <div className="space-y-3 mt-2">
+          <div className="space-y-2 mt-1">
             {message.taskLists.map((taskList) => (
               <Card key={taskList.id} className="border-gray-800 bg-gray-950 rounded-xl overflow-hidden">
                 {/* Full-width header with top curves */}
-                <div className="bg-gray-800 px-4 py-3 rounded-t-xl">
+                <div className="bg-gray-800 px-3 py-2 rounded-t-xl">
                   <div className="flex items-center gap-2">
-                    <List className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <h3 className="font-semibold text-sm text-white">{taskList.title}</h3>
+                    <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                    <h3 className="font-semibold text-[13px] text-white">{taskList.title}</h3>
                   </div>
                 </div>
-                <CardContent className="p-4 pb-6">
+                <CardContent className="p-3 pb-4">
                   
-                  <div className="space-y-2 mt-0">
+                  <div className="space-y-1.5 mt-0">
                     {taskList.tasks && taskList.tasks.length > 0 ? (
                       taskList.tasks.map((task) => (
                         <div
                           key={task.id}
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg",
+                            "flex items-center gap-2 p-2 rounded-lg",
                             "hover:bg-gray-800/50 transition-colors",
                             task.completed && "opacity-60"
                           )}
@@ -111,21 +111,21 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                             className="flex-shrink-0 hover:scale-110 transition-transform"
                           >
                             {task.completed ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-400" />
+                              <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />
                             ) : (
-                              <Circle className="h-4 w-4 text-gray-400 hover:text-blue-400" />
+                              <Circle className="h-3.5 w-3.5 text-gray-400 hover:text-blue-400" />
                             )}
                           </button>
 
                           <div className="flex-1 min-w-0">
                             <p className={cn(
-                              "text-sm font-medium text-white",
+                              "text-xs font-medium text-white",
                               task.completed && "line-through text-gray-500"
                             )}>
                               {task.title}
                             </p>
                             {task.description && (
-                              <p className="text-xs text-gray-400 truncate">
+                              <p className="text-[10px] text-gray-400 truncate">
                                 {task.description}
                               </p>
                             )}
@@ -142,7 +142,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                             {task.dueDate && (
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3 text-gray-400" />
-                                <span className="text-xs text-gray-400">
+                                <span className="text-[10px] text-gray-400">
                                   {formatDueDate(task.dueDate)}
                                 </span>
                               </div>

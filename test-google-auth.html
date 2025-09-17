@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Google Auth Redirect</title>
+</head>
+<body style="padding: 20px; font-family: monospace;">
+    <h1>Test Google Authentication Redirect</h1>
+
+    <div id="status"></div>
+    <div id="logs" style="background: #f0f0f0; padding: 10px; margin-top: 20px; max-height: 400px; overflow-y: auto;"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function checkAuth() {
+            log('Checking authentication status...');
+
+            // Check localStorage for auth store
+            const authStore = localStorage.getItem('auth-store');
+            if (authStore) {
+                const authData = JSON.parse(authStore);
+                log('Auth store found: ' + JSON.stringify(authData.state?.user?.email || 'no user'));
+
+                if (authData.state?.user) {
+                    statusDiv.innerHTML = '<h2 style="color: green;">✅ User is authenticated</h2>';
+                    log('User is authenticated: ' + authData.state.user.email);
+                } else {
+                    statusDiv.innerHTML = '<h2 style="color: orange;">⚠️ No user in auth store</h2>';
+                    log('No user found in auth store');
+                }
+            } else {
+                statusDiv.innerHTML = '<h2 style="color: red;">❌ No auth store found</h2>';
+                log('No auth store in localStorage');
+            }
+
+            // Test navigation
+            setTimeout(() => {
+                log('Testing navigation to /tasks...');
+                statusDiv.innerHTML += '<br><button onclick="testNavigate()">Test Navigate to /tasks</button>';
+                statusDiv.innerHTML += '<br><button onclick="location.reload()">Reload Page</button>';
+                statusDiv.innerHTML += '<br><button onclick="clearAuth()">Clear Auth</button>';
+                statusDiv.innerHTML += '<br><br><a href="http://localhost:3000" target="_blank">Open App in New Tab</a>';
+            }, 1000);
+        }
+
+        function testNavigate() {
+            log('Attempting navigation to /tasks...');
+            window.location.href = 'http://localhost:3000/tasks';
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('auth-store');
+            log('Cleared auth store from localStorage');
+            location.reload();
+        }
+
+        // Check auth on load
+        checkAuth();
+
+        // Monitor for changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'auth-store') {
+                log('Auth store changed!');
+                checkAuth();
+            }
+        });
+    </script>
+</body>
+</html>

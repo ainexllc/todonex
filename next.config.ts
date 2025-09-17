@@ -15,6 +15,20 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['firebasestorage.googleapis.com']
   },
+  // Improve development experience with better hot reloading
+  experimental: {
+    // Enable faster refresh for better hot reloading
+    optimizeCss: false, // Disable CSS optimization in dev for faster reloads
+  },
+  // Configure webpack for better development experience
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Use Next.js defaults for watcher; only set a lightweight devtool
+      config.devtool = 'cheap-module-source-map'
+    }
+
+    return config
+  },
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

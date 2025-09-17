@@ -172,7 +172,17 @@ export function useTaskChat(): UseTaskChatResult {
         const updatedTaskLists = [...taskLists]
         
         data.taskLists.forEach((newList: any) => {
-          if (newList.isAddToExisting) {
+          // Handle list deletion operation
+          if (newList.operation === 'deleteList') {
+            const listIndex = updatedTaskLists.findIndex(list =>
+              list.id === newList.id || list.title.toLowerCase() === newList.title.toLowerCase()
+            )
+            if (listIndex !== -1) {
+              console.log('Deleting entire list:', updatedTaskLists[listIndex].title)
+              // Remove the list from the array
+              updatedTaskLists.splice(listIndex, 1)
+            }
+          } else if (newList.isAddToExisting) {
             // Find existing list to modify
             const existingIndex = updatedTaskLists.findIndex(list => list.id === newList.id)
             if (existingIndex !== -1) {
@@ -180,8 +190,8 @@ export function useTaskChat(): UseTaskChatResult {
                 // Remove specified tasks from existing list
                 updatedTaskLists[existingIndex] = {
                   ...updatedTaskLists[existingIndex],
-                  tasks: updatedTaskLists[existingIndex].tasks.filter(task => 
-                    !newList.tasksToDelete.some((titleToDelete: string) => 
+                  tasks: updatedTaskLists[existingIndex].tasks.filter(task =>
+                    !newList.tasksToDelete.some((titleToDelete: string) =>
                       task.title.toLowerCase() === titleToDelete.toLowerCase()
                     )
                   )
@@ -196,7 +206,7 @@ export function useTaskChat(): UseTaskChatResult {
             }
           } else {
             // Add as new list (only for add operations)
-            if (newList.operation !== 'delete') {
+            if (newList.operation !== 'delete' && newList.operation !== 'deleteList') {
               updatedTaskLists.push(newList)
             }
           }
@@ -207,7 +217,16 @@ export function useTaskChat(): UseTaskChatResult {
         // Save all changes to Firebase
         for (const newList of data.taskLists) {
           try {
-            if (newList.isAddToExisting) {
+            if (newList.operation === 'deleteList') {
+              // Delete entire list from Firebase
+              const listToDelete = taskLists.find(list =>
+                list.id === newList.id || list.title.toLowerCase() === newList.title.toLowerCase()
+              )
+              if (listToDelete) {
+                console.log('Deleting list from Firebase:', listToDelete.id)
+                await deleteTaskListFromFirebase(listToDelete.id)
+              }
+            } else if (newList.isAddToExisting) {
               // Update existing list in Firebase
               const existingIndex = updatedTaskLists.findIndex(list => list.id === newList.id)
               if (existingIndex !== -1) {
@@ -217,7 +236,7 @@ export function useTaskChat(): UseTaskChatResult {
               }
             } else {
               // Save new list to Firebase (only for add operations)
-              if (newList.operation !== 'delete') {
+              if (newList.operation !== 'delete' && newList.operation !== 'deleteList') {
                 await saveTaskListToFirebase(newList)
               }
             }
@@ -242,7 +261,7 @@ export function useTaskChat(): UseTaskChatResult {
     } finally {
       setLoading(false)
     }
-  }, [user, messages, taskLists, loading, trackTaskUsage])
+  }, [user, messages, taskLists, loading, trackTaskUsage, deleteTaskListFromFirebase])
 
   const createTaskList = useCallback(async (title: string, tasks: Task[]) => {
     // Check if a task list with the same title already exists

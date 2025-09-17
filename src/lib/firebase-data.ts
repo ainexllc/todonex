@@ -16,6 +16,17 @@ import {
 } from 'firebase/firestore'
 import { db, auth } from './firebase'
 
+// Helper function to remove undefined values from an object
+function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: any = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      cleaned[key] = obj[key]
+    }
+  }
+  return cleaned
+}
+
 // Generic CRUD operations
 export async function createDocument<T extends Record<string, any>>(
   collectionName: string,
@@ -23,17 +34,43 @@ export async function createDocument<T extends Record<string, any>>(
   data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<void> {
   if (!auth.currentUser) throw new Error('Not authenticated')
-  
+
+  console.log('createDocument: Creating document in', collectionName, 'with ID:', id)
+  console.log('createDocument: Current user:', auth.currentUser.uid)
+
+  // Clean the data to remove undefined fields
+  const cleanedData = removeUndefinedFields(data)
+
   const docData = {
-    ...data,
+    ...cleanedData,
     id,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     createdBy: auth.currentUser.uid,
     familyId: auth.currentUser.uid // For now, user ID is family ID
   }
-  
-  await setDoc(doc(db, collectionName, id), docData)
+
+  console.log('createDocument: Document data:', docData)
+
+  try {
+    // Clean the document data to remove any undefined fields
+    const cleanedDocData = removeUndefinedFields(docData)
+    console.log('createDocument: Cleaned document data:', cleanedDocData)
+
+    await setDoc(doc(db, collectionName, id), cleanedDocData)
+    console.log('createDocument: Document created successfully in Firestore')
+
+    // Verify the document was created
+    const verifyDoc = await getDoc(doc(db, collectionName, id))
+    if (verifyDoc.exists()) {
+      console.log('createDocument: Verified - document exists with ID:', id)
+    } else {
+      console.error('createDocument: WARNING - Document not found after creation!')
+    }
+  } catch (error) {
+    console.error('createDocument: Failed to create document:', error)
+    throw error
+  }
 }
 
 export async function updateDocument<T extends Record<string, any>>(
@@ -77,7 +114,12 @@ export async function getUserDocuments<T>(
   collectionName: string,
   orderByField = 'updatedAt'
 ): Promise<T[]> {
-  if (!auth.currentUser) return []
+  if (!auth.currentUser) {
+    console.log('getUserDocuments: No current user')
+    return []
+  }
+
+  console.log('getUserDocuments: Querying', collectionName, 'for user:', auth.currentUser.uid)
 
   try {
     const q = query(
@@ -87,8 +129,10 @@ export async function getUserDocuments<T>(
     )
 
     const querySnapshot = await getDocs(q)
+    console.log('getUserDocuments: Found', querySnapshot.docs.length, 'documents in', collectionName)
     return querySnapshot.docs.map(doc => {
       const data = doc.data()
+      console.log('Document data:', doc.id, data)
       return {
         ...data,
         id: doc.id,

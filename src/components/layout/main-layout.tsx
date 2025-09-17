@@ -15,6 +15,14 @@ export function MainLayout({ children }: MainLayoutProps) {
     loading,
     initialized
   } = useAuthStore()
+
+  // Debug logging to understand the loading state
+  console.log('MainLayout state:', { initialized, loading, firebaseUser: !!firebaseUser, user: !!user })
+
+  // Log state changes
+  useEffect(() => {
+    console.log('MainLayout state changed:', { initialized, loading, firebaseUser: !!firebaseUser, user: !!user })
+  }, [initialized, loading, firebaseUser, user])
   const [emergencyBypass, setEmergencyBypass] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -34,19 +42,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   }, [initialized, loading])
 
 
-  // Handle authentication redirects
-  useEffect(() => {
-    if (initialized && !loading) {
-      const isAuthPage = pathname?.startsWith('/auth')
-      const isPublicPage = pathname === '/' || pathname === '/landing' // Allow root and landing to be public
-
-      // Only redirect to root if user is trying to access auth pages while authenticated
-      if (firebaseUser && isAuthPage) {
-        router.push('/')
-      }
-      // No longer redirect unauthenticated users away from protected pages - let each page handle its own auth state
-    }
-  }, [firebaseUser, initialized, loading, pathname, router])
+  // Let individual pages handle their own authentication redirects
+  // MainLayout no longer handles redirects to avoid conflicts with page-level logic
 
   // Show loading spinner during initialization (unless emergency bypass is active)
   if ((!initialized || loading) && !emergencyBypass) {
@@ -59,12 +56,20 @@ export function MainLayout({ children }: MainLayoutProps) {
             Initialized: {initialized ? 'Yes' : 'No'} | Loading: {loading ? 'Yes' : 'No'}
           </p>
           {process.env.NODE_ENV === 'development' && (
-            <button 
-              onClick={() => setEmergencyBypass(true)}
-              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
-            >
-              Emergency Bypass (Dev Only)
-            </button>
+            <div className="mt-4 space-y-2">
+              <button
+                onClick={() => setEmergencyBypass(true)}
+                className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+              >
+                Emergency Bypass (Dev Only)
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="ml-2 px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              >
+                Force Refresh
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { TaskListSidebar } from './TaskListSidebar'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
-import { TaskListModal } from './TaskListModal'
+import { TaskListView } from './TaskListView'
 import { useTaskChat } from '@/hooks/useTaskChat'
 import { useAuthStore } from '@/store/auth-store'
 import { cn } from '@/lib/utils'
@@ -20,7 +20,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [selectedTaskList, setSelectedTaskList] = useState<any>(null)
-  const [showTaskListModal, setShowTaskListModal] = useState(false)
+  const [showInlineTaskList, setShowInlineTaskList] = useState(false)
   const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   
@@ -33,7 +33,8 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     createTaskList,
     updateTaskList,
     deleteTaskList,
-    resetConversation
+    resetConversation,
+    reloadTaskLists
   } = useTaskChat()
 
   // Reset conversation state when component mounts (fresh start)
@@ -41,7 +42,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     setHasStarted(false)
     setInputValue('')
     setSelectedTaskList(null)
-    setShowTaskListModal(false)
+    setShowInlineTaskList(false)
     setSelectedTaskListId(null)
     resetConversation()
   }, [resetConversation])
@@ -49,9 +50,27 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   // Reset modal state when task lists change (prevents auto-popup on AI creation)
   useEffect(() => {
     setSelectedTaskList(null)
-    setShowTaskListModal(false)
+    setShowInlineTaskList(false)
     setSelectedTaskListId(null)
   }, [taskLists.length])
+
+  // Sync selectedTaskList with taskLists when modal is open
+  useEffect(() => {
+    if (showInlineTaskList && selectedTaskListId) {
+      const currentList = taskLists.find(list => list.id === selectedTaskListId)
+      if (currentList) {
+        // Update selectedTaskList if the data has changed
+        if (JSON.stringify(currentList) !== JSON.stringify(selectedTaskList)) {
+          setSelectedTaskList(currentList)
+        }
+      } else {
+        // If the selected list no longer exists (was deleted), close modal
+        setShowInlineTaskList(false)
+        setSelectedTaskList(null)
+        setSelectedTaskListId(null)
+      }
+    }
+  }, [taskLists, selectedTaskListId, showInlineTaskList, selectedTaskList])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -80,21 +99,27 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     if (taskList) {
       setSelectedTaskList(taskList)
       setSelectedTaskListId(taskList.id)
-      setShowTaskListModal(true)
+      setShowInlineTaskList(true)
     } else {
       setSelectedTaskList(null)
       setSelectedTaskListId(null)
-      setShowTaskListModal(false)
+      setShowInlineTaskList(false)
     }
   }
 
-  const handleCloseTaskListModal = () => {
-    setShowTaskListModal(false)
+  const handleCloseTaskList = () => {
+    setShowInlineTaskList(false)
     setSelectedTaskList(null)
     setSelectedTaskListId(null)
   }
 
   const handleDeleteTaskList = async (taskListId: string) => {
+    // If the deleted list is currently selected, close the modal
+    if (selectedTaskListId === taskListId) {
+      setShowInlineTaskList(false)
+      setSelectedTaskList(null)
+      setSelectedTaskListId(null)
+    }
     await deleteTaskList(taskListId)
   }
 
@@ -108,45 +133,84 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           selectedTaskListId={selectedTaskListId}
           onTaskListSelect={handleTaskListSelect}
           onTaskListDelete={handleDeleteTaskList}
+          onRefresh={reloadTaskLists}
           className="flex-shrink-0"
         />
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col bg-gray-900">
-          <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-2xl">
-              {/* Compact Instructions Above Input */}
-              <div className="text-center mb-4">
-                <p className="text-xs text-gray-400 mb-2">
-                  Create and manage tasks with natural language
-                </p>
-                <div className="flex flex-wrap gap-1 justify-center text-[10px] text-gray-400">
-                  {[
-                    "Set daily goals",
-                    "Plan morning routine",
-                    "Organize by priority"
-                  ].map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSubmit(example)}
-                      className="px-2 py-1 text-[10px] bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 rounded-full border border-gray-700 transition-colors"
-                      disabled={loading}
-                    >
-                      {example}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className="flex-1 flex flex-col p-4">
+            {/* Show selected task list inline at top */}
+            {showInlineTaskList && selectedTaskList && (
+              <TaskListView
+                taskList={selectedTaskList}
+                onClose={handleCloseTaskList}
+                onTaskUpdate={async (taskId, updates) => {
+                  // Update task in the selected task list
+                  if (selectedTaskList) {
+                    // First update local state immediately for responsive UI
+                    const updatedTasks = selectedTaskList.tasks.map((task: any) =>
+                      task.id === taskId ? { ...task, ...updates } : task
+                    )
+                    setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
-              {/* Chat Input - Centered in the middle */}
-              <ChatInput
-                value={inputValue}
-                onChange={handleInputChange}
-                onSubmit={handleSubmit}
-                loading={loading}
-                placeholder="Describe what tasks you want to create or manage..."
-                centered={true}
+                    // Then update Firebase
+                    await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                  }
+                }}
+                onTaskDelete={async (taskId) => {
+                  // Remove task from the selected task list
+                  if (selectedTaskList) {
+                    // First update local state immediately for responsive UI
+                    const updatedTasks = selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
+                    setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                    // Then update Firebase
+                    await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                  }
+                }}
+                onTaskListDelete={async (taskListId) => {
+                  await deleteTaskList(taskListId)
+                }}
               />
+            )}
+
+            {/* Centered content when no list is selected */}
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="w-full max-w-2xl">
+                {/* Compact Instructions Above Input */}
+                <div className="text-center mb-4">
+                  <p className="text-xs text-gray-400 mb-2">
+                    Create and manage tasks with natural language
+                  </p>
+                  <div className="flex flex-wrap gap-1 justify-center text-[10px] text-gray-400">
+                    {[
+                      "Set daily goals",
+                      "Plan morning routine",
+                      "Organize by priority"
+                    ].map((example, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSubmit(example)}
+                        className="px-2 py-1 text-[10px] bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 rounded-full border border-gray-700 transition-colors"
+                        disabled={loading}
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat Input - Centered in the middle */}
+                <ChatInput
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  placeholder="Describe what tasks you want to create or manage..."
+                  centered={true}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -170,6 +234,42 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
       <div className="flex-1 flex flex-col bg-gray-900">
         {/* Scrollable Chat area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+          {/* Show selected task list inline */}
+          {showInlineTaskList && selectedTaskList && (
+            <TaskListView
+              taskList={selectedTaskList}
+              onClose={handleCloseTaskList}
+              onTaskUpdate={async (taskId, updates) => {
+                // Update task in the selected task list
+                if (selectedTaskList) {
+                  // First update local state immediately for responsive UI
+                  const updatedTasks = selectedTaskList.tasks.map((task: any) =>
+                    task.id === taskId ? { ...task, ...updates } : task
+                  )
+                  setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                  // Then update Firebase
+                  await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                }
+              }}
+              onTaskDelete={async (taskId) => {
+                // Remove task from the selected task list
+                if (selectedTaskList) {
+                  // First update local state immediately for responsive UI
+                  const updatedTasks = selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
+                  setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                  // Then update Firebase
+                  await updateTaskList(selectedTaskList.id, { tasks: updatedTasks })
+                }
+              }}
+              onTaskListDelete={async (taskListId) => {
+                await deleteTaskList(taskListId)
+              }}
+            />
+          )}
+
+          {/* Chat messages */}
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
@@ -220,33 +320,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         </div>
       </div>
 
-      {/* Task List Modal */}
-      <TaskListModal
-        taskList={selectedTaskList}
-        isOpen={showTaskListModal}
-        onClose={handleCloseTaskListModal}
-        onTaskUpdate={async (taskId, updates) => {
-          // Update task in the selected task list
-          if (selectedTaskList) {
-            await updateTaskList(selectedTaskList.id, {
-              tasks: selectedTaskList.tasks.map((task: any) =>
-                task.id === taskId ? { ...task, ...updates } : task
-              )
-            })
-          }
-        }}
-        onTaskDelete={async (taskId) => {
-          // Remove task from the selected task list
-          if (selectedTaskList) {
-            await updateTaskList(selectedTaskList.id, {
-              tasks: selectedTaskList.tasks.filter((task: any) => task.id !== taskId)
-            })
-          }
-        }}
-        onTaskListDelete={async (taskListId) => {
-          await deleteTaskList(taskListId)
-        }}
-      />
     </div>
   )
 }

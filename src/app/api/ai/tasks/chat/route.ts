@@ -135,8 +135,23 @@ Users can request DELETION using various words. Recognize these as DELETE operat
 - "add", "create", "put on", "include", "insert"
 - "add to", "put in", "include in"
 
-TASK DELETION RULES - CRITICAL:
-When users request to delete/remove tasks:
+TASK AND LIST DELETION RULES - CRITICAL:
+
+A. LIST DELETION (Deleting entire lists):
+When users request to delete/remove an ENTIRE LIST (e.g., "delete today list", "remove shopping list"):
+
+✅ ALWAYS set "operation": "deleteList" to delete the entire list
+✅ ALWAYS ask what to do with existing tasks: move to another list or delete them
+✅ ALWAYS confirm the list deletion with the user
+🚫 NEVER just empty the list - actually DELETE the list entirely
+
+Example list deletion scenarios:
+- User: "Delete today list" → AI asks "Should I move the tasks to another list or delete them completely?"
+- User: "Remove shopping list" → AI deletes entire Shopping list after confirmation
+- User: "Get rid of the work list" → AI removes entire Work list
+
+B. TASK DELETION (Deleting individual tasks):
+When users request to delete/remove specific TASKS:
 
 ✅ ALWAYS remove ALL instances of the requested task if duplicates exist
 ✅ ALWAYS check all task lists for the task to be deleted
@@ -144,7 +159,7 @@ When users request to delete/remove tasks:
 ✅ ALWAYS clean up duplicates when explicitly asked to delete a task
 🚫 NEVER ADD tasks when user says "remove", "delete", "take off", etc.
 
-Example deletion scenarios:
+Example task deletion scenarios:
 - User: "Delete wash dishes" → AI removes ALL "wash dishes" tasks from ALL lists
 - User: "Remove one wash dishes from today list" → AI removes ONE "wash dishes" from Today list
 - User: "Take wash dishes off my list" → AI removes wash dishes from the list
@@ -183,11 +198,13 @@ When creating, updating, or deleting tasks, respond with this JSON structure:
 
 CRITICAL OPERATIONS:
 - Set "operation": "add" when adding tasks (default behavior)
-- Set "operation": "delete" when removing tasks
+- Set "operation": "delete" when removing individual tasks from a list
+- Set "operation": "deleteList" when deleting an entire list
 - Set "isAddToExisting": true when modifying an existing task list
-- For deletions, only include the task titles to be removed in the tasks array
+- For task deletions, only include the task titles to be removed in the tasks array
+- For list deletions, set operation to "deleteList" with the list id/title
 
-Example deletion JSON:
+Example task deletion JSON:
 {
   "taskLists": [
     {
@@ -197,6 +214,18 @@ Example deletion JSON:
       "tasks": [{"title": "Wash dishes"}]
     }
   ]
+}
+
+Example list deletion JSON:
+{
+  "taskLists": [
+    {
+      "id": "list-id-here",
+      "title": "Today",
+      "operation": "deleteList"
+    }
+  ],
+  "confirmationMessage": "Should I move the tasks to another list or delete them completely?"
 }
 
 Always include the JSON structure when creating, modifying, or deleting tasks.`

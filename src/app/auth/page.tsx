@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AuthForm } from '@/components/features/auth/auth-form'
 import { Card } from '@/components/ui/card'
 import { Sparkles, Brain, Users, Zap, CheckCircle, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export default function AuthPage() {
+function AuthPageContent() {
   const searchParams = useSearchParams()
   const [currentSlide, setCurrentSlide] = useState(0)
   const initialMode = searchParams?.get('mode') as 'signin' | 'signup' || 'signin'
@@ -154,5 +154,20 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-gray-900 to-slate-900 text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-slate-300">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   )
 }

@@ -170,5 +170,15 @@ module.exports = {
         },
       });
     },
+    // H3 max font size constraint
+    function({ addBase }) {
+      addBase({
+        'h3': {
+          'max-height': '17px',
+          'font-size': '17px',
+          'line-height': '1.2',
+        },
+      });
+    },
   ],
 };
