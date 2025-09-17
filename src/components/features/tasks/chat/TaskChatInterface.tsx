@@ -174,11 +174,17 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                     // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                    const tasksForFirebase = updatedTasks.map((task: any) => ({
-                      ...task,
-                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
-                      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
-                    }))
+                    const tasksForFirebase = updatedTasks.map((task: any) => {
+                      const firebaseTask: any = {
+                        ...task,
+                        completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                      }
+                      // Only add dueDate if it exists (Firebase doesn't accept undefined)
+                      if (task.dueDate) {
+                        firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                      }
+                      return firebaseTask
+                    })
 
                     // Then update Firebase
                     await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
@@ -192,11 +198,17 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                     // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                    const tasksForFirebase = updatedTasks.map((task: any) => ({
-                      ...task,
-                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
-                      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
-                    }))
+                    const tasksForFirebase = updatedTasks.map((task: any) => {
+                      const firebaseTask: any = {
+                        ...task,
+                        completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                      }
+                      // Only add dueDate if it exists (Firebase doesn't accept undefined)
+                      if (task.dueDate) {
+                        firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                      }
+                      return firebaseTask
+                    })
 
                     // Then update Firebase
                     await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
@@ -297,11 +309,17 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                   // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                  const tasksForFirebase = updatedTasks.map((task: any) => ({
-                    ...task,
-                    completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
-                    dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
-                  }))
+                  const tasksForFirebase = updatedTasks.map((task: any) => {
+                    const firebaseTask: any = {
+                      ...task,
+                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                    }
+                    // Only add dueDate if it exists (Firebase doesn't accept undefined)
+                    if (task.dueDate) {
+                      firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                    }
+                    return firebaseTask
+                  })
                   console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
 
                   // Then update Firebase
@@ -317,11 +335,17 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                   // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                  const tasksForFirebase = updatedTasks.map((task: any) => ({
-                    ...task,
-                    completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
-                    dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined
-                  }))
+                  const tasksForFirebase = updatedTasks.map((task: any) => {
+                    const firebaseTask: any = {
+                      ...task,
+                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                    }
+                    // Only add dueDate if it exists (Firebase doesn't accept undefined)
+                    if (task.dueDate) {
+                      firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                    }
+                    return firebaseTask
+                  })
                   console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
 
                   // Then update Firebase
