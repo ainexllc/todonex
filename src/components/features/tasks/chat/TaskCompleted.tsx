@@ -165,10 +165,10 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
               <div className="animate-spin h-6 w-6 border-2 border-gray-600 border-t-transparent rounded-full" />
             </div>
           ) : dayGroups.length === 0 ? (
-            <div className="text-center py-12">
-              <CheckCircle2 className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-[13px] text-gray-400">No completed tasks yet</p>
-              <p className="text-[13px] text-gray-500 mt-1">
+            <div className="text-center py-8">
+              <CheckSquare className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+              <p className="text-[12px] text-gray-400">No completed tasks yet</p>
+              <p className="text-[11px] text-gray-500 mt-1">
                 Completed tasks will appear here
               </p>
             </div>
