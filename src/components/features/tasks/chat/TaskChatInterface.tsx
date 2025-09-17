@@ -25,7 +25,14 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   const [showInlineTaskList, setShowInlineTaskList] = useState(false)
   const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Load collapsed state from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar-collapsed')
+      return saved === 'true'
+    }
+    return false
+  })
   const chatEndRef = useRef<HTMLDivElement>(null)
   
   const {
@@ -136,7 +143,12 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   }
 
   const handleSidebarCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed)
+    const newState = !isSidebarCollapsed
+    setIsSidebarCollapsed(newState)
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-collapsed', newState.toString())
+    }
   }
 
   // Show centered input when there are no active messages (regardless of task lists)
