@@ -12,6 +12,7 @@ interface Task {
   title: string
   description?: string
   completed: boolean
+  completedAt?: Date | null
   priority: 'low' | 'medium' | 'high'
   dueDate?: Date
   category?: string
@@ -66,7 +67,13 @@ export function TaskListView({
   }
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
-    onTaskUpdate?.(taskId, { completed })
+    const updates: any = { completed }
+    if (completed) {
+      updates.completedAt = new Date()
+    } else {
+      updates.completedAt = null
+    }
+    onTaskUpdate?.(taskId, updates)
   }
 
   const handleTaskDelete = (taskId: string) => {

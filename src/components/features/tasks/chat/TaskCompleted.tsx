@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle2, Calendar, X, ChevronDown, ChevronUp, Archive as ArchiveIcon } from 'lucide-react'
+import { CheckCircle2, Calendar, X, ChevronDown, ChevronUp, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, startOfDay, isSameDay, subDays, isToday, isYesterday } from 'date-fns'
 import { getUserDocuments } from '@/lib/firebase-data'
@@ -32,12 +32,12 @@ interface DayGroup {
   isExpanded: boolean
 }
 
-interface TaskArchiveProps {
+interface TaskCompletedProps {
   onClose: () => void
   className?: string
 }
 
-export function TaskArchive({ onClose, className }: TaskArchiveProps) {
+export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
   const [dayGroups, setDayGroups] = useState<DayGroup[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -132,11 +132,11 @@ export function TaskArchive({ onClose, className }: TaskArchiveProps) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ArchiveIcon className="h-5 w-5 text-gray-400" />
+            <CheckCircle className="h-5 w-5 text-green-500" />
             <div>
-              <h2 className="text-lg font-semibold text-white">Task Archive</h2>
+              <h2 className="text-lg font-semibold text-white">Completed Tasks</h2>
               <p className="text-[13px] text-gray-400">
-                {getTotalCompleted()} completed tasks
+                {getTotalCompleted()} tasks completed
               </p>
             </div>
           </div>
