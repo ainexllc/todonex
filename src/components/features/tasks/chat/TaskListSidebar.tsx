@@ -92,10 +92,7 @@ export function TaskListSidebar({
     setDeleteDialog({ isOpen: false, taskList: null })
   }
 
-  const pendingTasks = taskLists.reduce((total, list) => 
-    total + list.tasks.filter(task => !task.completed).length, 0
-  )
-  const completedTasks = taskLists.reduce((total, list) => 
+  const completedTasks = taskLists.reduce((total, list) =>
     total + list.tasks.filter(task => task.completed).length, 0
   )
 
@@ -121,12 +118,6 @@ export function TaskListSidebar({
         {/* Minimal Stats Bar */}
         <div className="flex items-center gap-3 px-3 pb-2">
           <div className="flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-            <span className="text-[11px] text-gray-300">
-              <span className="font-medium text-gray-100">{pendingTasks}</span> Pending
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
             <span className="text-[11px] text-gray-300">
               <span className="font-medium text-green-400">{completedTasks}</span> Done
@@ -146,7 +137,6 @@ export function TaskListSidebar({
         ) : (
           <>
             {taskLists.map((taskList) => {
-              const pendingCount = taskList.tasks.filter(task => !task.completed).length
               const completedCount = taskList.tasks.filter(task => task.completed).length
               const isSelected = selectedTaskListId === taskList.id
               
@@ -183,7 +173,7 @@ export function TaskListSidebar({
                   {taskList.tasks.length > 0 && (
                     <div className="px-2.5 pb-1.5">
                       <div className="space-y-0.5">
-                        {taskList.tasks.slice(0, 2).map((task) => (
+                        {taskList.tasks.slice(0, 5).map((task) => (
                           <div
                             key={task.id}
                             className="flex items-center gap-1.5 text-[10px]"
@@ -200,9 +190,9 @@ export function TaskListSidebar({
                             </span>
                           </div>
                         ))}
-                        {taskList.tasks.length > 2 && (
+                        {taskList.tasks.length > 5 && (
                           <div className="text-[9px] text-gray-500 pl-2.5">
-                            +{taskList.tasks.length - 2} more
+                            +{taskList.tasks.length - 5} more
                           </div>
                         )}
                       </div>
@@ -210,18 +200,11 @@ export function TaskListSidebar({
                   )}
 
                   {/* Task count bar */}
-                  {taskList.tasks.length > 0 && (
+                  {taskList.tasks.length > 0 && completedCount > 0 && (
                     <div className="px-2.5 pb-1.5 flex items-center gap-2 text-[9px]">
-                      {pendingCount > 0 && (
-                        <span className="text-gray-500">
-                          {pendingCount} pending
-                        </span>
-                      )}
-                      {completedCount > 0 && (
-                        <span className="text-green-500/70">
-                          {completedCount} done
-                        </span>
-                      )}
+                      <span className="text-green-500/70">
+                        {completedCount} done
+                      </span>
                     </div>
                   )}
                 </div>
