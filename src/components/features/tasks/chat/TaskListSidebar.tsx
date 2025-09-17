@@ -97,7 +97,7 @@ export function TaskListSidebar({
   )
 
   return (
-    <div className={cn("w-80 bg-gray-950 border-r border-gray-800 flex flex-col", className)}>
+    <div className={cn("bg-gray-950 border-r border-gray-800 flex flex-col", className)}>
       {/* Sidebar Header - Compact Modern Design */}
       <div className="border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
         <div className="px-3 py-2 flex items-center justify-between">

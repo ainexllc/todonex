@@ -6,6 +6,7 @@ import { TaskListSidebar } from './TaskListSidebar'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 import { TaskListView } from './TaskListView'
+import { ResizableSidebar } from '@/components/ui/resizable-sidebar'
 import { useTaskChat } from '@/hooks/useTaskChat'
 import { useAuthStore } from '@/store/auth-store'
 import { cn } from '@/lib/utils'
@@ -128,14 +129,21 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     return (
       <div className={cn("flex h-full", className)}>
         {/* Task List Sidebar */}
-        <TaskListSidebar
-          taskLists={taskLists}
-          selectedTaskListId={selectedTaskListId}
-          onTaskListSelect={handleTaskListSelect}
-          onTaskListDelete={handleDeleteTaskList}
-          onRefresh={reloadTaskLists}
-          className="flex-shrink-0"
-        />
+        <ResizableSidebar
+          defaultWidth={300}
+          minWidth={200}
+          maxWidth={500}
+          storageKey="task-sidebar-width"
+        >
+          <TaskListSidebar
+            taskLists={taskLists}
+            selectedTaskListId={selectedTaskListId}
+            onTaskListSelect={handleTaskListSelect}
+            onTaskListDelete={handleDeleteTaskList}
+            onRefresh={reloadTaskLists}
+            className="h-full"
+          />
+        </ResizableSidebar>
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col bg-gray-900">
@@ -222,13 +230,20 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   return (
     <div className={cn("flex h-full", className)}>
       {/* Task List Sidebar */}
-      <TaskListSidebar
-        taskLists={taskLists}
-        selectedTaskListId={selectedTaskListId}
-        onTaskListSelect={handleTaskListSelect}
-        onTaskListDelete={handleDeleteTaskList}
-        className="flex-shrink-0"
-      />
+      <ResizableSidebar
+        defaultWidth={300}
+        minWidth={200}
+        maxWidth={500}
+        storageKey="task-sidebar-width"
+      >
+        <TaskListSidebar
+          taskLists={taskLists}
+          selectedTaskListId={selectedTaskListId}
+          onTaskListSelect={handleTaskListSelect}
+          onTaskListDelete={handleDeleteTaskList}
+          className="h-full"
+        />
+      </ResizableSidebar>
       
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-gray-900">
