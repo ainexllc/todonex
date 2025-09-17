@@ -88,6 +88,18 @@ export function useTaskChat(): UseTaskChatResult {
     }
   }, [user])
 
+  // Delete task list from Firebase (moved up to fix circular dependency)
+  const deleteTaskListFromFirebase = useCallback(async (id: string) => {
+    try {
+      await deleteDocument('taskLists', id)
+      console.log('Successfully deleted task list from Firebase:', id)
+      // Don't reload here - let the caller handle state updates
+    } catch (error) {
+      console.error('Failed to delete task list from Firebase:', error)
+      throw error // Re-throw to let caller know deletion failed
+    }
+  }, [])
+
   // Cleanup duplicate lists in Firebase
   const cleanupDuplicateLists = useCallback(async () => {
     if (!user) return
@@ -174,17 +186,6 @@ export function useTaskChat(): UseTaskChatResult {
     }
   }, [reloadTaskLists])
 
-  // Delete task list from Firebase
-  const deleteTaskListFromFirebase = useCallback(async (id: string) => {
-    try {
-      await deleteDocument('taskLists', id)
-      console.log('Successfully deleted task list from Firebase:', id)
-      // Don't reload here - let the caller handle state updates
-    } catch (error) {
-      console.error('Failed to delete task list from Firebase:', error)
-      throw error // Re-throw to let caller know deletion failed
-    }
-  }, [])
 
   const sendMessage = useCallback(async (message: string) => {
     if (!user || loading) return
