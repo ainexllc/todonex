@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/ui/delete-dialog'
-import { ListTodo, Trash2, Edit3, User, List, RefreshCw, CheckCircle } from 'lucide-react'
+import { ListTodo, Trash2, Edit3, User, List, RefreshCw, CheckCircle, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
@@ -35,6 +35,8 @@ interface TaskListSidebarProps {
   onTaskListDelete: (taskListId: string) => void
   onRefresh?: () => void
   onCompletedClick?: () => void
+  onCollapse?: () => void
+  isCollapsed?: boolean
   className?: string
 }
 
@@ -45,6 +47,8 @@ export function TaskListSidebar({
   onTaskListDelete,
   onRefresh,
   onCompletedClick,
+  onCollapse,
+  isCollapsed = false,
   className
 }: TaskListSidebarProps) {
   const { user } = useAuthStore()
@@ -142,6 +146,7 @@ export function TaskListSidebar({
       </div>
 
       {/* Task Lists */}
+      {!isCollapsed && (
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {taskLists.length === 0 ? (
           <div className="text-center py-3">
@@ -228,6 +233,23 @@ export function TaskListSidebar({
           </>
         )}
       </div>
+      )}
+
+      {/* Collapse/Expand Button */}
+      <div className="px-3 py-1 border-t border-gray-800/50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCollapse}
+          className="w-full h-7 flex items-center justify-center gap-2 text-[11px] text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+        >
+          {isCollapsed ? (
+            <><ChevronRight className="h-3 w-3" /> Expand</>
+          ) : (
+            <><ChevronLeft className="h-3 w-3" /> Collapse</>
+          )}
+        </Button>
+      </div>
 
       {/* Sidebar Footer - Compact */}
       <div className="px-3 py-2 border-t border-gray-800/50 bg-gray-900/50">
@@ -257,6 +279,21 @@ export function TaskListSidebar({
                 {user.email}
               </div>
             </div>
+
+            {/* Logout Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                const { signOut } = await import('firebase/auth')
+                const { auth } = await import('@/lib/firebase')
+                await signOut(auth)
+              }}
+              className="h-6 w-6 p-0 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm transition-colors"
+              title="Logout"
+            >
+              <LogOut className="h-3 w-3" />
+            </Button>
           </div>
         )}
       </div>

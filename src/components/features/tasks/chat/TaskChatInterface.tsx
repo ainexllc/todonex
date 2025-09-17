@@ -25,6 +25,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   const [showInlineTaskList, setShowInlineTaskList] = useState(false)
   const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   
   const {
@@ -134,15 +135,19 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     setShowCompleted(false)
   }
 
+  const handleSidebarCollapse = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed)
+  }
+
   // Show centered input when there are no active messages (regardless of task lists)
   if (messages.length === 0) {
     return (
       <div className={cn("flex h-full", className)}>
         {/* Task List Sidebar */}
         <ResizableSidebar
-          defaultWidth={300}
-          minWidth={200}
-          maxWidth={500}
+          defaultWidth={isSidebarCollapsed ? 50 : 200}
+          minWidth={isSidebarCollapsed ? 50 : 200}
+          maxWidth={isSidebarCollapsed ? 50 : 400}
           storageKey="task-sidebar-width"
         >
           <TaskListSidebar
@@ -152,6 +157,8 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             onTaskListDelete={handleDeleteTaskList}
             onRefresh={reloadTaskLists}
             onCompletedClick={handleCompletedClick}
+            onCollapse={handleSidebarCollapse}
+            isCollapsed={isSidebarCollapsed}
             className="h-full"
           />
         </ResizableSidebar>
@@ -273,9 +280,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     <div className={cn("flex h-full", className)}>
       {/* Task List Sidebar */}
       <ResizableSidebar
-        defaultWidth={300}
-        minWidth={200}
-        maxWidth={500}
+        defaultWidth={isSidebarCollapsed ? 50 : 200}
+        minWidth={isSidebarCollapsed ? 50 : 200}
+        maxWidth={isSidebarCollapsed ? 50 : 400}
         storageKey="task-sidebar-width"
       >
         <TaskListSidebar
@@ -284,6 +291,8 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           onTaskListSelect={handleTaskListSelect}
           onTaskListDelete={handleDeleteTaskList}
           onCompletedClick={handleCompletedClick}
+          onCollapse={handleSidebarCollapse}
+          isCollapsed={isSidebarCollapsed}
           className="h-full"
         />
       </ResizableSidebar>
