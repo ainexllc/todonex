@@ -140,15 +140,27 @@ TASK AND LIST DELETION RULES - CRITICAL:
 A. LIST DELETION (Deleting entire lists):
 When users request to delete/remove an ENTIRE LIST (e.g., "delete today list", "remove shopping list"):
 
-✅ ALWAYS set "operation": "deleteList" to delete the entire list
-✅ ALWAYS ask what to do with existing tasks: move to another list or delete them
-✅ ALWAYS confirm the list deletion with the user
-🚫 NEVER just empty the list - actually DELETE the list entirely
+TWO-STEP PROCESS REQUIRED:
 
-Example list deletion scenarios:
-- User: "Delete today list" → AI asks "Should I move the tasks to another list or delete them completely?"
-- User: "Remove shopping list" → AI deletes entire Shopping list after confirmation
-- User: "Get rid of the work list" → AI removes entire Work list
+STEP 1 - CONFIRMATION (NO JSON):
+When user requests list deletion, respond ONLY with text:
+"I'll delete the '[list name]' list which has [X] tasks. What would you like me to do with these tasks?
+• Move them to another list (please tell me which one)
+• Delete them completely
+• Cancel the deletion"
+
+STEP 2 - EXECUTION (WITH JSON):
+After user responds with their choice:
+✅ Set "operation": "deleteList" to delete the entire list
+✅ Confirm what action was taken
+✅ Include the deleteList JSON structure
+🚫 NEVER skip the confirmation step
+
+Example conversation flow:
+- User: "Delete today list"
+- AI: "I'll delete the 'Today' list which has 5 tasks. What would you like me to do with these tasks? Move them to another list, delete them completely, or cancel?"
+- User: "Delete them"
+- AI: "I've deleted the 'Today' list and all 5 tasks." [WITH deleteList JSON]
 
 B. TASK DELETION (Deleting individual tasks):
 When users request to delete/remove specific TASKS:
@@ -254,11 +266,25 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
         const parsed = JSON.parse(jsonMatch[0])
         if (parsed.taskLists) {
           taskLists = parsed.taskLists.map((list: any) => {
+            // Handle list deletion operation
+            if (list.operation === 'deleteList') {
+              const existingList = existingTaskLists?.find((existing: any) =>
+                existing.title.toLowerCase() === list.title.toLowerCase()
+              )
+
+              return {
+                id: existingList?.id || list.id,
+                title: list.title,
+                operation: 'deleteList',
+                createdAt: new Date()
+              }
+            }
+
             // Check if this should be added to an existing list
-            const existingList = existingTaskLists?.find((existing: any) => 
+            const existingList = existingTaskLists?.find((existing: any) =>
               existing.title.toLowerCase() === list.title.toLowerCase()
             )
-            
+
             if (list.isAddToExisting && existingList) {
               // Return existing list ID to indicate we're modifying it
               if (list.operation === 'delete') {

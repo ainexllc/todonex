@@ -64,11 +64,75 @@ export function useTaskChat(): UseTaskChatResult {
     try {
       const { getUserDocuments } = await import('@/lib/firebase-data')
       const lists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
-      setTaskLists(lists)
+
+      // Deduplicate lists by title (keep the most recently updated one)
+      const uniqueLists = lists.reduce((acc: TaskList[], list) => {
+        const existingIndex = acc.findIndex(l => l.title.toLowerCase() === list.title.toLowerCase())
+        if (existingIndex !== -1) {
+          // Compare updatedAt dates and keep the more recent one
+          const existingDate = acc[existingIndex].updatedAt || acc[existingIndex].createdAt
+          const newDate = list.updatedAt || list.createdAt
+          if (newDate > existingDate) {
+            acc[existingIndex] = list
+          }
+        } else {
+          acc.push(list)
+        }
+        return acc
+      }, [])
+
+      console.log(`Loaded ${lists.length} lists, deduplicated to ${uniqueLists.length}`)
+      setTaskLists(uniqueLists)
     } catch (error) {
       console.log('Error loading task lists:', error)
     }
   }, [user])
+
+  // Cleanup duplicate lists in Firebase
+  const cleanupDuplicateLists = useCallback(async () => {
+    if (!user) return
+
+    try {
+      const { getUserDocuments } = await import('@/lib/firebase-data')
+      const lists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
+
+      // Find duplicates by title
+      const duplicateGroups: Map<string, TaskList[]> = new Map()
+
+      lists.forEach(list => {
+        const key = list.title.toLowerCase()
+        if (!duplicateGroups.has(key)) {
+          duplicateGroups.set(key, [])
+        }
+        duplicateGroups.get(key)!.push(list)
+      })
+
+      // Delete older duplicates, keeping only the most recent
+      for (const [title, duplicates] of duplicateGroups) {
+        if (duplicates.length > 1) {
+          console.log(`Found ${duplicates.length} duplicate lists for "${title}"`)
+
+          // Sort by date (most recent first)
+          duplicates.sort((a, b) => {
+            const dateA = (a.updatedAt || a.createdAt) as any
+            const dateB = (b.updatedAt || b.createdAt) as any
+            return dateB - dateA
+          })
+
+          // Keep the first (most recent) and delete the rest
+          for (let i = 1; i < duplicates.length; i++) {
+            console.log(`Deleting duplicate list: ${duplicates[i].id} (${duplicates[i].title})`)
+            await deleteTaskListFromFirebase(duplicates[i].id)
+          }
+        }
+      }
+
+      // Reload lists after cleanup
+      await reloadTaskLists()
+    } catch (error) {
+      console.error('Failed to cleanup duplicate lists:', error)
+    }
+  }, [user, deleteTaskListFromFirebase, reloadTaskLists])
 
   // Load Firebase task lists when user is authenticated
   useEffect(() => {
@@ -76,8 +140,9 @@ export function useTaskChat(): UseTaskChatResult {
       setTaskLists([])
       return
     }
-    reloadTaskLists()
-  }, [user, reloadTaskLists])
+    // Run cleanup once on mount, then load lists
+    cleanupDuplicateLists()
+  }, [user, cleanupDuplicateLists])
 
   // Save task list to Firebase
   const saveTaskListToFirebase = useCallback(async (taskList: TaskList) => {
@@ -113,12 +178,13 @@ export function useTaskChat(): UseTaskChatResult {
   const deleteTaskListFromFirebase = useCallback(async (id: string) => {
     try {
       await deleteDocument('taskLists', id)
-      // Reload task lists to update UI
-      await reloadTaskLists()
+      console.log('Successfully deleted task list from Firebase:', id)
+      // Don't reload here - let the caller handle state updates
     } catch (error) {
       console.error('Failed to delete task list from Firebase:', error)
+      throw error // Re-throw to let caller know deletion failed
     }
-  }, [reloadTaskLists])
+  }, [])
 
   const sendMessage = useCallback(async (message: string) => {
     if (!user || loading) return
@@ -174,14 +240,21 @@ export function useTaskChat(): UseTaskChatResult {
         data.taskLists.forEach((newList: any) => {
           // Handle list deletion operation
           if (newList.operation === 'deleteList') {
-            const listIndex = updatedTaskLists.findIndex(list =>
-              list.id === newList.id || list.title.toLowerCase() === newList.title.toLowerCase()
+            // Remove ALL lists with matching title
+            const titleToDelete = newList.title.toLowerCase()
+            const beforeCount = updatedTaskLists.length
+
+            // Filter out all lists with matching title
+            const filteredLists = updatedTaskLists.filter(list =>
+              list.title.toLowerCase() !== titleToDelete
             )
-            if (listIndex !== -1) {
-              console.log('Deleting entire list:', updatedTaskLists[listIndex].title)
-              // Remove the list from the array
-              updatedTaskLists.splice(listIndex, 1)
-            }
+
+            const deletedCount = beforeCount - filteredLists.length
+            console.log(`Deleting ${deletedCount} list(s) named "${newList.title}"`)
+
+            // Replace the array with filtered version
+            updatedTaskLists.length = 0
+            updatedTaskLists.push(...filteredLists)
           } else if (newList.isAddToExisting) {
             // Find existing list to modify
             const existingIndex = updatedTaskLists.findIndex(list => list.id === newList.id)
@@ -218,13 +291,16 @@ export function useTaskChat(): UseTaskChatResult {
         for (const newList of data.taskLists) {
           try {
             if (newList.operation === 'deleteList') {
-              // Delete entire list from Firebase
-              const listToDelete = taskLists.find(list =>
-                list.id === newList.id || list.title.toLowerCase() === newList.title.toLowerCase()
+              // Delete ALL lists with matching title from Firebase
+              const listsToDelete = taskLists.filter(list =>
+                list.title.toLowerCase() === newList.title.toLowerCase()
               )
-              if (listToDelete) {
-                console.log('Deleting list from Firebase:', listToDelete.id)
-                await deleteTaskListFromFirebase(listToDelete.id)
+              console.log(`Found ${listsToDelete.length} lists named "${newList.title}" to delete`)
+
+              // Delete all matching lists
+              for (const list of listsToDelete) {
+                console.log('Deleting list from Firebase:', list.id, list.title)
+                await deleteTaskListFromFirebase(list.id)
               }
             } else if (newList.isAddToExisting) {
               // Update existing list in Firebase
@@ -261,7 +337,7 @@ export function useTaskChat(): UseTaskChatResult {
     } finally {
       setLoading(false)
     }
-  }, [user, messages, taskLists, loading, trackTaskUsage, deleteTaskListFromFirebase])
+  }, [user, messages, taskLists, loading, trackTaskUsage, deleteTaskListFromFirebase, saveTaskListToFirebase, updateTaskListInFirebase])
 
   const createTaskList = useCallback(async (title: string, tasks: Task[]) => {
     // Check if a task list with the same title already exists
@@ -308,6 +384,7 @@ export function useTaskChat(): UseTaskChatResult {
     createTaskList,
     updateTaskList,
     deleteTaskList,
-    resetConversation
+    resetConversation,
+    reloadTaskLists
   }
 }
