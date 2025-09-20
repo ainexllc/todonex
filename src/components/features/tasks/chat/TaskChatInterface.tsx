@@ -167,6 +167,13 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             selectedTaskListId={selectedTaskListId}
             onTaskListSelect={handleTaskListSelect}
             onTaskListDelete={handleDeleteTaskList}
+            onTaskListRename={async (taskListId, newTitle) => {
+              await updateTaskList(taskListId, { title: newTitle })
+              // Update local state if this is the selected task list
+              if (selectedTaskList && selectedTaskList.id === taskListId) {
+                setSelectedTaskList({ ...selectedTaskList, title: newTitle })
+              }
+            }}
             onRefresh={reloadTaskLists}
             onCompletedClick={handleCompletedClick}
             onCollapse={handleSidebarCollapse}
@@ -187,26 +194,34 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   // Update task in the selected task list
                   if (selectedTaskList) {
                     // First update local state immediately for responsive UI
-                    const updatedTasks = selectedTaskList.tasks.map((task: any) =>
+                    let updatedTasks = selectedTaskList.tasks.map((task: any) =>
                       task.id === taskId ? { ...task, ...updates } : task
                     )
+
+                    // Auto-remove completed tasks from active list (but keep in Firebase for history)
+                    if (updates.completed === true) {
+                      console.log('TaskChatInterface: Auto-removing completed task from active view:', taskId)
+                      updatedTasks = updatedTasks.filter((task: any) => task.id !== taskId)
+                    }
+
                     setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
-                    // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                    const tasksForFirebase = updatedTasks.map((task: any) => {
+                    // Prepare ALL tasks for Firebase (including the completed one for history)
+                    const allTasksForFirebase = selectedTaskList.tasks.map((task: any) => {
+                      const taskToSave = task.id === taskId ? { ...task, ...updates } : task
                       const firebaseTask: any = {
-                        ...task,
-                        completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                        ...taskToSave,
+                        completedAt: taskToSave.completedAt ? new Date(taskToSave.completedAt).toISOString() : null
                       }
                       // Only add dueDate if it exists (Firebase doesn't accept undefined)
-                      if (task.dueDate) {
-                        firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                      if (taskToSave.dueDate) {
+                        firebaseTask.dueDate = new Date(taskToSave.dueDate).toISOString()
                       }
                       return firebaseTask
                     })
 
-                    // Then update Firebase
-                    await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                    // Save all tasks to Firebase (including completed ones for history)
+                    await updateTaskList(selectedTaskList.id, { tasks: allTasksForFirebase })
                   }
                 }}
                 onTaskDelete={async (taskId) => {
@@ -235,6 +250,14 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                 }}
                 onTaskListDelete={async (taskListId) => {
                   await deleteTaskList(taskListId)
+                }}
+                onTaskListRename={async (taskListId, newTitle) => {
+                  // Update the title in Firebase
+                  await updateTaskList(taskListId, { title: newTitle })
+                  // Update local state
+                  if (selectedTaskList && selectedTaskList.id === taskListId) {
+                    setSelectedTaskList({ ...selectedTaskList, title: newTitle })
+                  }
                 }}
               />
             )}
@@ -302,6 +325,13 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           selectedTaskListId={selectedTaskListId}
           onTaskListSelect={handleTaskListSelect}
           onTaskListDelete={handleDeleteTaskList}
+          onTaskListRename={async (taskListId, newTitle) => {
+            await updateTaskList(taskListId, { title: newTitle })
+            // Update local state if this is the selected task list
+            if (selectedTaskList && selectedTaskList.id === taskListId) {
+              setSelectedTaskList({ ...selectedTaskList, title: newTitle })
+            }
+          }}
           onCompletedClick={handleCompletedClick}
           onCollapse={handleSidebarCollapse}
           isCollapsed={isSidebarCollapsed}
@@ -323,28 +353,36 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                 // Update task in the selected task list
                 if (selectedTaskList) {
                   // First update local state immediately for responsive UI
-                  const updatedTasks = selectedTaskList.tasks.map((task: any) =>
+                  let updatedTasks = selectedTaskList.tasks.map((task: any) =>
                     task.id === taskId ? { ...task, ...updates } : task
                   )
+
+                  // Auto-remove completed tasks from active list (but keep in Firebase for history)
+                  if (updates.completed === true) {
+                    console.log('TaskChatInterface: Auto-removing completed task from active view:', taskId)
+                    updatedTasks = updatedTasks.filter((task: any) => task.id !== taskId)
+                  }
+
                   console.log('TaskChatInterface: Updated tasks before Firebase:', updatedTasks)
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
-                  // Prepare tasks for Firebase (convert Date objects to ISO strings)
-                  const tasksForFirebase = updatedTasks.map((task: any) => {
+                  // Prepare ALL tasks for Firebase (including the completed one for history)
+                  const allTasksForFirebase = selectedTaskList.tasks.map((task: any) => {
+                    const taskToSave = task.id === taskId ? { ...task, ...updates } : task
                     const firebaseTask: any = {
-                      ...task,
-                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                      ...taskToSave,
+                      completedAt: taskToSave.completedAt ? new Date(taskToSave.completedAt).toISOString() : null
                     }
                     // Only add dueDate if it exists (Firebase doesn't accept undefined)
-                    if (task.dueDate) {
-                      firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                    if (taskToSave.dueDate) {
+                      firebaseTask.dueDate = new Date(taskToSave.dueDate).toISOString()
                     }
                     return firebaseTask
                   })
-                  console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
+                  console.log('TaskChatInterface: Tasks prepared for Firebase:', allTasksForFirebase)
 
-                  // Then update Firebase
-                  await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                  // Save all tasks to Firebase (including completed ones for history)
+                  await updateTaskList(selectedTaskList.id, { tasks: allTasksForFirebase })
                   console.log('TaskChatInterface: Firebase update completed')
                 }
               }}
@@ -377,6 +415,14 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               onTaskListDelete={async (taskListId) => {
                 await deleteTaskList(taskListId)
               }}
+              onTaskListRename={async (taskListId, newTitle) => {
+                // Update the title in Firebase
+                await updateTaskList(taskListId, { title: newTitle })
+                // Update local state
+                if (selectedTaskList && selectedTaskList.id === taskListId) {
+                  setSelectedTaskList({ ...selectedTaskList, title: newTitle })
+                }
+              }}
             />
           )}
 
@@ -386,6 +432,8 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               key={index}
               message={message}
               onTaskAction={async (action, taskId, data) => {
+                console.log('TaskChatInterface: Handling task action:', action, 'with data:', data)
+
                 // Handle task actions
                 switch (action) {
                   case 'create':
@@ -397,6 +445,119 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   case 'delete':
                     await deleteTaskList(taskId)
                     break
+                  case 'toggle':
+                    // Toggle task completion
+                    if (selectedTaskList && taskId) {
+                      const updatedTasks = selectedTaskList.tasks.map(task =>
+                        task.id === taskId ? { ...task, ...data } : task
+                      )
+                      setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                      // Update Firebase
+                      const tasksForFirebase = updatedTasks.map((task: any) => {
+                        const firebaseTask: any = {
+                          ...task,
+                          completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                        }
+                        if (task.dueDate) {
+                          firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                        }
+                        return firebaseTask
+                      })
+                      await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                    }
+                    break
+                  case 'create_list':
+                    // Create a new task list with the specified name
+                    console.log('Creating new task list:', data)
+                    await createTaskList(data, [])
+                    break
+                  case 'add_tasks':
+                    // Parse tasks from the data string and add to current list
+                    if (selectedTaskList && data) {
+                      console.log('Adding tasks to current list:', data)
+                      // Simple parsing - split by commas or newlines
+                      const taskTitles = data.split(/[,\n]/).map((title: string) => title.trim()).filter(Boolean)
+                      const newTasks = taskTitles.map((title: string) => ({
+                        id: `task-${Date.now()}-${Math.random()}`,
+                        title,
+                        completed: false,
+                        priority: 'medium' as const
+                      }))
+
+                      const updatedTasks = [...selectedTaskList.tasks, ...newTasks]
+                      setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                      // Update Firebase
+                      const tasksForFirebase = updatedTasks.map((task: any) => {
+                        const firebaseTask: any = {
+                          ...task,
+                          completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                        }
+                        if (task.dueDate) {
+                          firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                        }
+                        return firebaseTask
+                      })
+                      await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                    }
+                    break
+                  case 'mark_complete':
+                    // Mark tasks as complete based on title match
+                    if (selectedTaskList && data) {
+                      console.log('Marking tasks complete:', data)
+                      const updatedTasks = selectedTaskList.tasks.map(task => {
+                        if (task.title.toLowerCase().includes(data.toLowerCase())) {
+                          return { ...task, completed: true, completedAt: new Date() }
+                        }
+                        return task
+                      })
+                      setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                      // Update Firebase
+                      const tasksForFirebase = updatedTasks.map((task: any) => {
+                        const firebaseTask: any = {
+                          ...task,
+                          completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                        }
+                        if (task.dueDate) {
+                          firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                        }
+                        return firebaseTask
+                      })
+                      await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                    }
+                    break
+                  case 'delete_task':
+                    // Delete tasks based on title match
+                    if (selectedTaskList && data) {
+                      console.log('Deleting tasks:', data)
+                      const updatedTasks = selectedTaskList.tasks.filter(task =>
+                        !task.title.toLowerCase().includes(data.toLowerCase())
+                      )
+                      setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+
+                      // Update Firebase
+                      const tasksForFirebase = updatedTasks.map((task: any) => {
+                        const firebaseTask: any = {
+                          ...task,
+                          completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                        }
+                        if (task.dueDate) {
+                          firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                        }
+                        return firebaseTask
+                      })
+                      await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
+                    }
+                    break
+                  case 'suggestion':
+                    // Handle suggestion clicks - simulate user input
+                    setInputValue(data)
+                    await handleSubmit(data)
+                    break
+                  default:
+                    console.warn('Unknown task action:', action)
                 }
               }}
             />

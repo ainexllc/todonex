@@ -37,6 +37,13 @@ interface ChatMessageProps {
   onTaskAction: (action: string, taskId?: string, data?: any) => void
 }
 
+interface ClickableAction {
+  text: string
+  action: string
+  data?: any
+  className?: string
+}
+
 export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const isAssistant = message.role === 'assistant'
@@ -54,12 +61,116 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
     const today = new Date()
     const dueDate = new Date(date)
     const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-    
+
     if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Tomorrow'
     if (diffDays === -1) return 'Yesterday'
     if (diffDays > 0) return `In ${diffDays} days`
     return `${Math.abs(diffDays)} days ago`
+  }
+
+  // Parse message content for clickable actions
+  const parseMessageForActions = (content: string) => {
+    // Define patterns that should be clickable
+    const actionPatterns = [
+      {
+        pattern: /create(?:d)?\s+(?:a\s+)?(?:new\s+)?(?:task\s+)?list(?:\s+called)?[\s:"]*([^"\n.!?]+)/gi,
+        action: 'create_list',
+        className: 'text-blue-400 hover:text-blue-300 underline cursor-pointer'
+      },
+      {
+        pattern: /add(?:ed)?\s+(?:the\s+)?(?:following\s+)?tasks?[:\s]?([^\n.!?]+)/gi,
+        action: 'add_tasks',
+        className: 'text-green-400 hover:text-green-300 underline cursor-pointer'
+      },
+      {
+        pattern: /mark(?:ed)?\s+(?:as\s+)?complete(?:d)?[:\s]?([^\n.!?]+)/gi,
+        action: 'mark_complete',
+        className: 'text-green-400 hover:text-green-300 underline cursor-pointer'
+      },
+      {
+        pattern: /delete(?:d)?\s+(?:the\s+)?(?:task\s+)?["']?([^"'\n.!?]+)["']?/gi,
+        action: 'delete_task',
+        className: 'text-red-400 hover:text-red-300 underline cursor-pointer'
+      }
+    ]
+
+    let processedContent = content
+    const actions: ClickableAction[] = []
+
+    actionPatterns.forEach(({ pattern, action, className }) => {
+      let match
+      while ((match = pattern.exec(content)) !== null) {
+        const fullMatch = match[0]
+        const actionData = match[1]?.trim()
+
+        if (actionData) {
+          actions.push({
+            text: fullMatch,
+            action,
+            data: actionData,
+            className
+          })
+        }
+      }
+    })
+
+    return { processedContent, actions }
+  }
+
+  const renderClickableContent = (content: string) => {
+    const { actions } = parseMessageForActions(content)
+
+    if (actions.length === 0) {
+      return <span>{content}</span>
+    }
+
+    let processedContent = content
+    const elements: React.ReactNode[] = []
+    let lastIndex = 0
+
+    actions.forEach((action, index) => {
+      const actionIndex = processedContent.indexOf(action.text, lastIndex)
+
+      if (actionIndex !== -1) {
+        // Add text before the action
+        if (actionIndex > lastIndex) {
+          elements.push(
+            <span key={`text-${index}`}>
+              {processedContent.substring(lastIndex, actionIndex)}
+            </span>
+          )
+        }
+
+        // Add clickable action
+        elements.push(
+          <button
+            key={`action-${index}`}
+            onClick={() => onTaskAction(action.action, undefined, action.data)}
+            className={cn(
+              'inline text-[13px] transition-colors',
+              action.className
+            )}
+            title={`Click to ${action.action.replace('_', ' ')}: ${action.data}`}
+          >
+            {action.text}
+          </button>
+        )
+
+        lastIndex = actionIndex + action.text.length
+      }
+    })
+
+    // Add remaining text
+    if (lastIndex < processedContent.length) {
+      elements.push(
+        <span key="text-end">
+          {processedContent.substring(lastIndex)}
+        </span>
+      )
+    }
+
+    return <>{elements}</>
   }
 
   return (
@@ -78,7 +189,9 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
             ? "bg-primary text-primary-foreground ml-auto"
             : "bg-black text-white"
         )}>
-          <p className="text-[13px] whitespace-pre-wrap leading-normal">{message.content}</p>
+          <div className="text-[13px] whitespace-pre-wrap leading-normal">
+            {isAssistant ? renderClickableContent(message.content) : message.content}
+          </div>
         </div>
 
         {/* Task Lists (Assistant only) */}

@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { DeleteDialog } from '@/components/ui/delete-dialog'
-import { ListTodo, Trash2, Edit3, User, List, RefreshCw, CheckCircle, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import { ListTodo, Trash2, Edit3, Edit2, User, List, RefreshCw, CheckCircle, ChevronLeft, ChevronRight, LogOut, Check, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
@@ -33,6 +34,7 @@ interface TaskListSidebarProps {
   selectedTaskListId: string | null
   onTaskListSelect: (taskList: TaskList | null) => void
   onTaskListDelete: (taskListId: string) => void
+  onTaskListRename?: (taskListId: string, newTitle: string) => void
   onRefresh?: () => void
   onCompletedClick?: () => void
   onCollapse?: () => void
@@ -45,6 +47,7 @@ export function TaskListSidebar({
   selectedTaskListId,
   onTaskListSelect,
   onTaskListDelete,
+  onTaskListRename,
   onRefresh,
   onCompletedClick,
   onCollapse,
@@ -56,6 +59,8 @@ export function TaskListSidebar({
     isOpen: boolean
     taskList: TaskList | null
   }>({ isOpen: false, taskList: null })
+  const [editingListId, setEditingListId] = useState<string | null>(null)
+  const [editedTitle, setEditedTitle] = useState('')
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -86,6 +91,25 @@ export function TaskListSidebar({
   const handleDeleteTaskList = (e: React.MouseEvent, taskList: TaskList) => {
     e.stopPropagation()
     setDeleteDialog({ isOpen: true, taskList })
+  }
+
+  const handleStartRename = (e: React.MouseEvent, taskList: TaskList) => {
+    e.stopPropagation()
+    setEditingListId(taskList.id)
+    setEditedTitle(taskList.title)
+  }
+
+  const handleSaveRename = (taskListId: string) => {
+    if (editedTitle.trim() && onTaskListRename) {
+      onTaskListRename(taskListId, editedTitle.trim())
+    }
+    setEditingListId(null)
+    setEditedTitle('')
+  }
+
+  const handleCancelRename = () => {
+    setEditingListId(null)
+    setEditedTitle('')
   }
 
   const handleDeleteConfirm = async () => {
@@ -172,21 +196,74 @@ export function TaskListSidebar({
                   onClick={() => handleTaskListClick(taskList)}
                 >
                   <div className="px-2.5 py-1.5 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <List className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                      <span className="text-[12px] font-medium truncate text-gray-100">
-                        {taskList.title}
-                      </span>
+                      {editingListId === taskList.id ? (
+                        <div className="flex items-center gap-1 flex-1">
+                          <Input
+                            type="text"
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              e.stopPropagation()
+                              if (e.key === 'Enter') handleSaveRename(taskList.id)
+                              if (e.key === 'Escape') handleCancelRename()
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-5 px-1 py-0 text-[11px] bg-gray-800 border-gray-700 text-gray-100"
+                            autoFocus
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSaveRename(taskList.id)
+                            }}
+                            className="h-4 w-4 p-0 text-green-500 hover:text-green-400"
+                          >
+                            <Check className="h-2.5 w-2.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCancelRename()
+                            }}
+                            className="h-4 w-4 p-0 text-red-500 hover:text-red-400"
+                          >
+                            <XCircle className="h-2.5 w-2.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-[12px] font-medium truncate text-gray-100">
+                          {taskList.title}
+                        </span>
+                      )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleDeleteTaskList(e, taskList)}
-                      className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm transition-all"
-                      title="Delete list"
-                    >
-                      <Trash2 className="h-2.5 w-2.5" />
-                    </Button>
+                    {editingListId !== taskList.id && (
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleStartRename(e, taskList)}
+                          className="h-5 w-5 p-0 text-gray-500 hover:text-gray-300 hover:bg-gray-800/50 rounded-sm"
+                          title="Rename list"
+                        >
+                          <Edit2 className="h-2.5 w-2.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleDeleteTaskList(e, taskList)}
+                          className="h-5 w-5 p-0 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm"
+                          title="Delete list"
+                        >
+                          <Trash2 className="h-2.5 w-2.5" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Task preview and stats */}
@@ -235,19 +312,16 @@ export function TaskListSidebar({
       </div>
       )}
 
-      {/* Collapse/Expand Button */}
-      <div className="px-3 py-1 border-t border-gray-800/50">
+      {/* Collapse/Expand Button - Ultra Compact */}
+      <div className="border-t border-gray-800/50">
         <Button
           variant="ghost"
           size="sm"
           onClick={onCollapse}
-          className="w-full h-7 flex items-center justify-center gap-2 text-[11px] text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+          className="w-full h-5 flex items-center justify-center text-[11px] font-mono text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 transition-colors"
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isCollapsed ? (
-            <><ChevronRight className="h-3 w-3" /> Expand</>
-          ) : (
-            <><ChevronLeft className="h-3 w-3" /> Collapse</>
-          )}
+          {isCollapsed ? ">>" : "<<"}
         </Button>
       </div>
 

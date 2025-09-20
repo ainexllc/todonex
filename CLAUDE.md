@@ -1,5 +1,12 @@
 # NextTaskPro - Project Instructions
 
+## ⚠️ CRITICAL: Git Commit Rules
+**IMPORTANT**: NEVER commit changes unless explicitly asked by the user
+- ❌ **DO NOT** automatically commit after making changes
+- ❌ **DO NOT** push to repository without explicit permission
+- ✅ **ONLY** commit when user says "commit", "save changes", or similar explicit request
+- ✅ **ASK** before committing if unclear whether user wants changes saved
+
 ## 🔥 CRITICAL: Firebase Auto-Deployment Requirements
 **MANDATORY**: Claude MUST automatically push and deploy Firebase components on my behalf:
 

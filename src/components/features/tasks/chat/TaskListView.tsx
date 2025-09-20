@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, Circle, Trash2, Calendar, Flag, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { CheckCircle2, Circle, Trash2, Calendar, Flag, X, ChevronDown, ChevronUp, Edit2, Check, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 
@@ -32,6 +33,7 @@ interface TaskListViewProps {
   onTaskUpdate?: (taskId: string, updates: Partial<Task>) => void
   onTaskDelete?: (taskId: string) => void
   onTaskListDelete?: (taskListId: string) => void
+  onTaskListRename?: (taskListId: string, newTitle: string) => void
   collapsed?: boolean
 }
 
@@ -41,9 +43,12 @@ export function TaskListView({
   onTaskUpdate,
   onTaskDelete,
   onTaskListDelete,
+  onTaskListRename,
   collapsed = false
 }: TaskListViewProps) {
   const [isCollapsed, setIsCollapsed] = useState(collapsed)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editedTitle, setEditedTitle] = useState(taskList.title)
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -89,6 +94,23 @@ export function TaskListView({
     }
   }
 
+  const handleRenameStart = () => {
+    setEditedTitle(taskList.title)
+    setIsEditingTitle(true)
+  }
+
+  const handleRenameCancel = () => {
+    setEditedTitle(taskList.title)
+    setIsEditingTitle(false)
+  }
+
+  const handleRenameSave = () => {
+    if (editedTitle.trim() && editedTitle !== taskList.title) {
+      onTaskListRename?.(taskList.id, editedTitle.trim())
+    }
+    setIsEditingTitle(false)
+  }
+
   const completedTasks = taskList.tasks.filter(task => task.completed)
   const pendingTasks = taskList.tasks.filter(task => !task.completed)
 
@@ -103,8 +125,51 @@ export function TaskListView({
           >
             {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
           </button>
-          <div>
-            <h3 className="text-[14px] font-medium text-gray-100">{taskList.title}</h3>
+          <div className="flex-1">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameSave()
+                    if (e.key === 'Escape') handleRenameCancel()
+                  }}
+                  className="h-6 px-2 py-0 text-[14px] bg-gray-800 border-gray-700 text-gray-100"
+                  autoFocus
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRenameSave}
+                  className="h-6 w-6 p-0 text-green-500 hover:text-green-400 hover:bg-green-900/20"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRenameCancel}
+                  className="h-6 w-6 p-0 text-red-500 hover:text-red-400 hover:bg-red-900/20"
+                >
+                  <XCircle className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h3 className="text-[14px] font-medium text-gray-100">{taskList.title}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRenameStart}
+                  className="h-5 w-5 p-0 text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
+                  title="Rename list"
+                >
+                  <Edit2 className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
             <div className="flex items-center gap-3 mt-1">
               <span className="text-[10px] text-gray-500">
                 {taskList.tasks.length} tasks

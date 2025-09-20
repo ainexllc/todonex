@@ -347,17 +347,49 @@ export function useTaskChat(): UseTaskChatResult {
     )
 
     if (existingList) {
-      // Add tasks to existing list instead of creating a new one
-      const updatedTasks = [...existingList.tasks, ...tasks]
-      await updateTaskListInFirebase(existingList.id, { tasks: updatedTasks })
+      // Filter out duplicate tasks (same title, case insensitive) and completed tasks
+      const existingTaskTitles = new Set(
+        existingList.tasks
+          .filter(task => !task.completed) // Only check against active tasks
+          .map(task => task.title.toLowerCase().trim())
+      )
+
+      const newTasksToAdd = tasks.filter(newTask => {
+        const normalizedTitle = newTask.title.toLowerCase().trim()
+        const isDuplicate = existingTaskTitles.has(normalizedTitle)
+
+        if (isDuplicate) {
+          console.log('Duplicate task detected, skipping:', newTask.title)
+        }
+
+        return !isDuplicate
+      })
+
+      if (newTasksToAdd.length > 0) {
+        console.log(`Adding ${newTasksToAdd.length} new tasks to existing list "${title}" (${tasks.length - newTasksToAdd.length} duplicates filtered)`)
+        const updatedTasks = [...existingList.tasks, ...newTasksToAdd]
+        await updateTaskListInFirebase(existingList.id, { tasks: updatedTasks })
+      } else {
+        console.log('All tasks were duplicates, no new tasks added to list:', title)
+      }
     } else {
-      // Create new task list
+      // Create new task list with unique tasks only
+      const uniqueTasks = tasks.filter((task, index, array) => {
+        const normalizedTitle = task.title.toLowerCase().trim()
+        return index === array.findIndex(t => t.title.toLowerCase().trim() === normalizedTitle)
+      })
+
       const newTaskList: TaskList = {
         id: `list-${Date.now()}`,
         title,
-        tasks,
+        tasks: uniqueTasks,
         createdAt: new Date()
       }
+
+      if (uniqueTasks.length < tasks.length) {
+        console.log(`Filtered ${tasks.length - uniqueTasks.length} duplicate tasks when creating new list "${title}"`)
+      }
+
       await saveTaskListToFirebase(newTaskList)
     }
   }, [taskLists, saveTaskListToFirebase, updateTaskListInFirebase])
