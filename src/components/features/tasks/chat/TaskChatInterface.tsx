@@ -8,9 +8,13 @@ import { ChatInput } from './ChatInput'
 import { TaskListView } from './TaskListView'
 import { TaskCompleted } from './TaskCompleted'
 import { ResizableSidebar } from '@/components/ui/resizable-sidebar'
+import { ResponsiveSidebar } from '@/components/ui/responsive-sidebar'
 import { useTaskChat } from '@/hooks/useTaskChat'
 import { useAuthStore } from '@/store/auth-store'
+import { useIsMobile } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
+import { Menu } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface TaskChatInterfaceProps {
   className?: string
@@ -19,15 +23,17 @@ interface TaskChatInterfaceProps {
 export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   const router = useRouter()
   const { user } = useAuthStore()
+  const isMobile = useIsMobile()
   const [hasStarted, setHasStarted] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [selectedTaskList, setSelectedTaskList] = useState<any>(null)
   const [showInlineTaskList, setShowInlineTaskList] = useState(false)
   const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    // Load collapsed state from localStorage
-    if (typeof window !== 'undefined') {
+    // Load collapsed state from localStorage (desktop only)
+    if (typeof window !== 'undefined' && !isMobile) {
       const saved = localStorage.getItem('sidebar-collapsed')
       return saved === 'true'
     }
@@ -44,8 +50,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     createTaskList,
     updateTaskList,
     deleteTaskList,
-    resetConversation,
-    reloadTaskLists
+    resetConversation
   } = useTaskChat()
 
   // Reset conversation state when component mounts (fresh start)
@@ -143,23 +148,46 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
   }
 
   const handleSidebarCollapse = () => {
-    const newState = !isSidebarCollapsed
-    setIsSidebarCollapsed(newState)
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-collapsed', newState.toString())
+    if (isMobile) {
+      setIsMobileDrawerOpen(false)
+    } else {
+      const newState = !isSidebarCollapsed
+      setIsSidebarCollapsed(newState)
+      // Save to localStorage for desktop
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar-collapsed', newState.toString())
+      }
     }
+  }
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileDrawerOpen(!isMobileDrawerOpen)
   }
 
   // Show centered input when there are no active messages (regardless of task lists)
   if (messages.length === 0) {
     return (
-      <div className={cn("flex h-full", className)}>
+      <div className={cn("flex h-full w-full relative", className)}>
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleMobileMenuToggle}
+            className="absolute top-2 left-2 z-30 h-9 w-9 p-0 bg-gray-900/90 hover:bg-gray-800 border border-gray-700/70 text-gray-300 hover:text-gray-100 shadow-sm"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+
         {/* Task List Sidebar */}
-        <ResizableSidebar
-          defaultWidth={isSidebarCollapsed ? 50 : 200}
-          minWidth={isSidebarCollapsed ? 50 : 200}
-          maxWidth={isSidebarCollapsed ? 50 : 400}
+        <ResponsiveSidebar
+          isOpen={isMobile ? isMobileDrawerOpen : true}
+          onClose={() => setIsMobileDrawerOpen(false)}
+          isCollapsed={!isMobile && isSidebarCollapsed}
+          defaultWidth={200}
+          minWidth={200}
+          maxWidth={400}
           storageKey="task-sidebar-width"
         >
           <TaskListSidebar
@@ -174,17 +202,23 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                 setSelectedTaskList({ ...selectedTaskList, title: newTitle })
               }
             }}
-            onRefresh={reloadTaskLists}
             onCompletedClick={handleCompletedClick}
             onCollapse={handleSidebarCollapse}
-            isCollapsed={isSidebarCollapsed}
+            isCollapsed={!isMobile && isSidebarCollapsed}
+            isMobile={isMobile}
             className="h-full"
           />
-        </ResizableSidebar>
+        </ResponsiveSidebar>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-900 chat-content-area">
-          <div className="flex-1 flex flex-col p-4">
+        <div className={cn(
+          "flex-1 min-w-0 flex flex-col bg-gray-900 chat-content-area h-full",
+          isMobile && "w-full"
+        )}>
+          <div className={cn(
+            "flex-1 min-h-0 flex flex-col",
+            isMobile ? "p-2 pt-12" : "p-4"
+          )}>
             {/* Show selected task list inline at top */}
             {showInlineTaskList && selectedTaskList && (
               <TaskListView
@@ -312,12 +346,27 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
 
   // If conversation has messages, show full chat interface with sidebar
   return (
-    <div className={cn("flex h-full", className)}>
+    <div className={cn("flex h-full w-full relative", className)}>
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleMobileMenuToggle}
+          className="absolute top-2 left-2 z-30 h-9 w-9 p-0 bg-gray-900/80 hover:bg-gray-800 border border-gray-700"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      )}
+
       {/* Task List Sidebar */}
-      <ResizableSidebar
-        defaultWidth={isSidebarCollapsed ? 50 : 200}
-        minWidth={isSidebarCollapsed ? 50 : 200}
-        maxWidth={isSidebarCollapsed ? 50 : 400}
+      <ResponsiveSidebar
+        isOpen={isMobile ? isMobileDrawerOpen : true}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        isCollapsed={!isMobile && isSidebarCollapsed}
+        defaultWidth={200}
+        minWidth={200}
+        maxWidth={400}
         storageKey="task-sidebar-width"
       >
         <TaskListSidebar
@@ -334,15 +383,22 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           }}
           onCompletedClick={handleCompletedClick}
           onCollapse={handleSidebarCollapse}
-          isCollapsed={isSidebarCollapsed}
+          isCollapsed={!isMobile && isSidebarCollapsed}
+          isMobile={isMobile}
           className="h-full"
         />
-      </ResizableSidebar>
-      
+      </ResponsiveSidebar>
+
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-gray-900 chat-content-area">
+      <div className={cn(
+        "flex-1 min-w-0 flex flex-col bg-gray-900 chat-content-area h-full",
+        isMobile && "w-full"
+      )}>
         {/* Scrollable Chat area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+        <div className={cn(
+          "flex-1 overflow-y-auto space-y-4 min-h-0",
+          isMobile ? "p-2 pt-12" : "p-4"
+        )}>
           {/* Show selected task list inline */}
           {showInlineTaskList && selectedTaskList && (
             <TaskListView
@@ -564,15 +620,15 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           ))}
           
           {loading && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-              <span>AI is thinking...</span>
+            <div className="chat-message flex items-center gap-2 text-muted-foreground">
+              <div className="animate-spin h-3 w-3 border-1.5 border-primary border-t-transparent rounded-full" />
+              <span className="text-[10px]">AI is thinking...</span>
             </div>
           )}
           
           {error && (
-            <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
-              <p className="text-[13px] text-red-300">{error}</p>
+            <div className="chat-message p-2 bg-red-900/20 border border-red-800 rounded-sm">
+              <p className="text-[10px] text-red-300">{error}</p>
             </div>
           )}
 
@@ -580,7 +636,10 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         </div>
 
         {/* Bottom input field */}
-        <div className="flex-shrink-0 border-t border-gray-800 p-4 bg-gray-950/95 backdrop-blur-sm">
+        <div className={cn(
+          "flex-shrink-0 border-t border-gray-800 bg-gray-950/95 backdrop-blur-sm",
+          isMobile ? "p-2" : "p-4"
+        )}>
           <ChatInput
             value={inputValue}
             onChange={handleInputChange}
