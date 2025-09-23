@@ -216,6 +216,57 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                 setSelectedTaskList({ ...selectedTaskList, title: newTitle })
               }
             }}
+            onTaskDelete={async (taskListId, taskId) => {
+              // Find the task list
+              const taskList = taskLists.find(list => list.id === taskListId)
+              if (!taskList) return
+
+              // Remove task from the task list
+              const updatedTasks = taskList.tasks.filter((task: any) => task.id !== taskId)
+
+              // Prepare tasks for Firebase (convert Date objects to ISO strings)
+              const tasksForFirebase = updatedTasks.map((task: any) => {
+                const firebaseTask: any = {
+                  id: task.id,
+                  title: task.title,
+                  completed: task.completed,
+                  priority: task.priority
+                }
+
+                // Add optional fields only if they exist
+                if (task.description !== undefined) {
+                  firebaseTask.description = task.description
+                }
+
+                // Validate and add dueDate
+                if (task.dueDate) {
+                  const dueDate = new Date(task.dueDate)
+                  if (!isNaN(dueDate.getTime())) {
+                    firebaseTask.dueDate = dueDate.toISOString()
+                  }
+                }
+
+                // Validate and add completedAt
+                if (task.completedAt) {
+                  const completedDate = new Date(task.completedAt)
+                  if (!isNaN(completedDate.getTime())) {
+                    firebaseTask.completedAt = completedDate.toISOString()
+                  } else {
+                    firebaseTask.completedAt = null
+                  }
+                }
+
+                return firebaseTask
+              })
+
+              // Update in Firebase
+              await updateTaskList(taskListId, { tasks: tasksForFirebase })
+
+              // Update local state if this is the selected task list
+              if (selectedTaskList && selectedTaskList.id === taskListId) {
+                setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
+              }
+            }}
             onCompletedClick={handleCompletedClick}
             onCollapse={handleSidebarCollapse}
             isCollapsed={!isMobile && isSidebarCollapsed}
@@ -415,6 +466,57 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             // Update local state if this is the selected task list
             if (selectedTaskList && selectedTaskList.id === taskListId) {
               setSelectedTaskList({ ...selectedTaskList, title: newTitle })
+            }
+          }}
+          onTaskDelete={async (taskListId, taskId) => {
+            // Find the task list
+            const taskList = taskLists.find(list => list.id === taskListId)
+            if (!taskList) return
+
+            // Remove task from the task list
+            const updatedTasks = taskList.tasks.filter((task: any) => task.id !== taskId)
+
+            // Prepare tasks for Firebase (convert Date objects to ISO strings)
+            const tasksForFirebase = updatedTasks.map((task: any) => {
+              const firebaseTask: any = {
+                id: task.id,
+                title: task.title,
+                completed: task.completed,
+                priority: task.priority
+              }
+
+              // Add optional fields only if they exist
+              if (task.description !== undefined) {
+                firebaseTask.description = task.description
+              }
+
+              // Validate and add dueDate
+              if (task.dueDate) {
+                const dueDate = new Date(task.dueDate)
+                if (!isNaN(dueDate.getTime())) {
+                  firebaseTask.dueDate = dueDate.toISOString()
+                }
+              }
+
+              // Validate and add completedAt
+              if (task.completedAt) {
+                const completedDate = new Date(task.completedAt)
+                if (!isNaN(completedDate.getTime())) {
+                  firebaseTask.completedAt = completedDate.toISOString()
+                } else {
+                  firebaseTask.completedAt = null
+                }
+              }
+
+              return firebaseTask
+            })
+
+            // Update in Firebase
+            await updateTaskList(taskListId, { tasks: tasksForFirebase })
+
+            // Update local state if this is the selected task list
+            if (selectedTaskList && selectedTaskList.id === taskListId) {
+              setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
             }
           }}
           onCompletedClick={handleCompletedClick}

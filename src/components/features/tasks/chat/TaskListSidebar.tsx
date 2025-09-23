@@ -36,6 +36,7 @@ interface TaskListSidebarProps {
   onTaskListSelect: (taskList: TaskList | null) => void
   onTaskListDelete: (taskListId: string) => void
   onTaskListRename?: (taskListId: string, newTitle: string) => void
+  onTaskDelete?: (taskListId: string, taskId: string) => void
   onRefresh?: () => void
   onCompletedClick?: () => void
   onCollapse?: () => void
@@ -49,6 +50,7 @@ export function TaskListSidebar({
   onTaskListSelect,
   onTaskListDelete,
   onTaskListRename,
+  onTaskDelete,
   onRefresh,
   onCompletedClick,
   onCollapse,
@@ -132,7 +134,12 @@ export function TaskListSidebar({
       {/* Sidebar Header - Compact Modern Design */}
       <div className="border-b border-subtle bg-elevated backdrop-blur-sm">
         <div className="padding-sidebar flex items-center justify-between">
-          <h2 className="text-nav-label">My Lists</h2>
+          {/* ASCII Logo */}
+          <pre className="text-primary text-xs leading-none font-mono select-none" style={{ fontSize: '10px' }}>
+{`╔═╗┬╔╦╗┌─┐┌─┐┬┌─
+╠═╣│ ║ ├─┤└─┐├┴┐
+╩ ╩┴ ╩ ┴ ┴└─┘┴ ┴`}
+          </pre>
           <div className="flex items-center gap-1">
             {onCompletedClick && (
               <Button
@@ -273,7 +280,7 @@ export function TaskListSidebar({
                         {sortTasksByDueDate(taskList.tasks).slice(0, 5).map((task) => (
                           <div
                             key={task.id}
-                            className="flex items-center justify-between gap-1 text-caption"
+                            className="group/task flex items-center justify-between gap-1 text-caption"
                           >
                             <div className="flex items-center gap-inline flex-1 min-w-0">
                               <div className={cn(
@@ -287,14 +294,30 @@ export function TaskListSidebar({
                                 {task.title}
                               </span>
                             </div>
-                            {task.dueDate && !task.completed && (
-                              <span className={cn(
-                                "text-[10px] flex-shrink-0",
-                                getDueDateColorClass(task.dueDate)
-                              )}>
-                                {formatCompactDueDate(task.dueDate)}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-0.5">
+                              {task.dueDate && !task.completed && (
+                                <span className={cn(
+                                  "text-[10px] flex-shrink-0",
+                                  getDueDateColorClass(task.dueDate)
+                                )}>
+                                  {formatCompactDueDate(task.dueDate)}
+                                </span>
+                              )}
+                              {onTaskDelete && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    onTaskDelete(taskList.id, task.id)
+                                  }}
+                                  className="h-3.5 w-3.5 p-0 opacity-0 group-hover/task:opacity-100 text-secondary hover:priority-high hover-surface rounded-sm transition-default"
+                                  title="Delete task"
+                                >
+                                  <Trash2 className="h-2.5 w-2.5" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         ))}
                         {taskList.tasks.length > 5 && (
