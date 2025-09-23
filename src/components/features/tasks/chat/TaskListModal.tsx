@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CheckCircle2, Circle, Edit, Trash2, Flag, Calendar, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useIsMobile } from '@/hooks/use-media-query'
 
 interface Task {
   id: string
@@ -36,14 +37,15 @@ interface TaskListModalProps {
   onTaskListDelete?: (taskListId: string) => void
 }
 
-export function TaskListModal({ 
-  taskList, 
-  isOpen, 
-  onClose, 
+export function TaskListModal({
+  taskList,
+  isOpen,
+  onClose,
   onTaskUpdate,
   onTaskDelete,
-  onTaskListDelete 
+  onTaskListDelete
 }: TaskListModalProps) {
+  const isMobile = useIsMobile()
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
 
   if (!taskList) return null
@@ -161,9 +163,9 @@ export function TaskListModal({
                     </button>
                     
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground">{task.title}</p>
+                      <p className={cn("font-medium text-foreground", isMobile ? "text-xs" : "text-sm")}>{task.title}</p>
                       {task.description && (
-                        <p className="text-[10px] text-muted-foreground truncate">{task.description}</p>
+                        <p className={cn("text-muted-foreground truncate", isMobile ? "text-[10px]" : "text-xs")}>{task.description}</p>
                       )}
                     </div>
                     
@@ -214,9 +216,9 @@ export function TaskListModal({
                     </button>
                     
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground line-through">{task.title}</p>
+                      <p className={cn("font-medium text-foreground line-through", isMobile ? "text-xs" : "text-sm")}>{task.title}</p>
                       {task.description && (
-                        <p className="text-sm text-muted-foreground truncate line-through">{task.description}</p>
+                        <p className={cn("text-muted-foreground truncate line-through", isMobile ? "text-[10px]" : "text-xs")}>{task.description}</p>
                       )}
                     </div>
                     

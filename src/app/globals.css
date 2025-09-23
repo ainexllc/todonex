@@ -1,16 +1,30 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+@import '../styles/design-system.css';
 
-/* Enforce consistent font sizes in main chat area */
-/* Override any heading tags or default sizes - but allow task cards and message content to use their own sizes */
-.chat-content-area *:not(.task-card):not(.task-card *):not(.chat-message):not(.chat-message *) {
-  font-size: 13px !important;
-  line-height: 1.5 !important;
+/* Chat content area uses semantic typography */
+.chat-content-area {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chat-content-area h1, .chat-content-area h2, .chat-content-area h3 {
+  font-size: clamp(16px, 2.5vw, 20px);
+  line-height: 1.4;
+  font-weight: 600;
+  color: rgb(243, 244, 246);
+}
+
+.chat-content-area p, .chat-content-area div {
+  font-size: clamp(12px, 1.8vw, 14px);
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgb(243, 244, 246);
 }
 
 /* Allow icons to maintain their sizes */
 .chat-content-area svg {
-  font-size: inherit !important;
+  font-size: inherit;
 }
 
 /* Universal Sans Text font family for tasks */
@@ -237,7 +251,7 @@ select {
 
 /* Fix input letter spacing */
 input, textarea {
-  letter-spacing: 0 !important;
+  letter-spacing: 0;
 }
 
 /* Enhanced text contrast for glass elements */
@@ -272,7 +286,7 @@ input, textarea {
   font-family: 'Inter', 'Universal Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 500;
   font-feature-settings: 'kern' 1, 'liga' 1;
-  font-size: 0.875rem !important; /* 14px - same as text-sm */
+  font-size: 0.875rem; /* 14px - same as text-sm */
   line-height: 1.5;
 }
 
@@ -280,7 +294,7 @@ input, textarea {
   font-family: 'Inter', 'Universal Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 500;
   font-feature-settings: 'kern' 1;
-  font-size: 0.875rem !important; /* 14px - same as text-sm */
+  font-size: 0.875rem; /* 14px - same as text-sm */
   line-height: 1.5;
 }
 
@@ -334,15 +348,15 @@ input, textarea {
 /* Enhanced Disabled State */
 .grok-button-enhanced:disabled {
   opacity: 0.5;
-  transform: none !important;
-  box-shadow: none !important;
+  transform: none;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 /* Enhanced Loading State */
 .grok-button-enhanced.loading {
   position: relative;
-  color: transparent !important;
+  color: transparent;
 }
 
 .grok-button-enhanced.loading::after {
@@ -1971,31 +1985,24 @@ code, pre, .grok-mono {
   display: none;  /* Safari and Chrome */
 }
 
-/* Custom task list typography overrides */
+/* Use semantic task typography from design system */
 .task-title-custom {
-  font-size: 14px !important;
-  font-weight: 550 !important;
-  line-height: 1.4 !important;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 550;
+  color: rgb(243, 244, 246);
 }
 
 .task-desc-custom {
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.4 !important;
-  color: #6B7280 !important; /* gray-500 */
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: rgb(156, 163, 175);
 }
 
-.dark .task-desc-custom {
-  color: #9CA3AF !important; /* gray-400 */
-}
-
-/* Task form modal background fix */
+/* Task form modal uses semantic background */
 .task-form-modal {
-  background-color: white !important;
-}
-
-.dark .task-form-modal {
-  background-color: black !important;
+  background-color: rgb(17, 24, 39);
 }
 
 .text-\[12px\] {
@@ -2053,8 +2060,8 @@ code, pre, .grok-mono {
 
   /* Mobile-optimized chat interface */
   .chat-content-area {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
   }
 
   /* Mobile input optimization */
@@ -2158,17 +2165,26 @@ code, pre, .grok-mono {
     border-bottom: 1px solid rgba(55, 65, 81, 0.5);
   }
 
-  /* Mobile-specific font sizes */
+  /* Mobile-specific font sizes use semantic classes */
   .text-mobile-xs {
-    font-size: 11px !important;
+    font-size: clamp(10px, 1.5vw, 12px);
+    line-height: 1.4;
+    font-weight: 400;
+    color: rgb(156, 163, 175);
   }
 
   .text-mobile-sm {
-    font-size: 13px !important;
+    font-size: clamp(12px, 1.8vw, 14px);
+    line-height: 1.5;
+    font-weight: 400;
+    color: rgb(243, 244, 246);
   }
 
   .text-mobile-base {
-    font-size: 15px !important;
+    font-size: clamp(14px, 2vw, 16px);
+    line-height: 1.6;
+    font-weight: 400;
+    color: rgb(243, 244, 246);
   }
 
   /* Improved touch targets */
@@ -2196,7 +2212,7 @@ code, pre, .grok-mono {
 @media (min-width: 1024px) {
   /* Show mobile-only elements */
   .mobile-only {
-    display: none !important;
+    display: none;
   }
 
   /* Desktop sidebar behavior */
@@ -2240,4 +2256,33 @@ code, pre, .grok-mono {
 .drawer-handle:active {
   background: rgba(107, 114, 128, 0.6);
   width: 6px;
+}
+
+/* ========================================
+   SEMANTIC TEXT CLASSES FOR SIDEBAR
+   Increased font size by 3px for better readability
+   ======================================== */
+
+/* Navigation label text - used for list titles in sidebar */
+.text-nav-label {
+  font-size: 13px; /* Increased from 10px to 13px */
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Navigation secondary text - used for stats and counts */
+.text-nav-secondary {
+  font-size: 12px; /* Increased from 9px to 12px for consistency */
+  line-height: 1.4;
+  font-weight: 400;
+  color: rgb(156, 163, 175);
+}
+
+/* Caption text - used for small labels and hints */
+.text-caption {
+  font-size: 11px; /* Increased from 8px to 11px */
+  line-height: 1.3;
+  font-weight: 400;
+  color: rgb(107, 114, 128);
 }

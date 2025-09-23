@@ -78,12 +78,18 @@ export async function updateDocument<T extends Record<string, any>>(
   id: string,
   data: Partial<T>
 ): Promise<void> {
+  // Clean the data to remove undefined fields
+  const cleanedData = removeUndefinedFields(data)
+
   const docData = {
-    ...data,
+    ...cleanedData,
     updatedAt: serverTimestamp()
   }
-  
-  await setDoc(doc(db, collectionName, id), docData, { merge: true })
+
+  // Clean again to ensure no undefined values slip through
+  const cleanedDocData = removeUndefinedFields(docData)
+
+  await setDoc(doc(db, collectionName, id), cleanedDocData, { merge: true })
 }
 
 export async function getDocument<T>(
@@ -133,6 +139,16 @@ export async function getUserDocuments<T>(
     return querySnapshot.docs.map(doc => {
       const data = doc.data()
       console.log('Document data:', doc.id, data)
+
+      // Convert nested task dates if this is a taskList document
+      if (data.tasks && Array.isArray(data.tasks)) {
+        data.tasks = data.tasks.map((task: any) => ({
+          ...task,
+          completedAt: task.completedAt ? new Date(task.completedAt) : null,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+        }))
+      }
+
       return {
         ...data,
         id: doc.id,

@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { CheckCircle2, Circle, Trash2, Calendar, Flag, X, ChevronDown, ChevronUp, Edit2, Check, XCircle } from 'lucide-react'
+import { CheckCircle2, Circle, Trash2, Calendar, Flag, X, ChevronDown, ChevronUp, Edit2, Check, XCircle, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useIsMobile } from '@/hooks/use-media-query'
+import { sortTasksByDueDate } from '@/lib/utils/task-sorting'
 
 interface Task {
   id: string
@@ -46,23 +48,32 @@ export function TaskListView({
   onTaskListRename,
   collapsed = false
 }: TaskListViewProps) {
+  const isMobile = useIsMobile()
   const [isCollapsed, setIsCollapsed] = useState(collapsed)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskList.title)
+  const [editingDueDateTaskId, setEditingDueDateTaskId] = useState<string | null>(null)
+  const [tempDueDate, setTempDueDate] = useState<string>('')
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'text-red-500'
-      case 'medium': return 'text-yellow-500'
-      case 'low': return 'text-green-500'
-      default: return 'text-gray-500'
+      case 'high': return 'priority-high'
+      case 'medium': return 'priority-medium'
+      case 'low': return 'priority-low'
+      default: return 'text-secondary'
     }
   }
 
   const formatDueDate = (date: Date) => {
+    // Normalize dates to midnight for accurate day comparison
     const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     const dueDate = new Date(date)
-    const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    dueDate.setHours(0, 0, 0, 0)
+
+    const diffTime = dueDate.getTime() - today.getTime()
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
     if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Tomorrow'
@@ -111,17 +122,47 @@ export function TaskListView({
     setIsEditingTitle(false)
   }
 
+  const handleStartEditDueDate = (taskId: string, currentDueDate?: Date) => {
+    setEditingDueDateTaskId(taskId)
+    if (currentDueDate) {
+      const date = new Date(currentDueDate)
+      const formattedDate = date.toISOString().split('T')[0]
+      setTempDueDate(formattedDate)
+    } else {
+      setTempDueDate('')
+    }
+  }
+
+  const handleSaveDueDate = (taskId: string) => {
+    const updates: any = {}
+    if (tempDueDate) {
+      const newDueDate = new Date(tempDueDate)
+      console.log('Setting due date:', tempDueDate, '->', newDueDate)
+      updates.dueDate = newDueDate
+    } else {
+      updates.dueDate = null
+    }
+    onTaskUpdate?.(taskId, updates)
+    setEditingDueDateTaskId(null)
+    setTempDueDate('')
+  }
+
+  const handleCancelEditDueDate = () => {
+    setEditingDueDateTaskId(null)
+    setTempDueDate('')
+  }
+
   const completedTasks = taskList.tasks.filter(task => task.completed)
-  const pendingTasks = taskList.tasks.filter(task => !task.completed)
+  const pendingTasks = sortTasksByDueDate(taskList.tasks.filter(task => !task.completed))
 
   return (
-    <div className="bg-gray-900/50 border border-gray-800/50 rounded-sm mb-4">
+    <div className="card-elevated margin-component">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-800/50 flex items-center justify-between">
+      <div className="padding-card border-b border-subtle flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-gray-400 hover:text-gray-200 transition-colors"
+            className="text-secondary hover:text-primary transition-default"
           >
             {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
           </button>
@@ -136,14 +177,14 @@ export function TaskListView({
                     if (e.key === 'Enter') handleRenameSave()
                     if (e.key === 'Escape') handleRenameCancel()
                   }}
-                  className="h-6 px-2 py-0 text-[14px] bg-gray-800 border-gray-700 text-gray-100"
+                  className="h-6 px-2 py-0 text-task-title input-default"
                   autoFocus
                 />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleRenameSave}
-                  className="h-6 w-6 p-0 text-green-500 hover:text-green-400 hover:bg-green-900/20"
+                  className="h-6 w-6 p-0 priority-low hover:opacity-80"
                 >
                   <Check className="h-3 w-3" />
                 </Button>
@@ -151,19 +192,19 @@ export function TaskListView({
                   variant="ghost"
                   size="sm"
                   onClick={handleRenameCancel}
-                  className="h-6 w-6 p-0 text-red-500 hover:text-red-400 hover:bg-red-900/20"
+                  className="h-6 w-6 p-0 priority-high hover:opacity-80"
                 >
                   <XCircle className="h-3 w-3" />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <h3 className="text-[14px] font-medium text-gray-100">{taskList.title}</h3>
+                <h3 className="text-task-title text-primary">{taskList.title}</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleRenameStart}
-                  className="h-5 w-5 p-0 text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
+                  className="h-5 w-5 p-0 text-secondary hover:text-primary hover-surface"
                   title="Rename list"
                 >
                   <Edit2 className="h-3 w-3" />
@@ -171,16 +212,16 @@ export function TaskListView({
               </div>
             )}
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-[10px] text-gray-500">
+              <span className="text-nav-secondary text-secondary">
                 {taskList.tasks.length} tasks
               </span>
               {pendingTasks.length > 0 && (
-                <span className="text-[10px] text-blue-400">
+                <span className="text-nav-secondary text-accent">
                   {pendingTasks.length} pending
                 </span>
               )}
               {completedTasks.length > 0 && (
-                <span className="text-[10px] text-green-400">
+                <span className="text-nav-secondary priority-low">
                   {completedTasks.length} done
                 </span>
               )}
@@ -193,7 +234,7 @@ export function TaskListView({
             variant="ghost"
             size="sm"
             onClick={handleTaskListDelete}
-            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-400 hover:bg-red-900/20"
+            className="h-7 px-2 text-nav-secondary priority-high hover:opacity-80 hover-surface"
           >
             <Trash2 className="h-3 w-3 mr-1" />
             Delete List
@@ -202,7 +243,7 @@ export function TaskListView({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-7 w-7 p-0 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+            className="h-7 w-7 p-0 text-secondary hover:text-primary hover-surface"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -211,36 +252,36 @@ export function TaskListView({
 
       {/* Content */}
       {!isCollapsed && (
-        <div className="p-4">
+        <div className="padding-card">
           {taskList.tasks.length === 0 ? (
             <div className="text-center py-8">
-              <Circle className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-              <p className="text-[12px] text-gray-400">No tasks in this list</p>
-              <p className="text-[10px] text-gray-500 mt-1">Add tasks using the chat below</p>
+              <Circle className="h-8 w-8 mx-auto mb-2 text-secondary" />
+              <p className="text-body-sm text-primary">No tasks in this list</p>
+              <p className="text-caption text-secondary mt-1">Add tasks using the chat below</p>
             </div>
           ) : (
             <div className="space-y-3">
               {/* Pending Tasks */}
               {pendingTasks.length > 0 && (
                 <div>
-                  <h4 className="text-[11px] font-medium text-gray-400 mb-2">To Do</h4>
+                  <h4 className="text-nav-label text-secondary mb-2">To Do</h4>
                   <div className="space-y-1">
                     {pendingTasks.map((task) => (
                       <div
                         key={task.id}
-                        className="flex items-center gap-2 p-2 rounded-sm bg-gray-900/40 hover:bg-gray-900/60 transition-colors group"
+                        className="task-item gap-component group"
                       >
                         <button
                           onClick={() => handleTaskToggle(task.id, true)}
                           className="flex-shrink-0 hover:scale-110 transition-transform"
                         >
-                          <Circle className="h-3.5 w-3.5 text-gray-400 hover:text-blue-400" />
+                          <Circle className="h-3.5 w-3.5 text-secondary hover:text-accent" />
                         </button>
 
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] text-gray-200">{task.title}</p>
+                          <p className={cn("text-primary", isMobile ? "text-body-sm" : "text-task-title")}>{task.title}</p>
                           {task.description && (
-                            <p className="text-[10px] text-gray-500 truncate">{task.description}</p>
+                            <p className={cn("text-secondary truncate", isMobile ? "text-caption" : "text-task-description")}>{task.description}</p>
                           )}
                         </div>
 
@@ -248,17 +289,55 @@ export function TaskListView({
                           {task.priority && task.priority !== 'medium' && (
                             <Flag className={cn("h-3 w-3", getPriorityColor(task.priority))} />
                           )}
-                          {task.dueDate && (
-                            <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                              <Calendar className="h-3 w-3" />
-                              {formatDueDate(task.dueDate)}
+                          {editingDueDateTaskId === task.id ? (
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="date"
+                                value={tempDueDate}
+                                onChange={(e) => setTempDueDate(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveDueDate(task.id)
+                                  if (e.key === 'Escape') handleCancelEditDueDate()
+                                }}
+                                className="h-6 px-2 text-xs bg-gray-800 border border-gray-700 rounded text-gray-100 focus:outline-none focus:border-blue-500"
+                                autoFocus
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSaveDueDate(task.id)}
+                                className="h-5 w-5 p-0 text-green-500 hover:text-green-400"
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleCancelEditDueDate}
+                                className="h-5 w-5 p-0 text-red-500 hover:text-red-400"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
                             </div>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEditDueDate(task.id, task.dueDate)}
+                              className={cn(
+                                "h-6 px-2 flex items-center gap-1 text-xs",
+                                task.dueDate ? "text-secondary hover:text-primary" : "opacity-0 group-hover:opacity-100 text-gray-500 hover:text-gray-300"
+                              )}
+                            >
+                              <CalendarDays className="h-3 w-3" />
+                              {task.dueDate ? formatDueDate(task.dueDate) : "Set date"}
+                            </Button>
                           )}
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleTaskDelete(task.id)}
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition-all"
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-secondary hover:priority-high hover-surface transition-default"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -272,24 +351,24 @@ export function TaskListView({
               {/* Completed Tasks */}
               {completedTasks.length > 0 && (
                 <div>
-                  <h4 className="text-[11px] font-medium text-gray-400 mb-2">Completed</h4>
+                  <h4 className="text-nav-label text-secondary mb-2">Completed</h4>
                   <div className="space-y-1">
                     {completedTasks.map((task) => (
                       <div
                         key={task.id}
-                        className="flex items-center gap-2 p-2 rounded-sm bg-gray-900/20 opacity-60 hover:opacity-80 transition-opacity group"
+                        className="task-item task-completed gap-component group"
                       >
                         <button
                           onClick={() => handleTaskToggle(task.id, false)}
                           className="flex-shrink-0 hover:scale-110 transition-transform"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                          <CheckCircle2 className="h-3.5 w-3.5 priority-low" />
                         </button>
 
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] text-gray-400 line-through">{task.title}</p>
+                          <p className={cn("text-secondary line-through", isMobile ? "text-body-sm" : "text-task-title")}>{task.title}</p>
                           {task.description && (
-                            <p className="text-[10px] text-gray-600 truncate line-through">{task.description}</p>
+                            <p className={cn("text-secondary truncate line-through", isMobile ? "text-caption" : "text-task-description")}>{task.description}</p>
                           )}
                         </div>
 
@@ -297,7 +376,7 @@ export function TaskListView({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleTaskDelete(task.id)}
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition-all"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-secondary hover:priority-high hover-surface transition-default"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

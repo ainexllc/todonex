@@ -10,6 +10,7 @@ import { TaskCompleted } from './TaskCompleted'
 import { ResizableSidebar } from '@/components/ui/resizable-sidebar'
 import { ResponsiveSidebar } from '@/components/ui/responsive-sidebar'
 import { useTaskChat } from '@/hooks/useTaskChat'
+import { useAutoCompletion } from '@/hooks/useAutoCompletion'
 import { useAuthStore } from '@/store/auth-store'
 import { useIsMobile } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
@@ -50,8 +51,23 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     createTaskList,
     updateTaskList,
     deleteTaskList,
-    resetConversation
+    resetConversation,
+    reloadTaskLists
   } = useTaskChat()
+
+  // Set up automatic task completion
+  useAutoCompletion({
+    checkInterval: 30 * 60 * 1000, // Check every 30 minutes
+    runImmediately: true, // Run check when component mounts
+    onAutoComplete: (result) => {
+      if (result.completedCount > 0) {
+        console.log(`Auto-completed ${result.completedCount} tasks due today`)
+        // Reload task lists to reflect the changes
+        reloadTaskLists?.()
+      }
+    },
+    enabled: true // Enable automatic completion
+  })
 
   // Reset conversation state when component mounts (fresh start)
   useEffect(() => {
@@ -75,10 +91,8 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     if (showInlineTaskList && selectedTaskListId) {
       const currentList = taskLists.find(list => list.id === selectedTaskListId)
       if (currentList) {
-        // Update selectedTaskList if the data has changed
-        if (JSON.stringify(currentList) !== JSON.stringify(selectedTaskList)) {
-          setSelectedTaskList(currentList)
-        }
+        // Always update to use the latest data from taskLists (which has properly parsed dates)
+        setSelectedTaskList(currentList)
       } else {
         // If the selected list no longer exists (was deleted), close modal
         setShowInlineTaskList(false)
@@ -86,7 +100,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         setSelectedTaskListId(null)
       }
     }
-  }, [taskLists, selectedTaskListId, showInlineTaskList, selectedTaskList])
+  }, [taskLists, selectedTaskListId, showInlineTaskList])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -185,9 +199,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
           isOpen={isMobile ? isMobileDrawerOpen : true}
           onClose={() => setIsMobileDrawerOpen(false)}
           isCollapsed={!isMobile && isSidebarCollapsed}
-          defaultWidth={200}
-          minWidth={200}
-          maxWidth={400}
+          defaultWidth={280}
+          minWidth={280}
+          maxWidth={500}
           storageKey="task-sidebar-width"
         >
           <TaskListSidebar
@@ -299,6 +313,28 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
             {/* Centered content when no list is selected */}
             <div className="flex-1 flex flex-col items-center justify-center">
               <div className="w-full max-w-2xl">
+                {/* NextTaskPro ASCII Logo */}
+                <div className="text-center mb-8">
+                  <pre className="text-primary text-lg leading-tight mb-4" style={{ fontFamily: "'Courier New', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace" }}>
+{`
+ ███╗   ██╗███████╗██╗  ██╗████████╗
+ ████╗  ██║██╔════╝╚██╗██╔╝╚══██╔══╝
+ ██╔██╗ ██║█████╗   ╚███╔╝    ██║
+ ██║╚██╗██║██╔══╝   ██╔██╗    ██║
+ ██║ ╚████║███████╗██╔╝ ██╗   ██║
+ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝   ╚═╝
+
+████████╗ █████╗ ███████╗██╗  ██╗
+╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+   ██║   ███████║███████╗█████╔╝
+   ██║   ██╔══██║╚════██║██╔═██╗
+   ██║   ██║  ██║███████║██║  ██╗
+   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+`}
+                  </pre>
+                  <p className="text-sm text-accent font-medium">Professional Task Management</p>
+                </div>
+
                 {/* Compact Instructions Above Input */}
                 <div className="text-center mb-4">
                   <p className="text-[13px] text-gray-400 mb-2">
@@ -364,9 +400,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
         isOpen={isMobile ? isMobileDrawerOpen : true}
         onClose={() => setIsMobileDrawerOpen(false)}
         isCollapsed={!isMobile && isSidebarCollapsed}
-        defaultWidth={200}
-        minWidth={200}
-        maxWidth={400}
+        defaultWidth={280}
+        minWidth={280}
+        maxWidth={500}
         storageKey="task-sidebar-width"
       >
         <TaskListSidebar
@@ -425,13 +461,38 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   // Prepare ALL tasks for Firebase (including the completed one for history)
                   const allTasksForFirebase = selectedTaskList.tasks.map((task: any) => {
                     const taskToSave = task.id === taskId ? { ...task, ...updates } : task
+                    // Build Firebase task object, excluding undefined values
                     const firebaseTask: any = {
-                      ...taskToSave,
-                      completedAt: taskToSave.completedAt ? new Date(taskToSave.completedAt).toISOString() : null
+                      id: taskToSave.id,
+                      title: taskToSave.title,
+                      completed: taskToSave.completed || false,
+                      priority: taskToSave.priority || 'medium',
+                      completedAt: null
                     }
-                    // Only add dueDate if it exists (Firebase doesn't accept undefined)
+
+                    // Validate and add completedAt
+                    if (taskToSave.completedAt) {
+                      const completedDate = new Date(taskToSave.completedAt)
+                      if (!isNaN(completedDate.getTime())) {
+                        firebaseTask.completedAt = completedDate.toISOString()
+                      }
+                    }
+
+                    // Only add optional fields if they exist
+                    if (taskToSave.description) {
+                      firebaseTask.description = taskToSave.description
+                    }
+
+                    // Validate and add dueDate
                     if (taskToSave.dueDate) {
-                      firebaseTask.dueDate = new Date(taskToSave.dueDate).toISOString()
+                      const dueDate = new Date(taskToSave.dueDate)
+                      if (!isNaN(dueDate.getTime())) {
+                        firebaseTask.dueDate = dueDate.toISOString()
+                      }
+                    }
+
+                    if (taskToSave.category) {
+                      firebaseTask.category = taskToSave.category
                     }
                     return firebaseTask
                   })
@@ -451,13 +512,38 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
 
                   // Prepare tasks for Firebase (convert Date objects to ISO strings)
                   const tasksForFirebase = updatedTasks.map((task: any) => {
+                    // Build Firebase task object, excluding undefined values
                     const firebaseTask: any = {
-                      ...task,
-                      completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null
+                      id: task.id,
+                      title: task.title,
+                      completed: task.completed || false,
+                      priority: task.priority || 'medium',
+                      completedAt: null
                     }
-                    // Only add dueDate if it exists (Firebase doesn't accept undefined)
+
+                    // Validate and add completedAt
+                    if (task.completedAt) {
+                      const completedDate = new Date(task.completedAt)
+                      if (!isNaN(completedDate.getTime())) {
+                        firebaseTask.completedAt = completedDate.toISOString()
+                      }
+                    }
+
+                    // Only add optional fields if they exist
+                    if (task.description) {
+                      firebaseTask.description = task.description
+                    }
+
+                    // Validate and add dueDate
                     if (task.dueDate) {
-                      firebaseTask.dueDate = new Date(task.dueDate).toISOString()
+                      const dueDate = new Date(task.dueDate)
+                      if (!isNaN(dueDate.getTime())) {
+                        firebaseTask.dueDate = dueDate.toISOString()
+                      }
+                    }
+
+                    if (task.category) {
+                      firebaseTask.category = task.category
                     }
                     return firebaseTask
                   })

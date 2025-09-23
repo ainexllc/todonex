@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropicClient } from '@/lib/ai/anthropic-client'
+import { unifiedAIClient } from '@/lib/ai/unified-client'
 import { aiCache, templateCache } from '@/lib/ai/cache'
 
 interface TaskCreationRequest {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     }
 
     // AI request with Haiku for cost efficiency
-    const response = await anthropicClient.sendRequest({
+    const response = await unifiedAIClient.sendRequest({
       taskType: `task_${action}`,
       complexity: 'simple',
       userMessage: fullPrompt,
@@ -141,7 +141,7 @@ Example format:
 
 Maximum 8 tasks. Return only the JSON array, no other text.`
 
-    const response = await anthropicClient.sendRequest({
+    const response = await unifiedAIClient.sendRequest({
       taskType: 'task_breakdown',
       complexity: 'simple',
       userMessage: batchPrompt,

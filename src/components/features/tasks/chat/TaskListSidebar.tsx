@@ -10,6 +10,7 @@ import { ListTodo, Trash2, Edit3, Edit2, User, List, RefreshCw, CheckCircle, Che
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
+import { sortTasksByDueDate, getDueDateColorClass, formatCompactDueDate } from '@/lib/utils/task-sorting'
 
 interface Task {
   id: string
@@ -127,18 +128,18 @@ export function TaskListSidebar({
   )
 
   return (
-    <div className={cn("bg-gray-950 border-r border-gray-800 flex flex-col", className)}>
+    <div className={cn("bg-surface border-r border-default flex flex-col", className)}>
       {/* Sidebar Header - Compact Modern Design */}
-      <div className="border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
-        <div className="px-3 py-2 flex items-center justify-between">
-          <h2 className="text-[13px] font-medium text-gray-100 tracking-tight">My Lists</h2>
+      <div className="border-b border-subtle bg-elevated backdrop-blur-sm">
+        <div className="padding-sidebar flex items-center justify-between">
+          <h2 className="text-nav-label">My Lists</h2>
           <div className="flex items-center gap-1">
             {onCompletedClick && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onCompletedClick}
-                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+                className="h-6 w-6 p-0 text-secondary hover:text-primary hover-surface rounded-sm transition-default"
                 title="View completed tasks"
               >
                 <CheckCircle className="h-3 w-3" />
@@ -149,7 +150,7 @@ export function TaskListSidebar({
                 variant="ghost"
                 size="sm"
                 onClick={onRefresh}
-                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm transition-colors"
+                className="h-6 w-6 p-0 text-secondary hover:text-primary hover-surface rounded-sm transition-default"
                 title="Refresh lists"
               >
                 <RefreshCw className="h-3 w-3" />
@@ -159,11 +160,11 @@ export function TaskListSidebar({
         </div>
 
         {/* Minimal Stats Bar */}
-        <div className="flex items-center gap-3 px-3 pb-2">
-          <div className="flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <span className="text-[11px] text-gray-300">
-              <span className="font-medium text-green-400">{completedTasks}</span> Done
+        <div className="flex items-center gap-component padding-sidebar pb-2">
+          <div className="flex items-center gap-inline">
+            <div className="h-1.5 w-1.5 rounded-full priority-low"></div>
+            <span className="text-nav-secondary">
+              <span className="font-medium priority-low">{completedTasks}</span> Done
             </span>
           </div>
         </div>
@@ -171,12 +172,12 @@ export function TaskListSidebar({
 
       {/* Task Lists */}
       {!isCollapsed && (
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      <div className="flex-1 overflow-y-auto padding-card space-y-1">
         {taskLists.length === 0 ? (
-          <div className="text-center py-3">
-            <ListTodo className="h-8 w-8 mx-auto mb-1 text-gray-500" />
-            <p className="text-xs text-gray-300 mb-1">No lists yet</p>
-            <p className="text-[10px] text-gray-500">Use the chat to create your first list</p>
+          <div className="text-center padding-card">
+            <ListTodo className="h-8 w-8 mx-auto mb-1 text-secondary" />
+            <p className="text-body-sm text-primary mb-1">No lists yet</p>
+            <p className="text-caption">Use the chat to create your first list</p>
           </div>
         ) : (
           <>
@@ -188,16 +189,15 @@ export function TaskListSidebar({
                 <div
                   key={taskList.id}
                   className={cn(
-                    "group cursor-pointer transition-all duration-150 rounded-sm border overflow-hidden",
+                    "group cursor-pointer transition-default rounded-sm border overflow-hidden",
                     isSelected
-                      ? "border-blue-600/50 bg-gray-900/80 shadow-sm shadow-blue-600/10"
-                      : "border-gray-800/50 bg-gray-900/40 hover:bg-gray-900/60 hover:border-gray-700/50"
+                      ? "border-accent bg-elevated shadow-sm"
+                      : "border-subtle bg-elevated hover-surface hover:border-default"
                   )}
                   onClick={() => handleTaskListClick(taskList)}
                 >
-                  <div className="px-2.5 py-1.5 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <List className="h-3 w-3 text-gray-500 flex-shrink-0" />
+                  <div className="py-1.5 px-2 flex items-center justify-between">
+                    <div className="flex items-center gap-inline min-w-0 flex-1">
                       {editingListId === taskList.id ? (
                         <div className="flex items-center gap-1 flex-1">
                           <Input
@@ -210,7 +210,7 @@ export function TaskListSidebar({
                               if (e.key === 'Escape') handleCancelRename()
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            className="h-5 px-1 py-0 text-[11px] bg-gray-800 border-gray-700 text-gray-100"
+                            className="h-5 px-1 py-0 text-nav-secondary bg-elevated border-default text-primary"
                             autoFocus
                           />
                           <Button
@@ -220,7 +220,7 @@ export function TaskListSidebar({
                               e.stopPropagation()
                               handleSaveRename(taskList.id)
                             }}
-                            className="h-4 w-4 p-0 text-green-500 hover:text-green-400"
+                            className="h-4 w-4 p-0 priority-low hover:opacity-80"
                           >
                             <Check className="h-2.5 w-2.5" />
                           </Button>
@@ -231,24 +231,24 @@ export function TaskListSidebar({
                               e.stopPropagation()
                               handleCancelRename()
                             }}
-                            className="h-4 w-4 p-0 text-red-500 hover:text-red-400"
+                            className="h-4 w-4 p-0 priority-high hover:opacity-80"
                           >
                             <XCircle className="h-2.5 w-2.5" />
                           </Button>
                         </div>
                       ) : (
-                        <span className="text-[12px] font-medium truncate text-gray-100">
+                        <span className="text-nav-label font-medium text-primary whitespace-nowrap overflow-visible">
                           {taskList.title}
                         </span>
                       )}
                     </div>
                     {editingListId !== taskList.id && (
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+                      <div className="flex items-center gap-inline opacity-0 group-hover:opacity-100 transition-default">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={(e) => handleStartRename(e, taskList)}
-                          className="h-5 w-5 p-0 text-gray-500 hover:text-gray-300 hover:bg-gray-800/50 rounded-sm"
+                          className="h-5 w-5 p-0 text-secondary hover:text-primary hover-surface rounded-sm"
                           title="Rename list"
                         >
                           <Edit2 className="h-2.5 w-2.5" />
@@ -257,7 +257,7 @@ export function TaskListSidebar({
                           variant="ghost"
                           size="sm"
                           onClick={(e) => handleDeleteTaskList(e, taskList)}
-                          className="h-5 w-5 p-0 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm"
+                          className="h-5 w-5 p-0 text-secondary hover:priority-high hover-surface rounded-sm"
                           title="Delete list"
                         >
                           <Trash2 className="h-2.5 w-2.5" />
@@ -268,27 +268,37 @@ export function TaskListSidebar({
 
                   {/* Task preview and stats */}
                   {taskList.tasks.length > 0 && (
-                    <div className="px-2.5 pb-1.5">
+                    <div className="px-2 py-1 pb-1.5">
                       <div className="space-y-0.5">
-                        {taskList.tasks.slice(0, 5).map((task) => (
+                        {sortTasksByDueDate(taskList.tasks).slice(0, 5).map((task) => (
                           <div
                             key={task.id}
-                            className="flex items-center gap-1.5 text-[10px]"
+                            className="flex items-center justify-between gap-1 text-caption"
                           >
-                            <div className={cn(
-                              "h-1 w-1 rounded-full flex-shrink-0",
-                              task.completed ? "bg-green-500" : "bg-blue-500"
-                            )} />
-                            <span className={cn(
-                              "truncate",
-                              task.completed ? "text-gray-500 line-through" : "text-gray-400"
-                            )}>
-                              {task.title}
-                            </span>
+                            <div className="flex items-center gap-inline flex-1 min-w-0">
+                              <div className={cn(
+                                "h-1 w-1 rounded-full flex-shrink-0",
+                                task.completed ? "priority-low" : "text-accent"
+                              )} />
+                              <span className={cn(
+                                "truncate flex-1",
+                                task.completed ? "text-secondary line-through" : "text-muted"
+                              )}>
+                                {task.title}
+                              </span>
+                            </div>
+                            {task.dueDate && !task.completed && (
+                              <span className={cn(
+                                "text-[10px] flex-shrink-0",
+                                getDueDateColorClass(task.dueDate)
+                              )}>
+                                {formatCompactDueDate(task.dueDate)}
+                              </span>
+                            )}
                           </div>
                         ))}
                         {taskList.tasks.length > 5 && (
-                          <div className="text-[9px] text-gray-500 pl-2.5">
+                          <div className="text-caption text-muted pl-2.5">
                             +{taskList.tasks.length - 5} more
                           </div>
                         )}
@@ -298,8 +308,8 @@ export function TaskListSidebar({
 
                   {/* Task count bar */}
                   {taskList.tasks.length > 0 && completedCount > 0 && (
-                    <div className="px-2.5 pb-1.5 flex items-center gap-2 text-[9px]">
-                      <span className="text-green-500/70">
+                    <div className="px-2 py-1 pb-1.5 flex items-center gap-component text-caption">
+                      <span className="priority-low opacity-70">
                         {completedCount} done
                       </span>
                     </div>
@@ -313,12 +323,12 @@ export function TaskListSidebar({
       )}
 
       {/* Collapse/Expand Button - Ultra Compact */}
-      <div className="border-t border-gray-800/50">
+      <div className="border-t border-subtle">
         <Button
           variant="ghost"
           size="sm"
           onClick={onCollapse}
-          className="w-full h-5 flex items-center justify-center text-[11px] font-mono text-gray-500 hover:text-gray-200 hover:bg-gray-800/50 transition-colors"
+          className="w-full h-5 flex items-center justify-center text-nav-secondary font-mono text-secondary hover:text-primary hover-surface transition-default"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? ">>" : "<<"}
@@ -326,9 +336,9 @@ export function TaskListSidebar({
       </div>
 
       {/* Sidebar Footer - Compact */}
-      <div className="px-3 py-2 border-t border-gray-800/50 bg-gray-900/50">
+      <div className="padding-sidebar border-t border-subtle bg-elevated">
         {user && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-component">
             {/* Profile Picture or Avatar */}
             <div className="relative flex-shrink-0">
               {user.photoURL ? (
@@ -338,7 +348,7 @@ export function TaskListSidebar({
                   className="w-5 h-5 rounded-sm"
                 />
               ) : (
-                <div className="w-5 h-5 rounded-sm bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-[9px] font-medium">
+                <div className="w-5 h-5 rounded-sm bg-accent flex items-center justify-center text-accent-foreground text-caption font-medium">
                   {getUserInitials(user.displayName || '', user.email || '')}
                 </div>
               )}
@@ -346,10 +356,10 @@ export function TaskListSidebar({
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] font-medium text-gray-200 truncate">
+              <div className="text-nav-label font-medium text-primary truncate">
                 {user.displayName || user.email?.split('@')[0] || 'User'}
               </div>
-              <div className="text-[9px] text-gray-500 truncate">
+              <div className="text-caption text-secondary truncate">
                 {user.email}
               </div>
             </div>
@@ -363,7 +373,7 @@ export function TaskListSidebar({
                 const { auth } = await import('@/lib/firebase')
                 await signOut(auth)
               }}
-              className="h-6 w-6 p-0 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-sm transition-colors"
+              className="h-6 w-6 p-0 text-secondary hover:priority-high hover-surface rounded-sm transition-default"
               title="Logout"
             >
               <LogOut className="h-3 w-3" />

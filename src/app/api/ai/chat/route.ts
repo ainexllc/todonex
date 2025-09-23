@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropicClient } from '@/lib/ai/anthropic-client'
+import { unifiedAIClient } from '@/lib/ai/unified-client'
 import { aiCache, shouldCache, getCacheDuration } from '@/lib/ai/cache'
 import { FeatureType, SYSTEM_PROMPTS } from '@/lib/ai/types'
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Make AI request
-    const aiResponse = await anthropicClient.sendRequest({
+    const aiResponse = await unifiedAIClient.sendRequest({
       taskType,
       complexity: 'simple',
       userMessage: message,

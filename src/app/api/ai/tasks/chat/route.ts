@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropicClient } from '@/lib/ai/anthropic-client'
+import { unifiedAIClient } from '@/lib/ai/unified-client'
 
 interface Task {
   id: string
@@ -244,10 +244,10 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
 
     const fullPrompt = `${message}${taskContext}${conversationContext}`
 
-    // Get AI response
-    const response = await anthropicClient.sendRequest({
+    // Get AI response using Grok as primary
+    const response = await unifiedAIClient.sendRequest({
       taskType: 'task-chat',
-      complexity: 'complex', // Use Sonnet for better task reasoning
+      complexity: 'complex', // Use primary model for better task reasoning
       userMessage: fullPrompt,
       systemPrompt,
       maxTokens: 1000,

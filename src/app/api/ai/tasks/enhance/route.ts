@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropicClient, AI_MODELS } from '@/lib/ai/anthropic-client'
+import { unifiedAIClient } from '@/lib/ai/unified-client'
 
 // Rate limiting store (in production, use Redis)
 const rateLimits = new Map<string, { count: number; resetTime: number }>()
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     
     const prompt = TASK_ENHANCEMENT_PROMPT.replace('{title}', taskTitle)
     
-    const response = await anthropicClient.sendRequest({
+    const response = await unifiedAIClient.sendRequest({
       taskType: 'task-enhancement',
       complexity: 'simple',
       userMessage: prompt,
