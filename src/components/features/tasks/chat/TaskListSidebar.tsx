@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { DeleteDialog } from '@/components/ui/delete-dialog'
-import { ListTodo, Trash2, Edit3, Edit2, User, List, RefreshCw, CheckCircle, ChevronLeft, ChevronRight, LogOut, Check, XCircle, Search } from 'lucide-react'
+import { ListTodo, Trash2, Edit3, Edit2, User, List, RefreshCw, CheckCircle, ChevronLeft, ChevronRight, LogOut, Check, XCircle, Search, Calendar, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
+import { format, isToday, isTomorrow, isYesterday, parseISO, startOfDay } from 'date-fns'
 import { useAuthStore } from '@/store/auth-store'
 
 interface Task {
@@ -35,6 +35,7 @@ interface TaskListSidebarProps {
   onTaskListSelect: (taskList: TaskList | null) => void
   onTaskListDelete: (taskListId: string) => void
   onTaskListRename?: (taskListId: string, newTitle: string) => void
+  onTaskDelete?: (taskListId: string, taskId: string) => void
   onRefresh?: () => void
   onCompletedClick?: () => void
   onCollapse?: () => void
@@ -49,6 +50,7 @@ export function TaskListSidebar({
   onTaskListSelect,
   onTaskListDelete,
   onTaskListRename,
+  onTaskDelete,
   onRefresh,
   onCompletedClick,
   onCollapse,
@@ -63,6 +65,7 @@ export function TaskListSidebar({
   }>({ isOpen: false, taskList: null })
   const [editingListId, setEditingListId] = useState<string | null>(null)
   const [editedTitle, setEditedTitle] = useState('')
+  const [viewMode, setViewMode] = useState<'lists' | 'dates'>('dates') // Default to date view
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -128,6 +131,68 @@ export function TaskListSidebar({
     total + list.tasks.filter(task => task.completed).length, 0
   )
 
+  // Group all tasks by due date
+  const getTasksByDueDate = () => {
+    const allTasks: (Task & { listId: string; listTitle: string })[] = []
+
+    // Collect all tasks from all lists with their source list info
+    taskLists.forEach(list => {
+      list.tasks.forEach(task => {
+        if (task.dueDate && !task.completed) { // Only show uncompleted tasks with due dates
+          allTasks.push({
+            ...task,
+            listId: list.id,
+            listTitle: list.title
+          })
+        }
+      })
+    })
+
+    // Group tasks by due date
+    const groupedTasks: Record<string, (Task & { listId: string; listTitle: string })[]> = {}
+
+    allTasks.forEach(task => {
+      if (task.dueDate) {
+        const dueDate = new Date(task.dueDate)
+        const dateKey = startOfDay(dueDate).toISOString()
+
+        if (!groupedTasks[dateKey]) {
+          groupedTasks[dateKey] = []
+        }
+        groupedTasks[dateKey].push(task)
+      }
+    })
+
+    // Sort dates and return with formatted labels
+    return Object.entries(groupedTasks)
+      .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+      .map(([dateKey, tasks]) => {
+        const date = new Date(dateKey)
+        let label = ''
+
+        if (isToday(date)) {
+          label = 'TODAY'
+        } else if (isTomorrow(date)) {
+          label = 'TOMORROW'
+        } else if (isYesterday(date)) {
+          label = 'YESTERDAY'
+        } else {
+          label = format(date, 'EEEE MMMM d').toUpperCase()
+        }
+
+        return {
+          dateKey,
+          date,
+          label,
+          tasks: tasks.sort((a, b) => {
+            // Sort by priority (high, medium, low)
+            const priorityOrder = { high: 3, medium: 2, low: 1 }
+            return (priorityOrder[b.priority] || 2) - (priorityOrder[a.priority] || 2)
+          })
+        }
+      })
+  }
+
   return (
     <div className={cn(
       "bg-gray-950 flex flex-col h-full overflow-hidden",
@@ -150,6 +215,23 @@ export function TaskListSidebar({
             NextTaskPro
           </div>
           <div className="flex items-center gap-1">
+            {/* View Mode Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode(viewMode === 'lists' ? 'dates' : 'lists')}
+              className={cn(
+                "p-0 hover:text-gray-100 hover:bg-gray-800/50 rounded-sm transition-colors",
+                isMobile ? "h-8 w-8 text-gray-200" : "h-6 w-6 text-gray-400"
+              )}
+              title={viewMode === 'lists' ? 'View by due dates' : 'View by lists'}
+            >
+              {viewMode === 'lists' ? (
+                <Calendar className={isMobile ? "h-5 w-5" : "h-3 w-3"} />
+              ) : (
+                <List className={isMobile ? "h-5 w-5" : "h-3 w-3"} />
+              )}
+            </Button>
             {isMobile && (
               <Button
                 variant="ghost"
@@ -204,194 +286,313 @@ export function TaskListSidebar({
         )}
       </div>
 
-      {/* Task Lists */}
+      {/* Content Area - Either Lists or Dates */}
       {(!isCollapsed || isMobile) && (
       <div className={cn(
         "flex-1 overflow-y-auto min-h-0",
         isMobile ? "p-1.5 space-y-0.5" : "p-2 space-y-1"
       )}>
-        {taskLists.length === 0 ? (
-          <div className={cn(
-            "text-center",
-            isMobile ? "py-6" : "py-3"
-          )}>
-            <ListTodo className={cn(
-              "mx-auto mb-1",
-              isMobile ? "h-8 w-8 mb-2 text-gray-300" : "h-8 w-8 text-gray-400"
-            )} />
-            <p className={cn(
-              "text-gray-300 mb-1",
-              isMobile ? "text-xs" : "text-xs"
-            )}>No lists yet</p>
-            <p className={cn(
-              "text-gray-500",
-              isMobile ? "text-[10px]" : "text-[10px]"
-            )}>Use the chat to create your first list</p>
-          </div>
-        ) : (
-          <>
-            {taskLists.map((taskList) => {
-              const completedCount = taskList.tasks.filter(task => task.completed).length
-              const totalCount = taskList.tasks.length
-              const isSelected = selectedTaskListId === taskList.id
-
-              return (
-                <div
-                  key={taskList.id}
-                  className={cn(
-                    "group cursor-pointer transition-all duration-150 rounded-md border overflow-hidden",
-                    isSelected
-                      ? "border-blue-500/60 bg-blue-950/30 shadow-sm shadow-blue-500/20"
-                      : "border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/40 hover:border-gray-700/60",
-                    isMobile && "mx-1 active:scale-[0.98]"
-                  )}
-                  onClick={() => {
-                    handleTaskListClick(taskList)
-                    // Close mobile drawer when selecting a task list
-                    if (isMobile && onCollapse) {
-                      onCollapse()
-                    }
-                  }}
-                >
+        {/* Date View */}
+        {viewMode === 'dates' && (() => {
+          const tasksByDate = getTasksByDueDate()
+          return tasksByDate.length === 0 ? (
+            <div className={cn(
+              "text-center",
+              isMobile ? "py-6" : "py-3"
+            )}>
+              <Clock className={cn(
+                "mx-auto mb-1",
+                isMobile ? "h-8 w-8 mb-2 text-gray-300" : "h-8 w-8 text-gray-400"
+              )} />
+              <p className={cn(
+                "text-gray-300 mb-1",
+                isMobile ? "text-xs" : "text-xs"
+              )}>No upcoming due dates</p>
+              <p className={cn(
+                "text-gray-500",
+                isMobile ? "text-[10px]" : "text-[10px]"
+              )}>Tasks with due dates will appear here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tasksByDate.map(({ dateKey, date, label, tasks }) => (
+                <div key={dateKey} className="space-y-1">
+                  {/* Date Header */}
                   <div className={cn(
-                    "flex items-center justify-between",
-                    isMobile ? "px-2 py-1.5" : "px-2.5 py-1.5"
+                    "flex items-center gap-2 px-2 py-1 border-b border-gray-800/30",
+                    isMobile ? "text-xs" : "text-[11px]"
                   )}>
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <List className={cn(
-                        "flex-shrink-0",
-                        isMobile ? "h-5 w-5 text-gray-200" : "h-3 w-3 text-gray-400"
-                      )} />
-                      {editingListId === taskList.id ? (
-                        <div className="flex items-center gap-1 flex-1">
-                          <Input
-                            type="text"
-                            value={editedTitle}
-                            onChange={(e) => setEditedTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              e.stopPropagation()
-                              if (e.key === 'Enter') handleSaveRename(taskList.id)
-                              if (e.key === 'Escape') handleCancelRename()
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="h-5 px-1 py-0 text-[11px] bg-gray-800/80 border-gray-700 text-gray-100"
-                            autoFocus
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleSaveRename(taskList.id)
-                            }}
-                            className="h-4 w-4 p-0 text-green-400 hover:text-green-300"
-                          >
-                            <Check className="h-2.5 w-2.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleCancelRename()
-                            }}
-                            className="h-4 w-4 p-0 text-red-400 hover:text-red-300"
-                          >
-                            <XCircle className="h-2.5 w-2.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          <span className={cn(
-                            "font-medium truncate text-gray-100 flex-1",
-                            isMobile ? "text-xs" : "text-[12px]"
-                          )}>
-                            {taskList.title}
-                          </span>
-                          {totalCount > 0 && (
-                            <span className={cn(
-                              "text-gray-500 flex-shrink-0",
-                              isMobile ? "text-[10px]" : "text-[10px]"
-                            )}>
-                              {completedCount}/{totalCount}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {editingListId !== taskList.id && (
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => handleStartRename(e, taskList)}
-                          className={cn(
-                            "p-0 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm",
-                            isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
-                          )}
-                          title="Rename list"
-                        >
-                          <Edit2 className={isMobile ? "h-4 w-4" : "h-2.5 w-2.5"} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => handleDeleteTaskList(e, taskList)}
-                          className={cn(
-                            "p-0 hover:text-red-400 hover:bg-red-900/20 rounded-sm",
-                            isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
-                          )}
-                          title="Delete list"
-                        >
-                          <Trash2 className={isMobile ? "h-4 w-4" : "h-2.5 w-2.5"} />
-                        </Button>
-                      </div>
-                    )}
+                    <Calendar className={cn(
+                      "text-blue-400",
+                      isMobile ? "h-4 w-4" : "h-3 w-3"
+                    )} />
+                    <span className="font-semibold text-gray-200 uppercase tracking-wide">
+                      {label}
+                    </span>
+                    <span className="text-gray-500 text-[9px]">
+                      {tasks.length} task{tasks.length !== 1 ? 's' : ''}
+                    </span>
                   </div>
 
-                  {/* Task preview and stats - More compact on mobile */}
-                  {taskList.tasks.length > 0 && (
-                    <div className={cn(
-                      isMobile ? "px-2 pb-1" : "px-2.5 pb-1.5"
-                    )}>
-                      <div className="space-y-0.5">
-                        {taskList.tasks.slice(0, isMobile ? 3 : 5).map((task) => (
-                          <div
-                            key={task.id}
-                            className="flex items-center gap-1.5 text-[10px]"
-                          >
-                            <div className={cn(
-                              "h-1 w-1 rounded-full flex-shrink-0",
-                              task.completed ? "bg-green-500" : "bg-blue-500"
-                            )} />
+                  {/* Tasks for this date */}
+                  {tasks.map((task) => (
+                    <div
+                      key={`${task.listId}-${task.id}`}
+                      className={cn(
+                        "group cursor-pointer transition-all duration-150 rounded-sm border overflow-hidden",
+                        "border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/40 hover:border-gray-700/60",
+                        isMobile && "mx-1 active:scale-[0.98]"
+                      )}
+                      onClick={() => {
+                        // Find and select the task list containing this task
+                        const taskList = taskLists.find(list => list.id === task.listId)
+                        if (taskList) {
+                          handleTaskListClick(taskList)
+                          if (isMobile && onCollapse) {
+                            onCollapse()
+                          }
+                        }
+                      }}
+                    >
+                      <div className={cn(
+                        "flex items-center justify-between",
+                        isMobile ? "px-2 py-1.5" : "px-2.5 py-1.5"
+                      )}>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <div className={cn(
+                            "h-2 w-2 rounded-full flex-shrink-0",
+                            task.priority === 'high' ? "bg-red-500" :
+                            task.priority === 'medium' ? "bg-yellow-500" :
+                            "bg-green-500"
+                          )} />
+                          <div className="flex flex-col min-w-0 flex-1">
                             <span className={cn(
-                              "truncate",
-                              task.completed ? "text-gray-500 line-through" : "text-gray-400"
+                              "font-medium truncate text-gray-100",
+                              isMobile ? "text-xs" : "text-[12px]"
                             )}>
                               {task.title}
                             </span>
+                            <span className={cn(
+                              "text-gray-500 truncate",
+                              isMobile ? "text-[9px]" : "text-[9px]"
+                            )}>
+                              from {task.listTitle}
+                            </span>
                           </div>
-                        ))}
-                        {taskList.tasks.length > (isMobile ? 3 : 5) && (
-                          <div className="text-[9px] text-gray-500 pl-2">
-                            +{taskList.tasks.length - (isMobile ? 3 : 5)} more
-                          </div>
+                        </div>
+                        {onTaskDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onTaskDelete(task.listId, task.id)
+                            }}
+                            className={cn(
+                              "p-0 hover:text-red-400 hover:bg-red-900/20 rounded-sm opacity-0 group-hover:opacity-100 transition-all",
+                              isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
+                            )}
+                            title="Delete task"
+                          >
+                            <Trash2 className={isMobile ? "h-4 w-4" : "h-2.5 w-2.5"} />
+                          </Button>
                         )}
                       </div>
                     </div>
-                  )}
-
-                  {/* Task count bar - Hide on mobile for space */}
-                  {!isMobile && taskList.tasks.length > 0 && completedCount > 0 && (
-                    <div className="px-2.5 pb-1.5 flex items-center gap-2 text-[9px]">
-                      <span className="text-green-500/70">
-                        {completedCount} done
-                      </span>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              )
-            })}
+              ))}
+            </div>
+          )
+        })()}
+
+        {/* List View */}
+        {viewMode === 'lists' && (
+          <>
+            {taskLists.length === 0 ? (
+              <div className={cn(
+                "text-center",
+                isMobile ? "py-6" : "py-3"
+              )}>
+                <ListTodo className={cn(
+                  "mx-auto mb-1",
+                  isMobile ? "h-8 w-8 mb-2 text-gray-300" : "h-8 w-8 text-gray-400"
+                )} />
+                <p className={cn(
+                  "text-gray-300 mb-1",
+                  isMobile ? "text-xs" : "text-xs"
+                )}>No lists yet</p>
+                <p className={cn(
+                  "text-gray-500",
+                  isMobile ? "text-[10px]" : "text-[10px]"
+                )}>Use the chat to create your first list</p>
+              </div>
+            ) : (
+              <>
+                {taskLists.map((taskList) => {
+                  const completedCount = taskList.tasks.filter(task => task.completed).length
+                  const totalCount = taskList.tasks.length
+                  const isSelected = selectedTaskListId === taskList.id
+
+                  return (
+                    <div
+                      key={taskList.id}
+                      className={cn(
+                        "group cursor-pointer transition-all duration-150 rounded-md border overflow-hidden",
+                        isSelected
+                          ? "border-blue-500/60 bg-blue-950/30 shadow-sm shadow-blue-500/20"
+                          : "border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/40 hover:border-gray-700/60",
+                        isMobile && "mx-1 active:scale-[0.98]"
+                      )}
+                      onClick={() => {
+                        handleTaskListClick(taskList)
+                        // Close mobile drawer when selecting a task list
+                        if (isMobile && onCollapse) {
+                          onCollapse()
+                        }
+                      }}
+                    >
+                      <div className={cn(
+                        "flex items-center justify-between",
+                        isMobile ? "px-2 py-1.5" : "px-2.5 py-1.5"
+                      )}>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <List className={cn(
+                            "flex-shrink-0",
+                            isMobile ? "h-5 w-5 text-gray-200" : "h-3 w-3 text-gray-400"
+                          )} />
+                          {editingListId === taskList.id ? (
+                            <div className="flex items-center gap-1 flex-1">
+                              <Input
+                                type="text"
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                onKeyDown={(e) => {
+                                  e.stopPropagation()
+                                  if (e.key === 'Enter') handleSaveRename(taskList.id)
+                                  if (e.key === 'Escape') handleCancelRename()
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-5 px-1 py-0 text-[11px] bg-gray-800/80 border-gray-700 text-gray-100"
+                                autoFocus
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleSaveRename(taskList.id)
+                                }}
+                                className="h-4 w-4 p-0 text-green-400 hover:text-green-300"
+                              >
+                                <Check className="h-2.5 w-2.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleCancelRename()
+                                }}
+                                className="h-4 w-4 p-0 text-red-400 hover:text-red-300"
+                              >
+                                <XCircle className="h-2.5 w-2.5" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                              <span className={cn(
+                                "font-medium truncate text-gray-100 flex-1",
+                                isMobile ? "text-xs" : "text-[12px]"
+                              )}>
+                                {taskList.title}
+                              </span>
+                              {totalCount > 0 && (
+                                <span className={cn(
+                                  "text-gray-500 flex-shrink-0",
+                                  isMobile ? "text-[10px]" : "text-[10px]"
+                                )}>
+                                  {completedCount}/{totalCount}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {editingListId !== taskList.id && (
+                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleStartRename(e, taskList)}
+                              className={cn(
+                                "p-0 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm",
+                                isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
+                              )}
+                              title="Rename list"
+                            >
+                              <Edit2 className={isMobile ? "h-4 w-4" : "h-2.5 w-2.5"} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleDeleteTaskList(e, taskList)}
+                              className={cn(
+                                "p-0 hover:text-red-400 hover:bg-red-900/20 rounded-sm",
+                                isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
+                              )}
+                              title="Delete list"
+                            >
+                              <Trash2 className={isMobile ? "h-4 w-4" : "h-2.5 w-2.5"} />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Task preview and stats - More compact on mobile */}
+                      {taskList.tasks.length > 0 && (
+                        <div className={cn(
+                          isMobile ? "px-2 pb-1" : "px-2.5 pb-1.5"
+                        )}>
+                          <div className="space-y-0.5">
+                            {taskList.tasks.slice(0, isMobile ? 3 : 5).map((task) => (
+                              <div
+                                key={task.id}
+                                className="flex items-center gap-1.5 text-[10px]"
+                              >
+                                <div className={cn(
+                                  "h-1 w-1 rounded-full flex-shrink-0",
+                                  task.completed ? "bg-green-500" : "bg-blue-500"
+                                )} />
+                                <span className={cn(
+                                  "truncate",
+                                  task.completed ? "text-gray-500 line-through" : "text-gray-400"
+                                )}>
+                                  {task.title}
+                                </span>
+                              </div>
+                            ))}
+                            {taskList.tasks.length > (isMobile ? 3 : 5) && (
+                              <div className="text-[9px] text-gray-500 pl-2">
+                                +{taskList.tasks.length - (isMobile ? 3 : 5)} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Task count bar - Hide on mobile for space */}
+                      {!isMobile && taskList.tasks.length > 0 && completedCount > 0 && (
+                        <div className="px-2.5 pb-1.5 flex items-center gap-2 text-[9px]">
+                          <span className="text-green-500/70">
+                            {completedCount} done
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </>
+            )}
           </>
         )}
       </div>

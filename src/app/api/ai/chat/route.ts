@@ -124,11 +124,12 @@ export async function POST(req: NextRequest) {
 // Health check endpoint
 export async function GET() {
   try {
-    const isHealthy = await anthropicClient.healthCheck()
+    const healthStatus = await unifiedAIClient.healthCheck()
     const cacheStats = aiCache.getStats()
-    
+
     return NextResponse.json({
-      status: isHealthy ? 'healthy' : 'unhealthy',
+      status: healthStatus.overall ? 'healthy' : 'unhealthy',
+      providers: healthStatus,
       cache: cacheStats,
       timestamp: new Date().toISOString(),
     })

@@ -3,9 +3,9 @@ import { generateText, streamText } from 'ai'
 
 // Grok model configuration
 export const GROK_MODELS = {
-  FAST_REASONING: 'grok-4-fast-non-reasoning',  // Primary fast model (as requested)
-  FALLBACK: 'grok-2-1212',                      // Fallback model
-  BETA: 'grok-beta',                           // Beta version
+  FAST: 'grok-2-1212',          // Primary fast model
+  BETA: 'grok-beta',            // Beta version
+  VISION_BETA: 'grok-vision-beta', // Vision model
 } as const
 
 export type GrokModel = typeof GROK_MODELS[keyof typeof GROK_MODELS]
@@ -36,8 +36,9 @@ export interface GrokResponse {
 
 // Cost tracking per model (estimated - adjust based on actual xAI pricing)
 const GROK_MODEL_COSTS = {
-  [GROK_MODELS.FAST_REASONING]: { input: 2.0, output: 8.0 }, // Estimated pricing per million tokens
+  [GROK_MODELS.FAST]: { input: 2.0, output: 8.0 }, // Estimated pricing per million tokens
   [GROK_MODELS.BETA]: { input: 1.5, output: 6.0 },
+  [GROK_MODELS.VISION_BETA]: { input: 2.0, output: 8.0 },
 }
 
 class GrokClient {
@@ -55,9 +56,9 @@ class GrokClient {
    * Smart model selection based on task complexity
    */
   private selectModel(config: GrokRequestConfig): GrokModel {
-    // For now, use fast reasoning for all tasks since it's our primary model
+    // Use the fast model for all tasks as primary
     // Can be enhanced later based on performance and cost analysis
-    return GROK_MODELS.FAST_REASONING
+    return GROK_MODELS.FAST
   }
 
   /**

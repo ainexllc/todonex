@@ -6,6 +6,7 @@ export const UNIFIED_MODELS = {
   // Primary models (Grok)
   GROK_FAST: 'grok-2-1212',
   GROK_BETA: 'grok-beta',
+  GROK_VISION: 'grok-vision-beta',
   // Fallback models (Anthropic)
   CLAUDE_HAIKU: 'claude-3-haiku-20240307',
   CLAUDE_SONNET: 'claude-3-5-sonnet-20241022',
@@ -40,6 +41,7 @@ export interface UnifiedResponse {
 const UNIFIED_MODEL_COSTS = {
   [UNIFIED_MODELS.GROK_FAST]: { input: 2.0, output: 8.0 },
   [UNIFIED_MODELS.GROK_BETA]: { input: 1.5, output: 6.0 },
+  [UNIFIED_MODELS.GROK_VISION]: { input: 2.0, output: 8.0 },
   [UNIFIED_MODELS.CLAUDE_HAIKU]: { input: 0.25, output: 1.25 },
   [UNIFIED_MODELS.CLAUDE_SONNET]: { input: 3, output: 15 },
 }
@@ -253,7 +255,7 @@ class UnifiedAIClient {
       primary: 'Grok (grok-2-1212)',
       fallback: 'Anthropic Claude',
       models: {
-        grok: [UNIFIED_MODELS.GROK_FAST, UNIFIED_MODELS.GROK_BETA],
+        grok: [UNIFIED_MODELS.GROK_FAST, UNIFIED_MODELS.GROK_BETA, UNIFIED_MODELS.GROK_VISION],
         anthropic: [UNIFIED_MODELS.CLAUDE_HAIKU, UNIFIED_MODELS.CLAUDE_SONNET],
       }
     }
