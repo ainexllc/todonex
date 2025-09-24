@@ -39,7 +39,10 @@ interface TaskEnhanceRequest {
   }
 }
 
-const TASK_ENHANCEMENT_PROMPT = `You are a task management expert that helps users create better, more actionable tasks. 
+const TASK_ENHANCEMENT_PROMPT = `You are a task management expert that helps users create better, more actionable tasks.
+
+CURRENT DATE CONTEXT:
+Today is {currentDate} ({currentDateISO})
 
 Analyze the given task title and provide helpful enhancements. Respond with valid JSON only.
 
@@ -74,14 +77,25 @@ Guidelines:
 - Suggest realistic time estimates
 - Only include applicable fields
 - Be concise but helpful
-- Focus on productivity and success`
+- Focus on productivity and success
+
+DATE CALCULATION RULES:
+- When users mention relative dates like "this Friday", "next Monday", "tomorrow", calculate the actual date based on today's date
+- For "this Friday": find the next Friday from today
+- For "next week": add 7 days to the equivalent day next week
+- For "tomorrow": add 1 day to today
+- Always use YYYY-MM-DD format for suggestedDueDate
+- If no specific date is mentioned, leave suggestedDueDate empty`
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate API key exists
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // Validate at least one AI provider is configured
+    const hasAnthropic = !!process.env.ANTHROPIC_API_KEY
+    const hasXAI = !!process.env.XAI_API_KEY
+
+    if (!hasAnthropic && !hasXAI) {
       return NextResponse.json(
-        { error: 'AI service configuration error' },
+        { error: 'AI service configuration error - no API keys configured' },
         { status: 500 }
       )
     }
@@ -112,12 +126,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use Claude Haiku for cost efficiency
+    // Use unified AI client with x.ai preference for cost efficiency
     const startTime = Date.now()
-    
-    const prompt = TASK_ENHANCEMENT_PROMPT.replace('{title}', taskTitle)
-    
+
+    // Get current date context for accurate date calculations
+    const now = new Date()
+    const currentDate = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    const currentDateISO = now.toISOString().split('T')[0] // YYYY-MM-DD format
+
+    const prompt = TASK_ENHANCEMENT_PROMPT
+      .replace('{title}', taskTitle)
+      .replace('{currentDate}', currentDate)
+      .replace('{currentDateISO}', currentDateISO)
+
     const response = await unifiedAIClient.sendRequest({
+      provider: 'xai', // Prefer x.ai for this task
       taskType: 'task-enhancement',
       complexity: 'simple',
       userMessage: prompt,
@@ -155,6 +183,7 @@ export async function POST(request: NextRequest) {
       ...validatedEnhancement,
       _meta: {
         model: response.model,
+        provider: response.provider,
         responseTime,
         inputTokens: response.tokensUsed.input,
         outputTokens: response.tokensUsed.output,
@@ -271,10 +300,23 @@ function validateEnhancement(enhancement: any) {
 
 // Health check endpoint
 export async function GET() {
-  return NextResponse.json({
-    status: 'healthy',
-    service: 'task-enhancement',
-    model: AI_MODELS.HAIKU,
-    timestamp: new Date().toISOString()
-  })
+  try {
+    const health = await unifiedAIClient.healthCheck()
+
+    return NextResponse.json({
+      status: 'healthy',
+      service: 'task-enhancement',
+      availableProviders: unifiedAIClient.getAvailableProviders(),
+      defaultProvider: unifiedAIClient.getDefaultProvider(),
+      health,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    return NextResponse.json({
+      status: 'unhealthy',
+      service: 'task-enhancement',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, { status: 500 })
+  }
 }

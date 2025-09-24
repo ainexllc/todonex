@@ -60,13 +60,8 @@ export function TaskViewModal({ task, onClose, onEdit }: TaskViewModalProps) {
     if (!date) return null
     const dateObj = date instanceof Date ? date : new Date(date)
     if (isNaN(dateObj.getTime())) return null
-    
-    return dateObj.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+
+    return `${dateObj.getUTCMonth() + 1}/${dateObj.getUTCDate()}`
   }
 
   const formatRecurringPattern = (task: Task) => {

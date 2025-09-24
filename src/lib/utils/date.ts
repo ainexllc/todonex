@@ -19,22 +19,17 @@ export function getCurrentUserDate(): string {
  */
 export function formatDisplayDate(date: Date | null | undefined, options?: Intl.DateTimeFormatOptions): string {
   if (!date) return 'No date'
-  
+
   // Convert Firebase Timestamp to Date if needed
   const dateObj = date instanceof Date ? date : new Date(date)
-  
+
   // Check if date is valid
   if (isNaN(dateObj.getTime())) {
     return 'Invalid date'
   }
-  
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: dateObj.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-  }
-  
-  return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(dateObj)
+
+  // Use simple M/D format by default (use UTC to avoid timezone issues)
+  return `${dateObj.getUTCMonth() + 1}/${dateObj.getUTCDate()}`
 }
 
 /**

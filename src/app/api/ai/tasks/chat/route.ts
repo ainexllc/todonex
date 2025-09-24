@@ -49,8 +49,23 @@ export async function POST(request: NextRequest) {
         ).join('\n')}`
       : ''
 
+    // Get current date and format it for the AI
+    const now = new Date()
+    const today = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    const currentDate = now.toISOString().split('T')[0] // YYYY-MM-DD format
+
     // Create system prompt for task-focused AI
-    const systemPrompt = `You are a specialized task management assistant. Your role is STRICTLY LIMITED to:
+    const systemPrompt = `You are a specialized task management assistant.
+
+CURRENT DATE CONTEXT:
+Today is ${today} (${currentDate})
+
+Your role is STRICTLY LIMITED to:
 
 1. Help users create, update, and organize tasks naturally through conversation
 2. Provide smart suggestions for task improvement and organization
@@ -184,6 +199,15 @@ RESPONSE RULES:
 - Maximum 2-3 sentences of conversational text before the JSON (unless asking for disambiguation)
 - Always include actionable task suggestions
 - When asking for disambiguation, provide a clear question and list options - DO NOT include JSON structure
+
+DATE CALCULATION RULES - CRITICAL:
+When users mention relative dates, calculate the actual date based on today's date:
+- "this Friday": find the next Friday from today
+- "next Monday": find the Monday of next week
+- "tomorrow": add 1 day to today
+- "next week": add 7 days to the equivalent day
+- Always use YYYY-MM-DD format for dueDate
+- If no specific date is mentioned, set dueDate to null
 
 Task List Format:
 When creating, updating, or deleting tasks, respond with this JSON structure:

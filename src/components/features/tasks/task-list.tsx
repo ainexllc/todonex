@@ -302,12 +302,12 @@ export function TaskList({ tasks, selectedTaskId, onTaskUpdate, onTaskDelete, on
                     </span>
                   )}
                   <span>
-                    {task.dueDate 
-                      ? new Date(task.dueDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: new Date(task.dueDate).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                        })
+                    {task.dueDate
+                      ? (() => {
+                          const dueDate = new Date(task.dueDate)
+                          if (isNaN(dueDate.getTime())) return 'Invalid date'
+                          return `${dueDate.getUTCMonth() + 1}/${dueDate.getUTCDate()}`
+                        })()
                       : 'No due date'
                     }
                   </span>
