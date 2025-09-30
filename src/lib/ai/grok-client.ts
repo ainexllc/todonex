@@ -42,14 +42,19 @@ const GROK_MODEL_COSTS = {
 }
 
 class GrokClient {
-  private apiKey: string
+  private apiKey: string | null = null
 
-  constructor() {
-    if (!process.env.XAI_API_KEY) {
-      throw new Error('XAI_API_KEY is required')
+  /**
+   * Lazy initialization of API key to prevent build-time errors
+   */
+  private getApiKey(): string {
+    if (!this.apiKey) {
+      if (!process.env.XAI_API_KEY) {
+        throw new Error('XAI_API_KEY is required')
+      }
+      this.apiKey = process.env.XAI_API_KEY
     }
-
-    this.apiKey = process.env.XAI_API_KEY
+    return this.apiKey
   }
 
   /**
@@ -83,7 +88,7 @@ class GrokClient {
 
       const result = await generateText({
         model: xai(model, {
-          apiKey: this.apiKey,
+          apiKey: this.getApiKey(),
         }),
         messages,
         maxTokens: config.maxTokens ?? 1000,
@@ -125,7 +130,7 @@ class GrokClient {
 
       const result = await streamText({
         model: xai(model, {
-          apiKey: this.apiKey,
+          apiKey: this.getApiKey(),
         }),
         messages,
         maxTokens: config.maxTokens ?? 1000,

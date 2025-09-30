@@ -47,16 +47,22 @@ const COMPLEX_TASKS = [
 ]
 
 class AnthropicClient {
-  private client: Anthropic
+  private client: Anthropic | null = null
 
-  constructor() {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is required')
+  /**
+   * Lazy initialization of Anthropic client to prevent build-time errors
+   */
+  private getClient(): Anthropic {
+    if (!this.client) {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        throw new Error('ANTHROPIC_API_KEY is required')
+      }
+
+      this.client = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      })
     }
-
-    this.client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    })
+    return this.client
   }
 
   /**
@@ -122,7 +128,7 @@ class AnthropicClient {
         },
       ]
 
-      const response = await this.client.messages.create({
+      const response = await this.getClient().messages.create({
         ...modelConfig,
         messages,
       })
@@ -169,7 +175,7 @@ class AnthropicClient {
         },
       ]
 
-      const stream = await this.client.messages.create({
+      const stream = await this.getClient().messages.create({
         ...modelConfig,
         messages,
         stream: true,
