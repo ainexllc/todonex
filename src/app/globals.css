@@ -147,25 +147,26 @@
   border-color: hsl(var(--border));
 }
 
-body {
-  background-color: hsl(var(--background));
-  min-height: 100vh;
-  color: hsl(var(--foreground));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-/* Mobile-first optimizations */
 html {
+  height: 100vh;
+  overflow: hidden;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
 }
 
 body {
+  background-color: hsl(var(--background));
+  height: 100vh;
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 0;
 }
 
 /* Touch improvements */
@@ -1196,15 +1197,7 @@ input, textarea {
    Inter font with clamp() fluid scaling for perfect readability
    ======================================== */
 
-/* Font family definitions */
-body {
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: clamp(14px, 2vw, 16px);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+/* Font family definitions - merged into main body styles above */
 
 /* Grok-style fluid typography scale */
 .grok-text-xs { font-size: clamp(11px, 1.5vw, 12px); line-height: 1.4; }

@@ -48,7 +48,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   // Show loading spinner during initialization (unless emergency bypass is active)
   if ((!initialized || loading) && !emergencyBypass) {
     return (
-      <div className="min-h-dvh bg-background flex items-center justify-center">
+      <div className="h-screen overflow-hidden bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
           <p className="text-muted-foreground">Loading NextTaskPro...</p>
@@ -79,14 +79,14 @@ export function MainLayout({ children }: MainLayoutProps) {
   // Show auth layout for authentication pages
   if (!firebaseUser || pathname?.startsWith('/auth')) {
     return (
-      <div className="min-h-dvh bg-background">
+      <div className="h-screen overflow-hidden bg-background">
         {children}
       </div>
     )
   }
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col">
+    <div className="h-screen overflow-hidden bg-background flex flex-col">
       {children}
     </div>
   )
