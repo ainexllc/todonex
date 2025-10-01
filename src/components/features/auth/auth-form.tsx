@@ -222,20 +222,20 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto border border-gray-700 bg-gray-800 text-white">
+    <Card className="w-full max-w-md mx-auto border border-border bg-card">
       <CardHeader className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-2">
-          <div className="h-10 w-10 rounded-2xl bg-blue-600 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 rounded-2xl bg-primary flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-white">NextTaskPro</h1>
+          <h1 className="text-2xl font-bold text-foreground">NextTaskPro</h1>
         </div>
 
         <div className="space-y-2">
-          <CardTitle className="text-xl text-white">
+          <CardTitle className="text-xl text-foreground">
             {mode === 'signin' ? 'Welcome back' : 'Get started'}
           </CardTitle>
-          <p className="text-sm text-gray-300">
+          <p className="text-sm text-muted-foreground">
             {mode === 'signin'
               ? 'Sign in to your adaptive home hub'
               : 'Create your personalized home management account'
@@ -254,7 +254,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
         {success && (
           <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 flex items-start space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-green-700 dark:text-green-300">{success}</p>
           </div>
         )}
@@ -264,7 +264,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
           variant="outline"
           size="lg"
           className={cn(
-            "w-full border-gray-600 bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300 hover:shadow-md",
+            "w-full transition-all duration-300 hover:shadow-md",
             loading && "cursor-not-allowed opacity-50"
           )}
           onClick={handleGoogleAuth}
@@ -272,13 +272,13 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         >
           {loading ? (
             <div className="flex items-center space-x-2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-              <span className="text-white">Connecting...</span>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+              <span>Connecting...</span>
             </div>
           ) : (
             <>
-              <Chrome className="mr-2 h-4 w-4 text-white" />
-              <span className="text-white">Continue with Google</span>
+              <Chrome className="mr-2 h-4 w-4" />
+              <span>Continue with Google</span>
             </>
           )}
         </Button>
@@ -286,10 +286,10 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
         {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-600" />
+            <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-gray-800 px-2 text-gray-400">
+            <span className="bg-card px-2 text-muted-foreground">
               Or continue with email
             </span>
           </div>
@@ -300,18 +300,18 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
           {mode === 'signup' && (
             <div className="space-y-1">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Full name"
                   value={displayName}
                   onChange={(e) => handleNameChange(e.target.value)}
                   className={cn(
-                    "w-full pl-10 pr-4 py-3 rounded-lg transition-colors",
-                    "bg-gray-700 text-white placeholder:text-gray-400 border-gray-600",
+                    "w-full pl-10 pr-4 py-3 rounded-lg transition-colors border",
+                    "bg-background text-foreground placeholder:text-muted-foreground",
                     nameError
                       ? "border-red-400 focus:border-red-500 focus:ring-red-500"
-                      : "focus:border-blue-500 focus:ring-blue-500",
+                      : "border-input focus:border-primary focus:ring-primary",
                     "focus:outline-none focus:ring-2"
                   )}
                   required={mode === 'signup'}
@@ -319,7 +319,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
                 />
               </div>
               {nameError && (
-                <p className="text-xs text-red-600 flex items-center space-x-1">
+                <p className="text-xs text-destructive flex items-center space-x-1">
                   <AlertCircle className="h-3 w-3" />
                   <span>{nameError}</span>
                 </p>
@@ -329,20 +329,20 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
           <div className="space-y-1">
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="email"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => handleEmailChange(e.target.value)}
                 className={cn(
-                  "w-full pl-10 pr-4 py-3 rounded-lg transition-colors",
-                  "bg-gray-700 text-white placeholder:text-gray-400 border-gray-600",
+                  "w-full pl-10 pr-4 py-3 rounded-lg transition-colors border",
+                  "bg-background text-foreground placeholder:text-muted-foreground",
                   emailError
                     ? "border-red-400 focus:border-red-500 focus:ring-red-500"
                     : email && !emailError
                     ? "border-green-400 focus:border-green-500 focus:ring-green-500"
-                    : "focus:border-blue-500 focus:ring-blue-500",
+                    : "border-input focus:border-primary focus:ring-primary",
                   "focus:outline-none focus:ring-2"
                 )}
                 required
@@ -353,7 +353,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
               )}
             </div>
             {emailError && (
-              <p className="text-xs text-red-600 flex items-center space-x-1">
+              <p className="text-xs text-destructive flex items-center space-x-1">
                 <AlertCircle className="h-3 w-3" />
                 <span>{emailError}</span>
               </p>
@@ -362,20 +362,20 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
           <div className="space-y-2">
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
                 className={cn(
-                  "w-full pl-10 pr-12 py-3 rounded-lg transition-colors",
-                  "bg-gray-700 text-white placeholder:text-gray-400 border-gray-600",
+                  "w-full pl-10 pr-12 py-3 rounded-lg transition-colors border",
+                  "bg-background text-foreground placeholder:text-muted-foreground",
                   passwordError
                     ? "border-red-400 focus:border-red-500 focus:ring-red-500"
                     : password && !passwordError
                     ? "border-green-400 focus:border-green-500 focus:ring-green-500"
-                    : "focus:border-blue-500 focus:ring-blue-500",
+                    : "border-input focus:border-primary focus:ring-primary",
                   "focus:outline-none focus:ring-2"
                 )}
                 required
@@ -385,7 +385,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 disabled={loading}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -393,7 +393,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
             </div>
 
             {passwordError && (
-              <p className="text-xs text-red-600 flex items-center space-x-1">
+              <p className="text-xs text-destructive flex items-center space-x-1">
                 <AlertCircle className="h-3 w-3" />
                 <span>{passwordError}</span>
               </p>
@@ -403,13 +403,13 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
             {mode === 'signup' && password && !passwordError && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">Password strength:</span>
+                  <span className="text-xs text-muted-foreground">Password strength:</span>
                   <span className={cn(
                     "text-xs font-medium",
-                    passwordStrength < 2 ? "text-red-400" :
-                    passwordStrength < 3 ? "text-orange-400" :
-                    passwordStrength < 4 ? "text-yellow-400" :
-                    passwordStrength < 5 ? "text-blue-400" : "text-green-400"
+                    passwordStrength < 2 ? "text-red-500" :
+                    passwordStrength < 3 ? "text-orange-500" :
+                    passwordStrength < 4 ? "text-yellow-500" :
+                    passwordStrength < 5 ? "text-blue-500" : "text-green-500"
                   )}>
                     {passwordStrengthLabels[passwordStrength]}
                   </span>
@@ -422,7 +422,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
                         "h-1 flex-1 rounded-full transition-colors",
                         i < passwordStrength + 1
                           ? passwordStrengthColors[passwordStrength]
-                          : "bg-gray-200 dark:bg-gray-700"
+                          : "bg-muted"
                       )}
                     />
                   ))}
@@ -438,15 +438,15 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded border-border text-blue-600 focus:ring-blue-500"
+                className="rounded border-border text-primary focus:ring-primary"
                 disabled={loading}
               />
-              <span className="text-gray-300">Remember me</span>
+              <span className="text-muted-foreground">Remember me</span>
             </label>
             {mode === 'signin' && (
               <button
                 type="button"
-                className="text-blue-400 hover:text-blue-300 hover:underline"
+                className="text-primary hover:underline"
                 disabled={loading}
               >
                 Forgot password?
@@ -456,12 +456,12 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
           {/* Terms for Signup */}
           {mode === 'signup' && (
-            <div className="text-xs text-gray-400 space-y-2">
+            <div className="text-xs text-muted-foreground space-y-2">
               <p>
                 By creating an account, you agree to our{' '}
-                <a href="/terms" className="text-blue-400 hover:underline">Terms of Service</a>
+                <a href="/terms" className="text-primary hover:underline">Terms of Service</a>
                 {' '}and{' '}
-                <a href="/privacy" className="text-blue-400 hover:underline">Privacy Policy</a>.
+                <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
               </p>
             </div>
           )}
@@ -470,17 +470,14 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
             type="submit"
             size="lg"
             className={cn(
-              "w-full font-medium transition-all duration-300",
-              success
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl",
+              "w-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl",
               loading && "cursor-not-allowed"
             )}
             disabled={loading || (emailError || passwordError || nameError ? true : false)}
           >
             {loading ? (
               <div className="flex items-center space-x-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                 <span>{mode === 'signin' ? 'Signing in...' : 'Creating account...'}</span>
               </div>
             ) : success ? (
@@ -494,9 +491,9 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
           </Button>
         </form>
 
-        {/* Toggle Mode */}
-        <div className="text-center pt-4 border-t border-gray-600">
-          <p className="text-sm text-gray-400">
+        {/* Toggle Mode - Hidden when using tabs */}
+        <div className="hidden text-center pt-4 border-t border-border">
+          <p className="text-sm text-muted-foreground">
             {mode === 'signin' ? "Don't have an account?" : "Already have an account?"}
           </p>
           <Button
@@ -504,7 +501,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
             size="sm"
             onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
             disabled={loading}
-            className="text-blue-400 hover:text-blue-300"
+            className="text-primary"
           >
             {mode === 'signin' ? 'Create one here' : 'Sign in instead'}
           </Button>
@@ -512,9 +509,9 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
         {/* Features Preview for New Users */}
         {mode === 'signup' && (
-          <div className="rounded-lg bg-gray-700/50 p-4 space-y-2">
-            <h4 className="text-sm font-medium text-white">What you'll get:</h4>
-            <ul className="text-xs text-gray-400 space-y-1">
+          <div className="rounded-lg bg-muted/50 p-4 space-y-2">
+            <h4 className="text-sm font-medium text-foreground">What you'll get:</h4>
+            <ul className="text-xs text-muted-foreground space-y-1">
               <li>• Adaptive dashboard that learns your habits</li>
               <li>• Smart task and bill management</li>
               <li>• Recipe organization and meal planning</li>

@@ -141,137 +141,132 @@
     "version": "1.54.2",
     "workers": 4,
     "webServer": {
-      "command": "npm run dev -- --port 3002",
-      "url": "http://localhost:3002",
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
       "reuseExistingServer": true,
       "timeout": 120000
     }
   },
   "suites": [
     {
-      "title": "simple-chat-test.spec.ts",
-      "file": "simple-chat-test.spec.ts",
+      "title": "comprehensive-ui-test.spec.ts",
+      "file": "comprehensive-ui-test.spec.ts",
       "column": 0,
       "line": 0,
-      "specs": [
+      "specs": [],
+      "suites": [
         {
-          "title": "check chat input visibility after manual login",
-          "ok": false,
-          "tags": [],
-          "tests": [
+          "title": "Comprehensive UI Tests",
+          "file": "comprehensive-ui-test.spec.ts",
+          "line": 62,
+          "column": 6,
+          "specs": [
             {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "chromium",
-              "projectName": "chromium",
-              "results": [
+              "title": "should toggle between light and dark modes",
+              "ok": false,
+              "tags": [],
+              "tests": [
                 {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "failed",
-                  "duration": 25445,
-                  "error": {
-                    "message": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================",
-                    "stack": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================\n    at /Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts:28:14",
-                    "location": {
-                      "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
-                      "column": 14,
-                      "line": 28
-                    },
-                    "snippet": "  26 |\n  27 |   // Wait for navigation with longer timeout\n> 28 |   await page.waitForURL('**/tasks', { timeout: 20000 })\n     |              ^\n  29 |   console.log('Current URL after login:', page.url())\n  30 |   await page.waitForTimeout(3000)\n  31 |"
-                  },
-                  "errors": [
-                    {
-                      "location": {
-                        "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
-                        "column": 14,
-                        "line": 28
-                      },
-                      "message": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================\n\n  26 |\n  27 |   // Wait for navigation with longer timeout\n> 28 |   await page.waitForURL('**/tasks', { timeout: 20000 })\n     |              ^\n  29 |   console.log('Current URL after login:', page.url())\n  30 |   await page.waitForTimeout(3000)\n  31 |\n    at /Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts:28:14"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "PAGE ERROR: [Error [SyntaxError]: Invalid or unexpected token]\n"
-                    },
-                    {
-                      "text": "BROWSER: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold\n"
-                    },
-                    {
-                      "text": "BROWSER: === Firebase Environment Variables Debug ===\n"
-                    },
-                    {
-                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_API_KEY: LOADED\n"
-                    },
-                    {
-                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: LOADED\n"
-                    },
-                    {
-                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_PROJECT_ID: LOADED\n"
-                    },
-                    {
-                      "text": "BROWSER: NODE_ENV: development\n"
-                    },
-                    {
-                      "text": "BROWSER: Firebase config loaded: {apiKey: SET, authDomain: SET, projectId: SET}\n"
-                    },
-                    {
-                      "text": "BROWSER: Initializing Firebase app...\n"
-                    },
-                    {
-                      "text": "BROWSER: Firebase app initialized: [DEFAULT]\n"
-                    },
-                    {
-                      "text": "BROWSER: Initializing Firebase services...\n"
-                    },
-                    {
-                      "text": "BROWSER: Firebase services initialized successfully\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-30T19:28:25.315Z",
+                  "timeout": 30000,
                   "annotations": [],
-                  "attachments": [
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
                     {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/test-failed-1.png"
-                    },
-                    {
-                      "name": "video",
-                      "contentType": "video/webm",
-                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/video.webm"
-                    },
-                    {
-                      "name": "error-context",
-                      "contentType": "text/markdown",
-                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/error-context.md"
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30196,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/comprehensive-ui-test.spec.ts",
+                            "column": 23,
+                            "line": 94
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button').filter({ hasText: /theme|dark|light/i }).first()\u001b[22m\n\n\n  92 |\n  93 |     // Click theme toggle\n> 94 |     await themeToggle.click();\n     |                       ^\n  95 |     await page.waitForTimeout(500); // Wait for theme transition\n  96 |\n  97 |     // Get new theme\n    at /Users/dinohorn/aiworkspace/nexttaskpro/tests/comprehensive-ui-test.spec.ts:94:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🔐 Starting login process...\n"
+                        },
+                        {
+                          "text": "Current URL: http://localhost:3000/\n"
+                        },
+                        {
+                          "text": "✓ Entered email\n"
+                        },
+                        {
+                          "text": "✓ Entered password\n"
+                        },
+                        {
+                          "text": "✓ Clicked sign in button\n"
+                        },
+                        {
+                          "text": "⚠️  Timeout waiting for /tasks redirect\n"
+                        },
+                        {
+                          "text": "Current URL: http://localhost:3000/\n"
+                        },
+                        {
+                          "text": "🎨 Testing theme toggle...\n"
+                        },
+                        {
+                          "text": "Found 5 icon buttons\n"
+                        },
+                        {
+                          "text": "Initial theme: light\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-01T18:36:50.332Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/error-context.md"
+                        }
+                      ]
                     }
                   ],
-                  "errorLocation": {
-                    "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
-                    "column": 14,
-                    "line": 28
-                  }
+                  "status": "unexpected"
                 }
               ],
-              "status": "unexpected"
+              "id": "be7edd2b97ffb096aabe-076025c647c4520fd3ed",
+              "file": "comprehensive-ui-test.spec.ts",
+              "line": 68,
+              "column": 7
             }
-          ],
-          "id": "533ff6bcf7b76fd090d4-f90343737aaf3353617f",
-          "file": "simple-chat-test.spec.ts",
-          "line": 3,
-          "column": 5
+          ]
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-09-30T19:28:19.518Z",
-    "duration": 33759.289,
+    "startTime": "2025-10-01T18:36:49.394Z",
+    "duration": 32744.913999999997,
     "expected": 0,
     "skipped": 0,
     "unexpected": 1,

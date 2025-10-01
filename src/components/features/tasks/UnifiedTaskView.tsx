@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { TaskCard, Task } from '../dashboard/TaskCard'
+import { TaskCard } from '../dashboard/TaskCard'
 import {
   Search,
   Calendar,
@@ -14,18 +14,25 @@ import {
   List as ListIcon,
   ChevronDown,
   ChevronRight,
-  Trash2
+  Trash2,
+  Settings,
+  User,
+  LogOut
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isToday, isTomorrow, isThisWeek, isPast } from 'date-fns'
-
-interface TaskList {
-  id: string
-  title: string
-  tasks: Task[]
-  category?: string
-  createdAt: Date
-}
+import { ViewModeSwitcher } from './ViewModeSwitcher'
+import { MasonryView } from './views/MasonryView'
+import { TimelineView } from './views/TimelineView'
+import { ListCustomizer } from './ListCustomizer'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { getIconComponent } from '@/lib/utils/icon-matcher'
+import { getListColor } from '@/lib/utils/list-colors'
+import { toAllCaps } from '@/lib/utils/text-formatter'
+import type { Task, TaskList, ViewMode } from '@/types/task'
+import { auth } from '@/lib/firebase'
+import { signOut } from 'firebase/auth'
+import { useRouter } from 'next/navigation'
 
 interface UnifiedTaskViewProps {
   taskLists: TaskList[]
@@ -33,6 +40,8 @@ interface UnifiedTaskViewProps {
   onTaskDelete?: (taskId: string, listId: string) => void
   onTaskToggle?: (taskId: string, listId: string, completed: boolean) => void
   onTaskListDelete?: (taskListId: string) => void
+  onTaskListUpdate?: (listId: string, updates: Partial<TaskList>) => void
+  onTaskListReorder?: (listId: string, direction: 'up' | 'down') => void
   className?: string
 }
 
@@ -44,12 +53,31 @@ export function UnifiedTaskView({
   onTaskDelete,
   onTaskToggle,
   onTaskListDelete,
+  onTaskListUpdate,
+  onTaskListReorder,
   className
 }: UnifiedTaskViewProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [viewFilter, setViewFilter] = useState<ViewFilter>('all')
+  const [viewMode, setViewMode] = useState<ViewMode>('masonry')
+  const [customizingList, setCustomizingList] = useState<TaskList | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set(taskLists.map(l => l.id)))
+
+  // Load view mode preference from localStorage
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem('taskViewMode')
+    if (savedViewMode && ['masonry', 'timeline'].includes(savedViewMode)) {
+      setViewMode(savedViewMode as ViewMode)
+    }
+  }, [])
+
+  // Save view mode preference to localStorage
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode)
+    localStorage.setItem('taskViewMode', mode)
+  }
 
   // Flatten all tasks with their list info
   const allTasks = useMemo(() => {
@@ -172,15 +200,28 @@ export function UnifiedTaskView({
     setExpandedLists(newExpanded)
   }
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      router.push('/')
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
+  }
+
+  const handleProfile = () => {
+    router.push('/profile')
+  }
+
   return (
-    <div className={cn('flex flex-col h-full bg-gray-900', className)}>
+    <div className={cn('flex flex-col h-full bg-background', className)}>
       {/* Header */}
-      <div className="flex-shrink-0 border-b border-gray-800 bg-gray-950/50">
+      <div className="flex-shrink-0 border-b border-border bg-card/50">
         {/* Stats Row */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div>
             <h1 className="text-lg font-bold">My Tasks</h1>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {stats.total} active {stats.total === 1 ? 'task' : 'tasks'}
               {stats.today > 0 && ` • ${stats.today} due today`}
               {stats.overdue > 0 && ` • ${stats.overdue} overdue`}
@@ -206,7 +247,7 @@ export function UnifiedTaskView({
         {/* Filters Row */}
         <div className="flex items-center gap-2 p-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -238,100 +279,71 @@ export function UnifiedTaskView({
           >
             {showCompleted ? 'Hide' : 'Show'} Done
           </Button>
+
+          {/* View Mode Switcher */}
+          <ViewModeSwitcher value={viewMode} onChange={handleViewModeChange} />
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Profile Button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleProfile}
+            className="h-8 w-8 p-0"
+            title="Profile"
+          >
+            <User className="h-4 w-4" />
+          </Button>
+
+          {/* Logout Button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleLogout}
+            className="h-8 w-8 p-0"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Tasks List - Grouped by List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {taskLists.map(list => {
-          const listTasks = tasksByList.get(list.id) || []
-          if (listTasks.length === 0 && (searchQuery || viewFilter !== 'all')) {
-            return null // Hide empty lists when filtering
-          }
+      {/* Render based on view mode */}
+      {viewMode === 'masonry' ? (
+        <MasonryView
+          taskLists={taskLists}
+          onTaskUpdate={onTaskUpdate}
+          onTaskDelete={onTaskDelete}
+          onTaskToggle={onTaskToggle}
+          onListCustomize={(list) => setCustomizingList(list)}
+          onListDelete={onTaskListDelete}
+          onListReorder={onTaskListReorder}
+          className="flex-1 overflow-y-auto"
+        />
+      ) : (
+        <TimelineView
+          taskLists={taskLists}
+          onTaskUpdate={onTaskUpdate}
+          onTaskDelete={onTaskDelete}
+          onTaskToggle={onTaskToggle}
+          className="flex-1"
+        />
+      )}
 
-          const isExpanded = expandedLists.has(list.id)
-
-          return (
-            <Card key={list.id} className="border-gray-700/50">
-              {/* List Header */}
-              <div
-                className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800/30 transition-colors"
-                onClick={() => toggleListExpanded(list.id)}
-              >
-                <div className="flex items-center gap-2 flex-1">
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  )}
-                  <ListIcon className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold text-sm">{list.title}</h3>
-                  <Badge variant="secondary" className="text-xs">
-                    {listTasks.length}
-                  </Badge>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (window.confirm(`Delete "${list.title}" list?`)) {
-                      onTaskListDelete?.(list.id)
-                    }
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                </Button>
-              </div>
-
-              {/* List Tasks */}
-              {isExpanded && listTasks.length > 0 && (
-                <div className="px-3 pb-3 space-y-2">
-                  {listTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onToggleComplete={(_, completed) => handleTaskToggle(task, completed)}
-                      onUpdate={(_, updates) => handleTaskUpdate(task, updates)}
-                      onDelete={() => handleTaskDelete(task)}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Empty State */}
-              {isExpanded && listTasks.length === 0 && (
-                <div className="px-3 pb-3 text-center py-8">
-                  <p className="text-xs text-gray-500">No tasks in this list</p>
-                </div>
-              )}
-            </Card>
-          )
-        })}
-
-        {/* Overall Empty State */}
-        {taskLists.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <ListIcon className="h-16 w-16 text-gray-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Task Lists Yet</h3>
-            <p className="text-sm text-gray-400 max-w-sm">
-              Create your first task list using the AI assistant below
-            </p>
-          </div>
-        )}
-
-        {/* No Results State */}
-        {taskLists.length > 0 && filteredTasks.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <Search className="h-16 w-16 text-gray-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Tasks Found</h3>
-            <p className="text-sm text-gray-400">
-              Try adjusting your filters or search query
-            </p>
-          </div>
-        )}
-      </div>
+      {/* List Customizer Modal */}
+      {customizingList && (
+        <ListCustomizer
+          taskList={customizingList}
+          isOpen={!!customizingList}
+          onClose={() => setCustomizingList(null)}
+          onSave={(updates) => {
+            onTaskListUpdate?.(customizingList.id, updates)
+            setCustomizingList(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -22,19 +22,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, isToday, isTomorrow, isPast, isThisWeek } from 'date-fns'
+import { toTitleCase } from '@/lib/utils/text-formatter'
+import type { Task } from '@/types/task'
 
-export interface Task {
-  id: string
-  title: string
-  description?: string
-  completed: boolean
-  completedAt?: Date | null
-  priority: 'low' | 'medium' | 'high'
-  dueDate?: Date
-  category?: string  // Keep for backward compatibility
-  categories?: string[]  // New multi-category support
-  tags?: string[]
-}
+// Re-export Task type for backward compatibility
+export type { Task }
 
 interface TaskCardProps {
   task: Task
@@ -150,7 +142,7 @@ export function TaskCard({
     return (
       <div
         className={cn(
-          'flex items-center gap-2 p-2 rounded-md hover:bg-gray-800/30 transition-colors group',
+          'flex items-center gap-2 p-2 rounded-md hover:bg-muted/30 transition-colors group',
           selected && 'bg-primary/10 border border-primary/30',
           task.completed && 'opacity-60',
           className
@@ -172,15 +164,15 @@ export function TaskCard({
           {task.completed ? (
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           ) : (
-            <Circle className="h-4 w-4 text-gray-400 hover:text-gray-300" />
+            <Circle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
           )}
         </button>
 
         <span className={cn(
           'text-xs truncate flex-shrink min-w-0',
-          task.completed && 'line-through text-gray-500'
+          task.completed && 'line-through text-muted-foreground'
         )}>
-          {task.title}
+          {toTitleCase(task.title)}
         </span>
 
         {task.dueDate && (
@@ -200,7 +192,7 @@ export function TaskCard({
   return (
     <Card
       className={cn(
-        'p-2.5 hover:shadow-md transition-all duration-200 border border-gray-700/50',
+        'p-2.5 hover:shadow-md transition-all duration-200 border border-border',
         selected && 'ring-2 ring-primary',
         task.completed && 'opacity-70',
         draggable && 'cursor-move',
@@ -210,7 +202,7 @@ export function TaskCard({
       <div className="flex items-start gap-2">
         {/* Drag Handle */}
         {draggable && (
-          <div className="flex-shrink-0 mt-1 text-gray-500 hover:text-gray-300 cursor-grab active:cursor-grabbing">
+          <div className="flex-shrink-0 mt-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
             <GripVertical className="h-4 w-4" />
           </div>
         )}
@@ -265,16 +257,16 @@ export function TaskCard({
               onClick={handleTitleClick}
               className={cn(
                 'font-medium text-xs cursor-pointer hover:text-primary transition-colors',
-                task.completed && 'line-through text-gray-500'
+                task.completed && 'line-through text-muted-foreground'
               )}
             >
-              {task.title}
+              {toTitleCase(task.title)}
             </h3>
           )}
 
           {/* Description */}
           {task.description && isExpanded && (
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {task.description}
             </p>
           )}
@@ -422,7 +414,7 @@ export function TaskCard({
       {task.description && !isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="text-xs text-gray-500 hover:text-gray-400 mt-2 ml-11"
+          className="text-xs text-muted-foreground hover:text-foreground mt-2 ml-11"
         >
           Show description...
         </button>

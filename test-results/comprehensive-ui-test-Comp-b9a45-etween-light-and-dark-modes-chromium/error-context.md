@@ -23,9 +23,10 @@
 - button "Continue with Google"
 - text: Or continue with email
 - textbox "Full name"
-- textbox "Email address": dinohorn9@gmail.com
+- textbox "Email address": dinohorn27@gmail.com
 - textbox "Password": dinodino
 - button
+- text: "Password strength: Fair"
 - checkbox "Remember me"
 - text: Remember me
 - paragraph:
@@ -45,4 +46,5 @@
   - listitem: • Smart task and bill management
   - listitem: • Recipe organization and meal planning
   - listitem: • Family-friendly collaboration tools
+- alert: Simple Task Management That Actually Works
 ```

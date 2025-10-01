@@ -9,32 +9,9 @@ import {
   deleteDocument,
   subscribeToUserDocuments
 } from '@/lib/firebase-data'
-
-interface Task {
-  id: string
-  title: string
-  description?: string
-  completed: boolean
-  priority: 'low' | 'medium' | 'high'
-  dueDate?: Date
-  category?: string
-}
-
-interface TaskList {
-  id: string
-  title: string
-  tasks: Task[]
-  category?: string
-  createdAt: Date
-}
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-  taskLists?: TaskList[]
-  suggestions?: string[]
-}
+import { getBestIconForList } from '@/lib/utils/icon-matcher'
+import { suggestColorForList } from '@/lib/utils/list-colors'
+import type { Task, TaskList, ChatMessage } from '@/types/task'
 
 interface UseTaskChatResult {
   messages: ChatMessage[]
@@ -80,6 +57,13 @@ export function useTaskChat(): UseTaskChatResult {
         }
         return acc
       }, [])
+
+      // Sort by order field (ascending), with undefined order values at the end
+      uniqueLists.sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+        return orderA - orderB
+      })
 
       console.log(`Loaded ${lists.length} lists, deduplicated to ${uniqueLists.length}`)
       setTaskLists(uniqueLists)
@@ -342,8 +326,34 @@ export function useTaskChat(): UseTaskChatResult {
                     )
                   )
                 }
+              } else if (newList.operation === 'update' && newList.tasks && newList.tasks.length > 0) {
+                // Update existing tasks (merge changes, don't add duplicates)
+                const updatedTasks = [...updatedTaskLists[existingIndex].tasks]
+
+                newList.tasks.forEach((updatedTask: Task) => {
+                  const taskIndex = updatedTasks.findIndex(task =>
+                    task.title.toLowerCase() === updatedTask.title.toLowerCase()
+                  )
+
+                  if (taskIndex !== -1) {
+                    // Update existing task by merging properties
+                    updatedTasks[taskIndex] = {
+                      ...updatedTasks[taskIndex],
+                      ...updatedTask
+                    }
+                    console.log(`Updated task "${updatedTask.title}" in list "${updatedTaskLists[existingIndex].title}"`)
+                  } else {
+                    // Task not found, this shouldn't happen for update operations
+                    console.warn(`Task "${updatedTask.title}" not found for update, skipping`)
+                  }
+                })
+
+                updatedTaskLists[existingIndex] = {
+                  ...updatedTaskLists[existingIndex],
+                  tasks: updatedTasks
+                }
               } else {
-                // Add tasks to existing list (default behavior)
+                // Add tasks to existing list (default behavior for new tasks)
                 updatedTaskLists[existingIndex] = {
                   ...updatedTaskLists[existingIndex],
                   tasks: [...updatedTaskLists[existingIndex].tasks, ...(newList.tasks || [])]
@@ -481,7 +491,10 @@ export function useTaskChat(): UseTaskChatResult {
         id: `list-${Date.now()}`,
         title,
         tasks: uniqueTasks,
-        createdAt: new Date()
+        createdAt: new Date(),
+        // Auto-detect icon and color based on title
+        icon: getBestIconForList(title),
+        color: suggestColorForList(title)
       }
 
       if (uniqueTasks.length < tasks.length) {

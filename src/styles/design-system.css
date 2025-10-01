@@ -97,22 +97,22 @@
    SEMANTIC COLOR SYSTEM
    ======================================== */
 
-/* Text colors - Dark theme compatible */
-.text-primary { color: rgb(243, 244, 246); } /* gray-100 equivalent */
-.text-secondary { color: rgb(107, 114, 128); } /* gray-500 equivalent */
-.text-muted { color: rgb(156, 163, 175); } /* gray-400 equivalent */
+/* Text colors - Theme adaptive */
+.text-primary { color: hsl(var(--foreground)); }
+.text-secondary { color: hsl(var(--muted-foreground)); }
+.text-muted { color: hsl(var(--muted-foreground) / 0.8); }
 .text-accent { color: hsl(var(--primary)); }
 
-/* Background colors - Dark theme compatible */
-.bg-surface { background-color: rgb(3, 7, 18); } /* gray-950 equivalent */
-.bg-elevated { background-color: rgb(17, 24, 39); } /* gray-900 equivalent */
+/* Background colors - Theme adaptive */
+.bg-surface { background-color: hsl(var(--background)); }
+.bg-elevated { background-color: hsl(var(--card)); }
 .bg-overlay { background-color: hsl(var(--popover)); }
 .bg-muted { background-color: hsl(var(--muted)); }
 
-/* Border colors - Dark theme compatible */
-.border-default { border-color: rgb(31, 41, 55); } /* gray-800 equivalent */
-.border-subtle { border-color: rgba(31, 41, 55, 0.5); } /* gray-800/50 equivalent */
-.border-strong { border-color: rgba(31, 41, 55, 0.8); }
+/* Border colors - Theme adaptive */
+.border-default { border-color: hsl(var(--border)); }
+.border-subtle { border-color: hsl(var(--border) / 0.5); }
+.border-strong { border-color: hsl(var(--border) / 0.8); }
 
 /* Status colors */
 .status-error {
@@ -133,17 +133,17 @@
   border-color: hsl(var(--priority-medium-border));
 }
 
-/* Priority colors - Direct color values */
+/* Priority colors - Theme adaptive */
 .priority-high {
-  color: rgb(239, 68, 68); /* red-500 equivalent */
+  color: hsl(var(--priority-high));
 }
 
 .priority-medium {
-  color: rgb(245, 158, 11); /* amber-500 equivalent */
+  color: hsl(var(--priority-medium));
 }
 
 .priority-low {
-  color: rgb(34, 197, 94); /* green-500 equivalent */
+  color: hsl(var(--priority-low));
 }
 
 .priority-high-bg {
@@ -161,10 +161,10 @@
   border-color: hsl(var(--priority-low-border));
 }
 
-/* Interactive colors - Dark theme compatible */
-.hover-surface:hover { background-color: rgba(31, 41, 55, 0.5); } /* gray-800/50 equivalent */
+/* Interactive colors - Theme adaptive */
+.hover-surface:hover { background-color: hsl(var(--hover-bg)); }
 .hover-accent:hover { color: hsl(var(--primary)); }
-.hover-muted:hover { color: rgb(156, 163, 175); }
+.hover-muted:hover { color: hsl(var(--muted-foreground)); }
 
 /* ========================================
    SEMANTIC SPACING SYSTEM

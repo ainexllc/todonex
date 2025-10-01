@@ -1,53 +1,53 @@
-<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="33.759288999999995">
-<testsuite name="simple-chat-test.spec.ts" timestamp="2025-09-30T19:28:24.915Z" hostname="chromium" tests="1" failures="1" skipped="0" time="25.445" errors="0">
-<testcase name="check chat input visibility after manual login" classname="simple-chat-test.spec.ts" time="25.445">
-<failure message="simple-chat-test.spec.ts:3:5 check chat input visibility after manual login" type="FAILURE">
-<![CDATA[  [chromium] › simple-chat-test.spec.ts:3:5 › check chat input visibility after manual login ───────
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="32.744913999999994">
+<testsuite name="comprehensive-ui-test.spec.ts" timestamp="2025-10-01T18:36:49.923Z" hostname="chromium" tests="1" failures="1" skipped="0" time="30.196" errors="0">
+<testcase name="Comprehensive UI Tests › should toggle between light and dark modes" classname="comprehensive-ui-test.spec.ts" time="30.196">
+<failure message="comprehensive-ui-test.spec.ts:68:7 should toggle between light and dark modes" type="FAILURE">
+<![CDATA[  [chromium] › comprehensive-ui-test.spec.ts:68:7 › Comprehensive UI Tests › should toggle between light and dark modes 
 
-    TimeoutError: page.waitForURL: Timeout 20000ms exceeded.
-    =========================== logs ===========================
-    waiting for navigation to "**/tasks" until "load"
-    ============================================================
+    Test timeout of 30000ms exceeded.
 
-      26 |
-      27 |   // Wait for navigation with longer timeout
-    > 28 |   await page.waitForURL('**/tasks', { timeout: 20000 })
-         |              ^
-      29 |   console.log('Current URL after login:', page.url())
-      30 |   await page.waitForTimeout(3000)
-      31 |
-        at /Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts:28:14
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('button').filter({ hasText: /theme|dark|light/i }).first()
+
+
+      92 |
+      93 |     // Click theme toggle
+    > 94 |     await themeToggle.click();
+         |                       ^
+      95 |     await page.waitForTimeout(500); // Wait for theme transition
+      96 |
+      97 |     // Get new theme
+        at /Users/dinohorn/aiworkspace/nexttaskpro/tests/comprehensive-ui-test.spec.ts:94:23
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ../test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/test-failed-1.png
+    ../test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ../test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/video.webm
+    ../test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
-    Error Context: ../test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/error-context.md
+    Error Context: ../test-results/comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[PAGE ERROR: [Error [SyntaxError]: Invalid or unexpected token]
-BROWSER: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-BROWSER: === Firebase Environment Variables Debug ===
-BROWSER: NEXT_PUBLIC_FIREBASE_API_KEY: LOADED
-BROWSER: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: LOADED
-BROWSER: NEXT_PUBLIC_FIREBASE_PROJECT_ID: LOADED
-BROWSER: NODE_ENV: development
-BROWSER: Firebase config loaded: {apiKey: SET, authDomain: SET, projectId: SET}
-BROWSER: Initializing Firebase app...
-BROWSER: Firebase app initialized: [DEFAULT]
-BROWSER: Initializing Firebase services...
-BROWSER: Firebase services initialized successfully
+<![CDATA[🔐 Starting login process...
+Current URL: http://localhost:3000/
+✓ Entered email
+✓ Entered password
+✓ Clicked sign in button
+⚠️  Timeout waiting for /tasks redirect
+Current URL: http://localhost:3000/
+🎨 Testing theme toggle...
+Found 5 icon buttons
+Initial theme: light
 
-[[ATTACHMENT|simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/test-failed-1.png]]
+[[ATTACHMENT|comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/test-failed-1.png]]
 
-[[ATTACHMENT|simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/video.webm]]
+[[ATTACHMENT|comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/video.webm]]
 
-[[ATTACHMENT|simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/error-context.md]]
+[[ATTACHMENT|comprehensive-ui-test-Comp-b9a45-etween-light-and-dark-modes-chromium/error-context.md]]
 ]]>
 </system-out>
 </testcase>
