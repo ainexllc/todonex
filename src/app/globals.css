@@ -2286,3 +2286,29 @@ code, pre, .grok-mono {
   font-weight: 400;
   color: rgb(107, 114, 128);
 }
+
+/* ========================================
+   GLOBAL COMPACT FONT SIZE OVERRIDE
+   12px (text-xs) for ALL text elements
+   ======================================== */
+
+/* Override ALL text sizes to be compact throughout the app */
+body, div, span, p, a, button, input, textarea, select, label, h1, h2, h3, h4, h5, h6 {
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+
+/* Ensure buttons and form elements inherit */
+button, [role="button"], input, textarea, select {
+  font-size: 12px !important;
+}
+
+/* Override any Tailwind classes */
+.text-xs, .text-sm, .text-base, .text-lg, .text-xl, .text-2xl, .text-3xl {
+  font-size: 12px !important;
+}
+
+/* Preserve icon sizes - only text should be affected */
+svg, img {
+  font-size: inherit;
+}

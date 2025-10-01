@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
     // Enable faster refresh for better hot reloading
     optimizeCss: false, // Disable CSS optimization in dev for faster reloads
   },
+  // Enable React strict mode for better development warnings
+  reactStrictMode: true,
   // Configure webpack for better development experience
   webpack: (config, { dev }) => {
     if (dev) {

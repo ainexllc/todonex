@@ -19,6 +19,7 @@ interface Task {
   priority: 'low' | 'medium' | 'high'
   dueDate?: Date
   category?: string
+  tags?: string[]
 }
 
 interface TaskList {
@@ -302,7 +303,7 @@ export function TaskListSidebar({
             )}>
               <Clock className={cn(
                 "mx-auto mb-1",
-                isMobile ? "h-8 w-8 mb-2 text-gray-300" : "h-8 w-8 text-gray-400"
+                isMobile ? "h-6 w-6 mb-2 text-gray-300" : "h-6 w-6 text-gray-400"
               )} />
               <p className={cn(
                 "text-gray-300 mb-1",
@@ -366,12 +367,19 @@ export function TaskListSidebar({
                             "bg-green-500"
                           )} />
                           <div className="flex flex-col min-w-0 flex-1">
-                            <span className={cn(
-                              "font-medium truncate text-gray-100",
-                              isMobile ? "text-xs" : "text-[12px]"
-                            )}>
-                              {task.title}
-                            </span>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <span className={cn(
+                                "font-medium text-gray-100",
+                                isMobile ? "text-xs" : "text-[12px]"
+                              )}>
+                                {task.title}
+                              </span>
+                              {task.tags && task.tags.length > 0 && task.tags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="px-1 py-0 text-[8px]">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
                             <span className={cn(
                               "text-gray-500 truncate",
                               isMobile ? "text-[9px]" : "text-[9px]"
@@ -429,6 +437,50 @@ export function TaskListSidebar({
               </div>
             ) : (
               <>
+                {/* All Lists Button */}
+                <div
+                  className={cn(
+                    "group cursor-pointer transition-all duration-150 rounded-sm border mb-2",
+                    selectedTaskListId === null
+                      ? "border-blue-500/50 bg-blue-900/20"
+                      : "border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/40 hover:border-gray-700/60",
+                    isMobile && "mx-1 active:scale-[0.98]"
+                  )}
+                  onClick={() => {
+                    onTaskListSelect?.(null)
+                    if (isMobile && onCollapse) {
+                      onCollapse()
+                    }
+                  }}
+                >
+                  <div className={cn(
+                    "flex items-center justify-between",
+                    isMobile ? "px-2 py-2" : "px-2.5 py-2"
+                  )}>
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <List className={cn(
+                        selectedTaskListId === null ? "text-blue-400" : "text-gray-400",
+                        isMobile ? "h-4 w-4" : "h-3.5 w-3.5"
+                      )} />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className={cn(
+                          "font-semibold truncate",
+                          selectedTaskListId === null ? "text-blue-300" : "text-gray-200",
+                          isMobile ? "text-sm" : "text-xs"
+                        )}>
+                          All Lists
+                        </span>
+                        <span className={cn(
+                          "text-gray-500",
+                          isMobile ? "text-[10px]" : "text-[9px]"
+                        )}>
+                          {taskLists.length} list{taskLists.length !== 1 ? 's' : ''} • {taskLists.reduce((total, list) => total + list.tasks.filter(t => !t.completed).length, 0)} tasks
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {taskLists.map((taskList) => {
                   const completedCount = taskList.tasks.filter(task => task.completed).length
                   const totalCount = taskList.tasks.length
@@ -557,18 +609,22 @@ export function TaskListSidebar({
                             {taskList.tasks.slice(0, isMobile ? 3 : 5).map((task) => (
                               <div
                                 key={task.id}
-                                className="flex items-center gap-1.5 text-[10px]"
+                                className="flex items-center gap-1.5 flex-wrap text-[10px]"
                               >
                                 <div className={cn(
                                   "h-1 w-1 rounded-full flex-shrink-0",
                                   task.completed ? "bg-green-500" : "bg-blue-500"
                                 )} />
                                 <span className={cn(
-                                  "truncate",
                                   task.completed ? "text-gray-500 line-through" : "text-gray-400"
                                 )}>
                                   {task.title}
                                 </span>
+                                {task.tags && task.tags.length > 0 && task.tags.map(tag => (
+                                  <Badge key={tag} variant="secondary" className="px-1 py-0 text-[7px]">
+                                    {tag}
+                                  </Badge>
+                                ))}
                               </div>
                             ))}
                             {taskList.tasks.length > (isMobile ? 3 : 5) && (

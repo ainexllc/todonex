@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "/Users/dino/AiFirst/nexttaskpro/playwright.config.ts",
-    "rootDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+    "configFile": "/Users/dinohorn/aiworkspace/nexttaskpro/playwright.config.ts",
+    "rootDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -39,7 +39,7 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -47,7 +47,7 @@
         },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -55,7 +55,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -63,7 +63,7 @@
         },
         "id": "firefox",
         "name": "firefox",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -71,7 +71,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -79,7 +79,7 @@
         },
         "id": "webkit",
         "name": "webkit",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -87,7 +87,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -95,7 +95,7 @@
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -103,7 +103,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -111,7 +111,7 @@
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -119,7 +119,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/Users/dino/AiFirst/nexttaskpro/test-results",
+        "outputDir": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -127,7 +127,7 @@
         },
         "id": "iPad",
         "name": "iPad",
-        "testDir": "/Users/dino/AiFirst/nexttaskpro/tests",
+        "testDir": "/Users/dinohorn/aiworkspace/nexttaskpro/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -139,7 +139,7 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.54.2",
-    "workers": 5,
+    "workers": 4,
     "webServer": {
       "command": "npm run dev -- --port 3002",
       "url": "http://localhost:3002",
@@ -149,106 +149,129 @@
   },
   "suites": [
     {
-      "title": "simple-dino-test.spec.ts",
-      "file": "simple-dino-test.spec.ts",
+      "title": "simple-chat-test.spec.ts",
+      "file": "simple-chat-test.spec.ts",
       "column": 0,
       "line": 0,
-      "specs": [],
-      "suites": [
+      "specs": [
         {
-          "title": "Dino Account Test - Simple",
-          "file": "simple-dino-test.spec.ts",
-          "line": 3,
-          "column": 6,
-          "specs": [
+          "title": "check chat input visibility after manual login",
+          "ok": false,
+          "tags": [],
+          "tests": [
             {
-              "title": "create or login to Dino account",
-              "ok": false,
-              "tags": [],
-              "tests": [
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
                 {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 25445,
+                  "error": {
+                    "message": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================",
+                    "stack": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================\n    at /Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts:28:14",
+                    "location": {
+                      "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
+                      "column": 14,
+                      "line": 28
+                    },
+                    "snippet": "  26 |\n  27 |   // Wait for navigation with longer timeout\n> 28 |   await page.waitForURL('**/tasks', { timeout: 20000 })\n     |              ^\n  29 |   console.log('Current URL after login:', page.url())\n  30 |   await page.waitForTimeout(3000)\n  31 |"
+                  },
+                  "errors": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30068,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      "location": {
+                        "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
+                        "column": 14,
+                        "line": 28
                       },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "/Users/dino/AiFirst/nexttaskpro/tests/simple-dino-test.spec.ts",
-                            "column": 16,
-                            "line": 67
-                          },
-                          "message": "Error: page.goto: Target page, context or browser has been closed\n\n  65 |\n  66 |     // Go back to homepage to reset\n> 67 |     await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });\n     |                ^\n  68 |\n  69 |     // Click Sign In tab\n  70 |     await page.getByRole('button', { name: 'Sign In' }).click();\n    at /Users/dino/AiFirst/nexttaskpro/tests/simple-dino-test.spec.ts:67:16"
-                        }
-                      ],
-                      "stdout": [
-                        {
-                          "text": "🚀 Starting test for: dinohorn9@gmail.com\n"
-                        },
-                        {
-                          "text": "✅ Homepage loaded\n"
-                        },
-                        {
-                          "text": "Sign up attempt failed, trying sign in...\n"
-                        },
-                        {
-                          "text": "🔑 Attempting to sign in...\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2025-09-16T18:26:47.933Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/Users/dino/AiFirst/nexttaskpro/test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "/Users/dino/AiFirst/nexttaskpro/test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/Users/dino/AiFirst/nexttaskpro/test-results/simple-dino-test-Dino-Acco-fc783-te-or-login-to-Dino-account-chromium/error-context.md"
-                        }
-                      ]
+                      "message": "TimeoutError: page.waitForURL: Timeout 20000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/tasks\" until \"load\"\n============================================================\n\n  26 |\n  27 |   // Wait for navigation with longer timeout\n> 28 |   await page.waitForURL('**/tasks', { timeout: 20000 })\n     |              ^\n  29 |   console.log('Current URL after login:', page.url())\n  30 |   await page.waitForTimeout(3000)\n  31 |\n    at /Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts:28:14"
                     }
                   ],
-                  "status": "unexpected"
+                  "stdout": [
+                    {
+                      "text": "PAGE ERROR: [Error [SyntaxError]: Invalid or unexpected token]\n"
+                    },
+                    {
+                      "text": "BROWSER: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold\n"
+                    },
+                    {
+                      "text": "BROWSER: === Firebase Environment Variables Debug ===\n"
+                    },
+                    {
+                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_API_KEY: LOADED\n"
+                    },
+                    {
+                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: LOADED\n"
+                    },
+                    {
+                      "text": "BROWSER: NEXT_PUBLIC_FIREBASE_PROJECT_ID: LOADED\n"
+                    },
+                    {
+                      "text": "BROWSER: NODE_ENV: development\n"
+                    },
+                    {
+                      "text": "BROWSER: Firebase config loaded: {apiKey: SET, authDomain: SET, projectId: SET}\n"
+                    },
+                    {
+                      "text": "BROWSER: Initializing Firebase app...\n"
+                    },
+                    {
+                      "text": "BROWSER: Firebase app initialized: [DEFAULT]\n"
+                    },
+                    {
+                      "text": "BROWSER: Initializing Firebase services...\n"
+                    },
+                    {
+                      "text": "BROWSER: Firebase services initialized successfully\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-30T19:28:25.315Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/dinohorn/aiworkspace/nexttaskpro/test-results/simple-chat-test-check-cha-3c43f-sibility-after-manual-login-chromium/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/dinohorn/aiworkspace/nexttaskpro/tests/simple-chat-test.spec.ts",
+                    "column": 14,
+                    "line": 28
+                  }
                 }
               ],
-              "id": "c734f2fbfb289684bbf2-46c4a7a1f0d13bc96a84",
-              "file": "simple-dino-test.spec.ts",
-              "line": 4,
-              "column": 7
+              "status": "unexpected"
             }
-          ]
+          ],
+          "id": "533ff6bcf7b76fd090d4-f90343737aaf3353617f",
+          "file": "simple-chat-test.spec.ts",
+          "line": 3,
+          "column": 5
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-09-16T18:26:44.564Z",
-    "duration": 33933.152,
+    "startTime": "2025-09-30T19:28:19.518Z",
+    "duration": 33759.289,
     "expected": 0,
     "skipped": 0,
     "unexpected": 1,

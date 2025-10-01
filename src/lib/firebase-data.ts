@@ -16,12 +16,33 @@ import {
 } from 'firebase/firestore'
 import { db, auth } from './firebase'
 
-// Helper function to remove undefined values from an object
+// Helper function to remove undefined values from an object (deep clean)
 function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
   const cleaned: any = {}
   for (const key in obj) {
-    if (obj[key] !== undefined) {
-      cleaned[key] = obj[key]
+    const value = obj[key]
+
+    // Skip undefined values
+    if (value === undefined) {
+      continue
+    }
+
+    // Handle arrays (recursively clean each item)
+    if (Array.isArray(value)) {
+      cleaned[key] = value.map(item => {
+        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+          return removeUndefinedFields(item)
+        }
+        return item
+      }).filter(item => item !== undefined)
+    }
+    // Handle nested objects (recursively clean)
+    else if (typeof value === 'object' && value !== null && !(value instanceof Date) && !(value instanceof Timestamp)) {
+      cleaned[key] = removeUndefinedFields(value)
+    }
+    // Handle primitive values
+    else {
+      cleaned[key] = value
     }
   }
   return cleaned
@@ -149,12 +170,28 @@ export async function getUserDocuments<T>(
         }))
       }
 
+      // Helper to safely convert Timestamp to Date
+      const safeToDate = (value: any) => {
+        if (!value) return value
+        if (typeof value?.toDate === 'function') {
+          return value.toDate()
+        }
+        if (value instanceof Date) {
+          return value
+        }
+        // If it's a string or number, try to convert
+        if (typeof value === 'string' || typeof value === 'number') {
+          return new Date(value)
+        }
+        return value
+      }
+
       return {
         ...data,
         id: doc.id,
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-        dueDate: data.dueDate?.toDate ? data.dueDate.toDate() : data.dueDate
+        createdAt: safeToDate(data.createdAt),
+        updatedAt: safeToDate(data.updatedAt),
+        dueDate: safeToDate(data.dueDate)
       } as T
     })
   } catch (error) {
@@ -178,12 +215,28 @@ export async function getUserDocuments<T>(
         }))
       }
 
+      // Helper to safely convert Timestamp to Date
+      const safeToDate = (value: any) => {
+        if (!value) return value
+        if (typeof value?.toDate === 'function') {
+          return value.toDate()
+        }
+        if (value instanceof Date) {
+          return value
+        }
+        // If it's a string or number, try to convert
+        if (typeof value === 'string' || typeof value === 'number') {
+          return new Date(value)
+        }
+        return value
+      }
+
       return {
         ...data,
         id: doc.id,
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-        dueDate: data.dueDate?.toDate ? data.dueDate.toDate() : data.dueDate
+        createdAt: safeToDate(data.createdAt),
+        updatedAt: safeToDate(data.updatedAt),
+        dueDate: safeToDate(data.dueDate)
       } as T
     })
 

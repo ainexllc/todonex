@@ -23,7 +23,7 @@ export function useAuthRedirect() {
     }
 
     // Define protected and public routes
-    const protectedRoutes = ['/tasks', '/dashboard', '/profile', '/settings']
+    const protectedRoutes = ['/tasks', '/profile', '/settings']
     const publicRoutes = ['/', '/auth', '/signin', '/signup', '/forgot-password']
 
     const isProtectedRoute = protectedRoutes.some(route => pathname?.startsWith(route))

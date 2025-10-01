@@ -34,7 +34,8 @@ interface ChatMessage {
 
 interface ChatMessageProps {
   message: ChatMessage
-  onTaskAction: (action: string, taskId?: string, data?: any) => void
+  onTaskAction?: (action: string, taskId?: string, data?: any) => void
+  onSendMessage?: (message: string) => void
 }
 
 interface ClickableAction {
@@ -44,7 +45,7 @@ interface ClickableAction {
   className?: string
 }
 
-export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
+export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessageProps) {
   const isUser = message.role === 'user'
   const isAssistant = message.role === 'assistant'
 
@@ -146,7 +147,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
         elements.push(
           <button
             key={`action-${index}`}
-            onClick={() => onTaskAction(action.action, undefined, action.data)}
+            onClick={() => onTaskAction?.(action.action, undefined, action.data)}
             className={cn(
               'inline text-[13px] transition-colors',
               action.className
@@ -179,91 +180,91 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
       isUser ? "justify-end" : "justify-start"
     )}>
       <div className={cn(
-        "max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] space-y-2 sm:space-y-3",
+        "max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] space-y-1.5",
         isUser ? "text-right" : "text-left"
       )}>
         {/* Message content */}
         <div className={cn(
-          "chat-message rounded-sm px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5",
+          "chat-message rounded-sm px-2 py-1.5",
           isUser
             ? "bg-primary text-primary-foreground ml-auto"
             : "bg-gray-800/70 text-gray-100 border border-gray-700/50"
         )}>
-          <div className="text-xs sm:text-sm md:text-base whitespace-pre-wrap leading-relaxed">
+          <div className="text-xs whitespace-pre-wrap leading-relaxed">
             {isAssistant ? renderClickableContent(message.content) : message.content}
           </div>
         </div>
 
         {/* Task Lists (Assistant only) */}
         {isAssistant && message.taskLists && message.taskLists.length > 0 && (
-          <div className="space-y-1 sm:space-y-2">
+          <div className="space-y-1">
             {message.taskLists.map((taskList) => (
               <div
                 key={taskList.id}
                 className="border border-gray-800/30 bg-gray-900/60 rounded overflow-hidden"
               >
                 {/* Responsive header */}
-                <div className="bg-gray-800/40 px-2 py-0.5 sm:px-3 sm:py-1 md:px-4 md:py-1.5 border-b border-gray-800/30">
-                  <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
-                    <List className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-gray-400 flex-shrink-0" />
-                    <span className="font-medium text-gray-300 text-xs sm:text-sm md:text-base">
+                <div className="bg-gray-800/40 px-2 py-1 border-b border-gray-800/30">
+                  <div className="flex items-center gap-1.5">
+                    <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                    <span className="font-medium text-gray-300 text-xs">
                       {taskList.title}
                     </span>
                   </div>
                 </div>
 
                 {/* Tasks list */}
-                <div className="p-1.5 sm:p-2 md:p-3">
+                <div className="p-1.5">
                   {taskList.tasks && taskList.tasks.length > 0 ? (
-                    <div className="space-y-0.5 sm:space-y-1 md:space-y-1.5">
+                    <div className="space-y-0.5">
                       {taskList.tasks.map((task) => (
                         <div
                           key={task.id}
                           className={cn(
-                            "flex items-start gap-1.5 sm:gap-2 md:gap-3 py-0.5 sm:py-1 md:py-1.5 px-1 sm:px-2 md:px-3 rounded-sm",
+                            "flex items-start gap-1.5 py-1 px-1.5 rounded-sm",
                             "hover:bg-gray-800/20 transition-colors",
                             task.completed && "opacity-60"
                           )}
                         >
                           <button
-                            onClick={() => onTaskAction('toggle', task.id, { completed: !task.completed })}
+                            onClick={() => onTaskAction?.('toggle', task.id, { completed: !task.completed })}
                             className="flex-shrink-0 mt-0.5 hover:scale-110 transition-transform"
                           >
                             {task.completed ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500" />
+                              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                             ) : (
-                              <Circle className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-gray-400 hover:text-blue-400" />
+                              <Circle className="h-3.5 w-3.5 text-gray-400 hover:text-blue-400" />
                             )}
                           </button>
 
                           <div className="flex-1 min-w-0">
                             <div
                               className={cn(
-                                "text-gray-200 text-xs sm:text-sm md:text-base leading-tight sm:leading-normal",
+                                "text-gray-200 text-xs leading-tight",
                                 task.completed && "line-through text-gray-500"
                               )}
                             >
                               {task.title}
                             </div>
                             {task.description && (
-                              <div className="text-gray-500 mt-0.5 text-xs sm:text-sm md:text-sm leading-tight">
+                              <div className="text-gray-500 mt-0.5 text-xs leading-tight">
                                 {task.description}
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             {task.priority && task.priority !== 'medium' && (
                               <Flag className={cn(
-                                "h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4",
+                                "h-3 w-3",
                                 task.priority === 'high' && "text-red-400",
                                 task.priority === 'low' && "text-green-400"
                               )} />
                             )}
                             {task.dueDate && (
-                              <div className="flex items-center gap-0.5 sm:gap-1">
-                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-gray-400" />
-                                <span className="text-gray-400 text-xs sm:text-xs md:text-sm">
+                              <div className="flex items-center gap-0.5">
+                                <Calendar className="h-3 w-3 text-gray-400" />
+                                <span className="text-gray-400 text-xs">
                                   {formatDueDate(task.dueDate)}
                                 </span>
                               </div>
@@ -273,7 +274,7 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 italic text-center py-1 sm:py-2 text-xs sm:text-sm">
+                    <p className="text-gray-500 italic text-center py-1.5 text-xs">
                       No tasks in this list yet
                     </p>
                   )}
@@ -283,20 +284,27 @@ export function ChatMessage({ message, onTaskAction }: ChatMessageProps) {
           </div>
         )}
 
-        {/* Suggestions (Assistant only) */}
+        {/* Suggestions (Assistant only) - Quick action buttons */}
         {isAssistant && message.suggestions && message.suggestions.length > 0 && (
-          <div className="flex flex-wrap gap-1 sm:gap-2">
-            {message.suggestions.map((suggestion, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="h-6 sm:h-7 md:h-8 text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1"
-                onClick={() => onTaskAction('suggestion', undefined, suggestion)}
-              >
-                {suggestion}
-              </Button>
-            ))}
+          <div className="space-y-1">
+            <div className="text-xs text-gray-400 font-medium px-1">Quick actions:</div>
+            <div className="flex flex-wrap gap-1.5">
+              {message.suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => onSendMessage?.(suggestion)}
+                  className="group relative h-auto min-h-[28px] px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
+                    bg-gradient-to-r from-blue-600/90 to-blue-500/90 hover:from-blue-500 hover:to-blue-400
+                    text-white shadow-sm hover:shadow-md
+                    border border-blue-400/20 hover:border-blue-300/40
+                    active:scale-95 transform
+                    flex items-center gap-1.5 break-words text-left"
+                >
+                  <span className="text-blue-100 group-hover:text-white transition-colors flex-shrink-0">▸</span>
+                  <span className="break-words">{suggestion}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
