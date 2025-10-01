@@ -42,31 +42,16 @@ export function useTaskChat(): UseTaskChatResult {
       const { getUserDocuments } = await import('@/lib/firebase-data')
       const lists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
 
-      // Deduplicate lists by title (keep the most recently updated one)
-      const uniqueLists = lists.reduce((acc: TaskList[], list) => {
-        const existingIndex = acc.findIndex(l => l.title.toLowerCase() === list.title.toLowerCase())
-        if (existingIndex !== -1) {
-          // Compare updatedAt dates and keep the more recent one
-          const existingDate = acc[existingIndex].updatedAt || acc[existingIndex].createdAt
-          const newDate = list.updatedAt || list.createdAt
-          if (newDate > existingDate) {
-            acc[existingIndex] = list
-          }
-        } else {
-          acc.push(list)
-        }
-        return acc
-      }, [])
-
       // Sort by order field (ascending), with undefined order values at the end
-      uniqueLists.sort((a, b) => {
+      // No longer deduplicating - users can have multiple lists with the same title if they want
+      const sortedLists = [...lists].sort((a, b) => {
         const orderA = a.order ?? Number.MAX_SAFE_INTEGER
         const orderB = b.order ?? Number.MAX_SAFE_INTEGER
         return orderA - orderB
       })
 
-      console.log(`Loaded ${lists.length} lists, deduplicated to ${uniqueLists.length}`)
-      setTaskLists(uniqueLists)
+      console.log(`Loaded ${lists.length} lists from Firebase`)
+      setTaskLists(sortedLists)
     } catch (error) {
       console.log('Error loading task lists:', error)
     }
@@ -136,9 +121,10 @@ export function useTaskChat(): UseTaskChatResult {
       setTaskLists([])
       return
     }
-    // Run cleanup once on mount, then load lists
-    cleanupDuplicateLists()
-  }, [user, cleanupDuplicateLists])
+    // Just load lists without aggressive cleanup
+    // The cleanupDuplicateLists function was too aggressive and deleted user lists
+    reloadTaskLists()
+  }, [user, reloadTaskLists])
 
   // Save task list to Firebase
   const saveTaskListToFirebase = useCallback(async (taskList: TaskList) => {
@@ -227,8 +213,17 @@ export function useTaskChat(): UseTaskChatResult {
 
       await updateDocument('taskLists', id, firebaseUpdates)
       console.log('Successfully updated task list in Firebase:', id)
-      // Reload task lists to update UI
-      await reloadTaskLists()
+
+      // For simple updates (title, color, icon), just update the local state
+      // instead of doing a full reload to avoid flickering
+      if (!firebaseUpdates.tasks) {
+        setTaskLists(prev => prev.map(list =>
+          list.id === id ? { ...list, ...updates } : list
+        ))
+      } else {
+        // Only reload for task updates
+        await reloadTaskLists()
+      }
     } catch (error) {
       console.error('Failed to update task list in Firebase:', error)
     }
