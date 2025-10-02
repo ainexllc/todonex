@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { TaskCard, type Task } from '../../dashboard/TaskCard'
 import { cn } from '@/lib/utils'
 import type { TaskStatus } from '@/types/task'
+import { LIST_COLORS } from '@/lib/utils/list-colors'
 import {
   DndContext,
   DragEndEvent,
@@ -67,7 +68,7 @@ function DroppableColumn({ id, children }: DroppableColumnProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        'flex-1 p-4 space-y-3 min-h-[300px] transition-colors',
+        'flex-1 p-4 space-y-4 min-h-[300px] transition-colors',
         isOver && 'bg-primary/5 border-2 border-dashed border-primary rounded-lg'
       )}
     >
@@ -240,31 +241,28 @@ export function BoardView({
               >
                 <div
                   className={cn(
-                    'rounded-2xl border backdrop-blur',
-                    'flex flex-col min-h-[500px] shadow-sm'
+                    'rounded-3xl border-0',
+                    'flex flex-col min-h-[400px] shadow-xl',
+                    'overflow-hidden'
                   )}
                   style={{
-                    backgroundColor: listColorHex ? `${listColorHex}60` : 'hsl(var(--card) / 0.7)',
-                    borderColor: listColorHex ? `${listColorHex}70` : 'hsl(var(--border))'
+                    background: column.id === 'upcoming' ? LIST_COLORS.purple.gradient :
+                                column.id === 'today' ? LIST_COLORS.pink.gradient :
+                                column.id === 'done' ? LIST_COLORS.blue.gradient :
+                                LIST_COLORS.teal.gradient,
                   }}
                 >
                   {/* Column Header */}
-                  <div
-                    className="p-4 border-b"
-                    style={{
-                      backgroundColor: listColorHex ? `${listColorHex}70` : undefined,
-                      borderColor: listColorHex ? `${listColorHex}80` : 'hsl(var(--border))'
-                    }}
-                  >
+                  <div className="p-5 border-b border-white/10">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-black dark:text-white">
+                      <h3 className="text-lg font-semibold text-white">
                         {column.title}
                       </h3>
-                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-black/20 text-black border border-black/30 dark:bg-white/20 dark:text-white dark:border-white/30">
+                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-white/20 text-white border border-white/30">
                         {columnTasks.length}
                       </span>
                     </div>
-                    <p className="text-xs text-black/70 dark:text-white/70">
+                    <p className="text-xs text-white/70">
                       {column.description}
                     </p>
                   </div>

@@ -298,7 +298,7 @@ export default function TasksPage() {
         />
       )}
 
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="h-dvh flex flex-col overflow-hidden bg-background">
       {/* Main Layout: Sidebar + Content */}
       <div className="flex-1 flex flex-row overflow-hidden">
         {/* Sidebar */}

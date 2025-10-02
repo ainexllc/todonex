@@ -192,14 +192,19 @@ export function TaskCard({
   return (
     <Card
       className={cn(
-        'p-2.5 hover:shadow-md transition-all duration-200 border border-border',
+        'p-4 transition-all duration-200',
+        'bg-gray-800/90 dark:bg-gray-800/90',
+        'border border-white/10',
+        'shadow-sm hover:shadow-md',
+        'rounded-xl',
+        'backdrop-blur-sm',
         selected && 'ring-2 ring-primary',
         task.completed && 'opacity-70',
-        draggable && 'cursor-move',
+        draggable && 'cursor-move hover:-translate-y-0.5',
         className
       )}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-3">
         {/* Drag Handle */}
         {draggable && (
           <div className="flex-shrink-0 mt-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
@@ -230,7 +235,7 @@ export function TaskCard({
         </button>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-2">
           {/* Title */}
           {isEditing ? (
             <div className="flex items-center gap-2">
@@ -256,8 +261,8 @@ export function TaskCard({
             <h3
               onClick={handleTitleClick}
               className={cn(
-                'font-medium text-xs cursor-pointer hover:text-primary transition-colors',
-                task.completed && 'line-through text-muted-foreground'
+                'font-medium text-sm cursor-pointer hover:text-blue-300 transition-colors leading-relaxed text-white',
+                task.completed && 'line-through text-gray-400'
               )}
             >
               {toTitleCase(task.title)}
@@ -266,7 +271,7 @@ export function TaskCard({
 
           {/* Description */}
           {task.description && isExpanded && (
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-gray-300 leading-relaxed">
               {task.description}
             </p>
           )}
