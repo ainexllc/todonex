@@ -65,10 +65,10 @@ export function TaskCard({
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border-red-200 dark:border-red-800'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
-      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300 border-green-200 dark:border-green-800'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+      case 'high': return 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400 border-red-200 dark:border-red-900'
+      case 'medium': return 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-900'
+      case 'low': return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900'
+      default: return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -192,15 +192,14 @@ export function TaskCard({
   return (
     <Card
       className={cn(
-        'p-4 transition-all duration-200',
-        'bg-gray-800/90 dark:bg-gray-800/90',
-        'border border-white/10',
-        'shadow-sm hover:shadow-md',
+        'p-4 transition-all duration-200 ease-out',
+        'bg-card',
+        'border border-border/50',
+        'shadow-sm hover:shadow-md hover:-translate-y-0.5',
         'rounded-xl',
-        'backdrop-blur-sm',
         selected && 'ring-2 ring-primary',
-        task.completed && 'opacity-70',
-        draggable && 'cursor-move hover:-translate-y-0.5',
+        task.completed && 'opacity-60',
+        draggable && 'cursor-move',
         className
       )}
     >
@@ -228,9 +227,9 @@ export function TaskCard({
           className="flex-shrink-0 mt-0.5 transition-transform hover:scale-110"
         >
           {task.completed ? (
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           ) : (
-            <Circle className="h-4 w-4 text-gray-400 hover:text-primary" />
+            <Circle className="h-5 w-5 text-muted-foreground hover:text-primary" />
           )}
         </button>
 
@@ -261,8 +260,8 @@ export function TaskCard({
             <h3
               onClick={handleTitleClick}
               className={cn(
-                'font-medium text-sm cursor-pointer hover:text-blue-300 transition-colors leading-relaxed text-white',
-                task.completed && 'line-through text-gray-400'
+                'font-medium text-sm cursor-pointer hover:text-primary transition-colors leading-relaxed text-card-foreground',
+                task.completed && 'line-through text-muted-foreground'
               )}
             >
               {toTitleCase(task.title)}
@@ -271,7 +270,7 @@ export function TaskCard({
 
           {/* Description */}
           {task.description && isExpanded && (
-            <p className="text-xs text-gray-300 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {task.description}
             </p>
           )}

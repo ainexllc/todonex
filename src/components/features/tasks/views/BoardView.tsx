@@ -68,7 +68,7 @@ function DroppableColumn({ id, children }: DroppableColumnProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        'flex-1 p-4 space-y-4 min-h-[300px] transition-colors',
+        'flex-1 p-5 space-y-3 min-h-[300px] transition-colors',
         isOver && 'bg-primary/5 border-2 border-dashed border-primary rounded-lg'
       )}
     >
@@ -241,28 +241,29 @@ export function BoardView({
               >
                 <div
                   className={cn(
-                    'rounded-3xl border-0',
-                    'flex flex-col min-h-[400px] shadow-xl',
+                    'rounded-2xl border-l-4',
+                    'flex flex-col min-h-[400px]',
+                    'bg-secondary/50',
                     'overflow-hidden'
                   )}
                   style={{
-                    background: column.id === 'upcoming' ? LIST_COLORS.purple.gradient :
-                                column.id === 'today' ? LIST_COLORS.pink.gradient :
-                                column.id === 'done' ? LIST_COLORS.blue.gradient :
-                                LIST_COLORS.teal.gradient,
+                    borderLeftColor: column.id === 'upcoming' ? LIST_COLORS.purple.hex :
+                                     column.id === 'today' ? LIST_COLORS.pink.hex :
+                                     column.id === 'done' ? LIST_COLORS.blue.hex :
+                                     LIST_COLORS.teal.hex,
                   }}
                 >
                   {/* Column Header */}
-                  <div className="p-5 border-b border-white/10">
+                  <div className="p-5 border-b border-border/10 bg-card/50">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-lg font-semibold text-foreground">
                         {column.title}
                       </h3>
-                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-white/20 text-white border border-white/30">
+                      <span className="text-sm font-medium px-3 py-1 rounded-full bg-muted text-muted-foreground">
                         {columnTasks.length}
                       </span>
                     </div>
-                    <p className="text-xs text-white/70">
+                    <p className="text-xs text-muted-foreground">
                       {column.description}
                     </p>
                   </div>
@@ -286,10 +287,10 @@ export function BoardView({
                     ) : (
                       /* Empty State - Droppable */
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-black/30 dark:border-white/30 flex items-center justify-center mb-4">
-                          <span className="text-2xl text-black/50 dark:text-white/50">∅</span>
+                        <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-border flex items-center justify-center mb-4">
+                          <span className="text-2xl text-muted-foreground/50">∅</span>
                         </div>
-                        <p className="text-sm font-medium text-black/70 dark:text-white/70">
+                        <p className="text-sm font-medium text-muted-foreground">
                           Drop tasks here
                         </p>
                       </div>
