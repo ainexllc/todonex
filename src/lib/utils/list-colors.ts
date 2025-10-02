@@ -10,8 +10,7 @@ export interface ListColorTheme {
   bg: string       // Background color (Tailwind class)
   border: string   // Border color (Tailwind class)
   text: string     // Text color (Tailwind class)
-  hex: string      // Hex value for reference
-  gradient: string // CSS gradient for vibrant backgrounds
+  hex: string      // Hex value for colored elements (dots, borders, accents)
 }
 
 export const LIST_COLORS = {
@@ -21,112 +20,96 @@ export const LIST_COLORS = {
     border: 'border-red-500',
     text: 'text-red-900 dark:text-red-300',
     hex: '#EF4444',
-    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
   },
   orange: {
     bg: 'bg-orange-100 dark:bg-orange-950',
     border: 'border-orange-500',
     text: 'text-orange-900 dark:text-orange-300',
     hex: '#F97316',
-    gradient: 'linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)',
   },
   amber: {
     bg: 'bg-amber-100 dark:bg-amber-950',
     border: 'border-amber-500',
     text: 'text-amber-900 dark:text-amber-300',
     hex: '#F59E0B',
-    gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
   },
   yellow: {
     bg: 'bg-yellow-100 dark:bg-yellow-950',
     border: 'border-yellow-500',
     text: 'text-yellow-900 dark:text-yellow-300',
     hex: '#EAB308',
-    gradient: 'linear-gradient(135deg, #ffeaa7 0%, #fd79a8 100%)',
   },
   lime: {
     bg: 'bg-lime-100 dark:bg-lime-950',
     border: 'border-lime-500',
     text: 'text-lime-900 dark:text-lime-300',
     hex: '#84CC16',
-    gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
   },
   green: {
     bg: 'bg-green-100 dark:bg-green-950',
     border: 'border-green-500',
     text: 'text-green-900 dark:text-green-300',
     hex: '#10B981',
-    gradient: 'linear-gradient(135deg, #56ab2f 0%, #a8e063 100%)',
   },
   emerald: {
     bg: 'bg-emerald-100 dark:bg-emerald-950',
     border: 'border-emerald-500',
     text: 'text-emerald-900 dark:text-emerald-300',
     hex: '#059669',
-    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
   },
   teal: {
     bg: 'bg-teal-100 dark:bg-teal-950',
     border: 'border-teal-500',
     text: 'text-teal-900 dark:text-teal-300',
     hex: '#14B8A6',
-    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
   },
   cyan: {
     bg: 'bg-cyan-100 dark:bg-cyan-950',
     border: 'border-cyan-500',
     text: 'text-cyan-900 dark:text-cyan-300',
     hex: '#06B6D4',
-    gradient: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
   },
   sky: {
     bg: 'bg-sky-100 dark:bg-sky-950',
     border: 'border-sky-500',
     text: 'text-sky-900 dark:text-sky-300',
     hex: '#0EA5E9',
-    gradient: 'linear-gradient(135deg, #74ebd5 0%, #9face6 100%)',
   },
   blue: {
     bg: 'bg-blue-100 dark:bg-blue-950',
     border: 'border-blue-500',
     text: 'text-blue-900 dark:text-blue-300',
     hex: '#3B82F6',
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
   },
   indigo: {
     bg: 'bg-indigo-100 dark:bg-indigo-950',
     border: 'border-indigo-500',
     text: 'text-indigo-900 dark:text-indigo-300',
     hex: '#6366F1',
-    gradient: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)',
   },
   violet: {
     bg: 'bg-violet-100 dark:bg-violet-950',
     border: 'border-violet-500',
     text: 'text-violet-900 dark:text-violet-300',
     hex: '#8B5CF6',
-    gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
   },
   purple: {
     bg: 'bg-purple-100 dark:bg-purple-950',
     border: 'border-purple-500',
     text: 'text-purple-900 dark:text-purple-300',
     hex: '#A855F7',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   },
   fuchsia: {
     bg: 'bg-fuchsia-100 dark:bg-fuchsia-950',
     border: 'border-fuchsia-500',
     text: 'text-fuchsia-900 dark:text-fuchsia-300',
     hex: '#D946EF',
-    gradient: 'linear-gradient(135deg, #fa709a 0%, #c471f5 100%)',
   },
   pink: {
     bg: 'bg-pink-100 dark:bg-pink-950',
     border: 'border-pink-500',
     text: 'text-pink-900 dark:text-pink-300',
     hex: '#EC4899',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
   },
 
   // Neutral colors
@@ -135,14 +118,12 @@ export const LIST_COLORS = {
     border: 'border-slate-500',
     text: 'text-slate-900 dark:text-slate-300',
     hex: '#64748B',
-    gradient: 'linear-gradient(135deg, #606c88 0%, #3f4c6b 100%)',
   },
   gray: {
     bg: 'bg-gray-100 dark:bg-gray-900',
     border: 'border-gray-500',
     text: 'text-gray-900 dark:text-gray-300',
     hex: '#6B7280',
-    gradient: 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)',
   },
 } as const
 

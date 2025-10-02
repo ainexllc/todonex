@@ -312,29 +312,17 @@ export default function TasksPage() {
         />
 
         {/* Main Content Area */}
-        <div
-          className="flex-1 flex flex-col overflow-hidden"
-          style={{
-            background: listColorTheme
-              ? `linear-gradient(to bottom, ${listColorTheme.hex}70, ${listColorTheme.hex}60)`
-              : undefined
-          }}
-        >
+        <div className="flex-1 flex flex-col overflow-hidden bg-background">
           {/* Task Header */}
-          <div
-            className="flex-shrink-0 border-b border-white/20 backdrop-blur-sm"
-            style={{
-              backgroundColor: listColorTheme ? `${listColorTheme.hex}80` : undefined
-            }}
-          >
+          <div className="flex-shrink-0 border-b border-border bg-card/50 backdrop-blur-sm">
             {/* Stats Row */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-black/10 dark:border-white/10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
               <div className="flex items-center gap-3">
                 <div>
-                  <h1 className="text-2xl font-bold text-black dark:text-white">
+                  <h1 className="text-2xl font-bold text-foreground">
                     {activeList?.title || 'Tasks'}
                   </h1>
-                  <p className="text-sm text-black/80 dark:text-white/80 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {stats.total} total {stats.total === 1 ? 'task' : 'tasks'}
                     {stats.today > 0 && ` • ${stats.today} for today`}
                     {stats.done > 0 && ` • ${stats.done} completed`}
@@ -345,7 +333,7 @@ export default function TasksPage() {
                     size="sm"
                     variant="ghost"
                     onClick={() => setSettingsOpen(true)}
-                    className="h-8 w-8 p-0 text-black dark:text-white hover:bg-black/20 dark:hover:bg-white/20"
+                    className="h-8 w-8 p-0"
                     title="List settings"
                   >
                     <Settings2 className="h-4 w-4" />
@@ -354,12 +342,12 @@ export default function TasksPage() {
               </div>
               <div className="flex items-center gap-2">
                 {stats.today > 0 && (
-                  <Badge variant="outline" className="text-xs text-black dark:text-white border-black/40 dark:border-white/40 font-semibold bg-black/10 dark:bg-white/10">
+                  <Badge variant="outline" className="text-xs font-semibold">
                     {stats.today} today
                   </Badge>
                 )}
                 {stats.done > 0 && (
-                  <Badge variant="outline" className="text-xs text-black dark:text-white border-black/40 dark:border-white/40 font-semibold bg-black/10 dark:bg-white/10">
+                  <Badge variant="outline" className="text-xs font-semibold">
                     {stats.done} done
                   </Badge>
                 )}
@@ -367,7 +355,7 @@ export default function TasksPage() {
                   size="sm"
                   variant="ghost"
                   onClick={handleProfile}
-                  className="h-8 w-8 p-0 text-black dark:text-white hover:bg-black/20 dark:hover:bg-white/20"
+                  className="h-8 w-8 p-0"
                   title="Profile"
                 >
                   <User className="h-4 w-4" />
@@ -376,7 +364,7 @@ export default function TasksPage() {
                   size="sm"
                   variant="ghost"
                   onClick={handleLogout}
-                  className="h-8 w-8 p-0 text-black dark:text-white hover:bg-black/20 dark:hover:bg-white/20"
+                  className="h-8 w-8 p-0"
                   title="Logout"
                 >
                   <LogOut className="h-4 w-4" />
@@ -387,12 +375,12 @@ export default function TasksPage() {
             {/* Filters Row */}
             <div className="flex items-center gap-3 px-6 py-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-black/60 dark:text-white/60" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search tasks..."
-                  className="h-9 pl-9 text-sm bg-black/10 dark:bg-white/10 border-black/20 dark:border-white/20 text-black dark:text-white placeholder:text-black/50 dark:placeholder:text-white/50"
+                  className="h-9 pl-9 text-sm"
                 />
               </div>
 
@@ -400,7 +388,7 @@ export default function TasksPage() {
               {priorityFilter && (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer bg-black/10 dark:bg-white/10 border-black/20 dark:border-white/20 text-black dark:text-white"
+                  className="cursor-pointer"
                   onClick={() => setPriorityFilter(null)}
                 >
                   Priority: {priorityFilter}
@@ -411,7 +399,7 @@ export default function TasksPage() {
               {tagFilter && (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer bg-black/10 dark:bg-white/10 border-black/20 dark:border-white/20 text-black dark:text-white"
+                  className="cursor-pointer"
                   onClick={() => setTagFilter(null)}
                 >
                   Tag: {tagFilter}
@@ -422,7 +410,7 @@ export default function TasksPage() {
                 size="sm"
                 variant="default"
                 onClick={() => setShowNewTaskModal(true)}
-                className="gap-2 bg-black/20 hover:bg-black/30 text-black border-black/30 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white dark:border-white/30"
+                className="gap-2"
               >
                 <Plus className="h-4 w-4" />
                 New Task
@@ -435,7 +423,7 @@ export default function TasksPage() {
             {!activeList ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
-                  <p className="text-black/70 dark:text-white/70 mb-4">No list selected</p>
+                  <p className="text-muted-foreground mb-4">No list selected</p>
                   <Button onClick={() => setIsAIModalOpen(true)}>
                     Create Your First List
                   </Button>
