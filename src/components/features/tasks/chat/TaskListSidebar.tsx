@@ -481,21 +481,25 @@ export function TaskListSidebar({
                   </div>
                 </div>
 
-                {taskLists.map((taskList) => {
+                {taskLists.map((taskList, index) => {
                   const completedCount = taskList.tasks.filter(task => task.completed).length
                   const totalCount = taskList.tasks.length
                   const isSelected = selectedTaskListId === taskList.id
+
+                  // Cycle through gradient colors
+                  const gradientClasses = ['card-purple', 'card-pink', 'card-blue', 'card-teal', 'card-emerald', 'card-amber', 'card-red']
+                  const gradientClass = gradientClasses[index % gradientClasses.length]
 
                   return (
                     <div
                       key={taskList.id}
                       className={cn(
-                        "group cursor-pointer transition-all duration-150 rounded-md border overflow-hidden",
-                        isSelected
-                          ? "border-blue-500/60 bg-blue-950/30 shadow-sm shadow-blue-500/20"
-                          : "border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/40 hover:border-gray-700/60",
-                        isMobile && "mx-1 active:scale-[0.98]"
+                        "group cursor-pointer transition-all duration-150 overflow-hidden shadow-md",
+                        isSelected && "ring-2 ring-white/30 shadow-xl",
+                        isMobile && "mx-1 active:scale-[0.98]",
+                        gradientClass
                       )}
+                      style={{ borderRadius: '0.5rem' }}
                       onClick={() => {
                         handleTaskListClick(taskList)
                         // Close mobile drawer when selecting a task list
@@ -510,8 +514,8 @@ export function TaskListSidebar({
                       )}>
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <List className={cn(
-                            "flex-shrink-0",
-                            isMobile ? "h-5 w-5 text-gray-200" : "h-3 w-3 text-gray-400"
+                            "flex-shrink-0 text-white/90",
+                            isMobile ? "h-5 w-5" : "h-3 w-3"
                           )} />
                           {editingListId === taskList.id ? (
                             <div className="flex items-center gap-1 flex-1">
@@ -525,7 +529,7 @@ export function TaskListSidebar({
                                   if (e.key === 'Escape') handleCancelRename()
                                 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="h-5 px-1 py-0 text-[11px] bg-gray-800/80 border-gray-700 text-gray-100"
+                                className="h-5 px-1 py-0 text-[11px] bg-white/20 border-white/30 text-white placeholder:text-white/60"
                                 autoFocus
                               />
                               <Button
@@ -535,7 +539,7 @@ export function TaskListSidebar({
                                   e.stopPropagation()
                                   handleSaveRename(taskList.id)
                                 }}
-                                className="h-4 w-4 p-0 text-green-400 hover:text-green-300"
+                                className="h-4 w-4 p-0 text-white hover:text-white/80 hover:bg-white/20"
                               >
                                 <Check className="h-2.5 w-2.5" />
                               </Button>
@@ -546,7 +550,7 @@ export function TaskListSidebar({
                                   e.stopPropagation()
                                   handleCancelRename()
                                 }}
-                                className="h-4 w-4 p-0 text-red-400 hover:text-red-300"
+                                className="h-4 w-4 p-0 text-white hover:text-white/80 hover:bg-white/20"
                               >
                                 <XCircle className="h-2.5 w-2.5" />
                               </Button>
@@ -554,14 +558,14 @@ export function TaskListSidebar({
                           ) : (
                             <div className="flex items-center gap-1.5 flex-1 min-w-0">
                               <span className={cn(
-                                "font-medium truncate text-gray-100 flex-1",
+                                "font-semibold truncate text-white drop-shadow-sm flex-1",
                                 isMobile ? "text-xs" : "text-[12px]"
                               )}>
                                 {taskList.title}
                               </span>
                               {totalCount > 0 && (
                                 <span className={cn(
-                                  "text-gray-500 flex-shrink-0",
+                                  "text-white/70 flex-shrink-0 font-medium",
                                   isMobile ? "text-[10px]" : "text-[10px]"
                                 )}>
                                   {completedCount}/{totalCount}
@@ -577,8 +581,8 @@ export function TaskListSidebar({
                               size="sm"
                               onClick={(e) => handleStartRename(e, taskList)}
                               className={cn(
-                                "p-0 hover:text-gray-200 hover:bg-gray-800/50 rounded-sm",
-                                isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
+                                "p-0 text-white/80 hover:text-white hover:bg-white/20 rounded-sm",
+                                isMobile ? "h-7 w-7" : "h-5 w-5"
                               )}
                               title="Rename list"
                             >
@@ -589,8 +593,8 @@ export function TaskListSidebar({
                               size="sm"
                               onClick={(e) => handleDeleteTaskList(e, taskList)}
                               className={cn(
-                                "p-0 hover:text-red-400 hover:bg-red-900/20 rounded-sm",
-                                isMobile ? "h-7 w-7 text-gray-300" : "h-5 w-5 text-gray-400"
+                                "p-0 text-white/80 hover:text-white hover:bg-red-500/30 rounded-sm",
+                                isMobile ? "h-7 w-7" : "h-5 w-5"
                               )}
                               title="Delete list"
                             >

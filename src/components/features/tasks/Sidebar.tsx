@@ -2,7 +2,6 @@
 
 import { Plus, LayoutGrid, List as ListIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 import { getListColor } from '@/lib/utils/list-colors'
 import { getIconComponent } from '@/lib/utils/icon-matcher'
@@ -31,6 +30,37 @@ export function Sidebar({
   const getIncompleteCount = (list: TaskList) => {
     return list.tasks.filter(task => !task.completed).length
   }
+
+  // Calculate completion stats across all lists
+  const getCompletionStats = () => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekStart = new Date(today)
+    weekStart.setDate(today.getDate() - today.getDay())
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const yearStart = new Date(now.getFullYear(), 0, 1)
+
+    let todayCount = 0
+    let weekCount = 0
+    let monthCount = 0
+    let yearCount = 0
+
+    lists.forEach(list => {
+      list.tasks.forEach(task => {
+        if (task.completed && task.completedAt) {
+          const completedDate = new Date(task.completedAt)
+          if (completedDate >= today) todayCount++
+          if (completedDate >= weekStart) weekCount++
+          if (completedDate >= monthStart) monthCount++
+          if (completedDate >= yearStart) yearCount++
+        }
+      })
+    })
+
+    return { today: todayCount, week: weekCount, month: monthCount, year: yearCount }
+  }
+
+  const stats = getCompletionStats()
 
   // Get active list for visual feedback
   const activeList = lists.find(list => list.id === activeListId)
@@ -65,35 +95,31 @@ export function Sidebar({
               key={list.id}
               onClick={() => onListSelect(list.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
-                'hover:bg-muted/50',
-                'text-left group relative',
-                isActive && 'bg-primary/10 hover:bg-primary/15'
+                'w-full flex items-center gap-3 px-3 py-2.5 transition-all duration-200',
+                'text-left group relative rounded-lg',
+                'hover:bg-accent',
+                isActive ? 'bg-accent' : 'bg-background'
               )}
             >
-              {/* Colored dot indicator */}
-              <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{
-                  backgroundColor: colorTheme.hex
-                }}
-              />
-
               {/* Icon (if available) */}
               {IconComponent && (
                 <IconComponent
-                  className="h-4 w-4 flex-shrink-0 text-foreground/70"
+                  className="h-4 w-4 flex-shrink-0"
+                  style={{ color: colorTheme.hex }}
                 />
               )}
 
               {/* List title */}
-              <span className="flex-1 text-sm font-medium truncate text-foreground">
+              <span className="flex-1 text-sm font-medium truncate">
                 {list.title}
               </span>
 
               {/* Incomplete task count badge */}
               {incompleteCount > 0 && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: colorTheme.hex }}
+                >
                   {incompleteCount}
                 </span>
               )}
@@ -107,6 +133,33 @@ export function Sidebar({
             No lists yet. Create your first list to get started!
           </div>
         )}
+      </div>
+
+      {/* Stats Summary Section */}
+      <div className="flex-shrink-0 px-4 py-3 border-t border-border">
+        <div className="mb-3">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Completed
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <div className="text-xs text-muted-foreground">Today</div>
+            <div className="text-lg font-bold">{stats.today}</div>
+          </div>
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <div className="text-xs text-muted-foreground">This Week</div>
+            <div className="text-lg font-bold">{stats.week}</div>
+          </div>
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <div className="text-xs text-muted-foreground">This Month</div>
+            <div className="text-lg font-bold">{stats.month}</div>
+          </div>
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <div className="text-xs text-muted-foreground">This Year</div>
+            <div className="text-lg font-bold">{stats.year}</div>
+          </div>
+        </div>
       </div>
 
       {/* Middle Section - View Mode Toggle */}
@@ -138,15 +191,6 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Bottom Section - Theme Toggle */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-border">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Theme
-          </span>
-          <ThemeToggle />
-        </div>
-      </div>
     </div>
   )
 }

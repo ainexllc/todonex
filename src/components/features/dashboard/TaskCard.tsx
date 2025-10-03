@@ -59,6 +59,7 @@ export function TaskCard({
   const [editedTitle, setEditedTitle] = useState(task.title)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isEditingPriority, setIsEditingPriority] = useState(false)
+  const [isEditingDueDate, setIsEditingDueDate] = useState(false)
 
   // Get categories from either new categories array or old category field
   const taskCategories = task.categories || (task.category ? [task.category] : [])
@@ -136,6 +137,12 @@ export function TaskCard({
   const handlePriorityChange = (priority: 'low' | 'medium' | 'high') => {
     onUpdate?.(task.id, { priority })
     setIsEditingPriority(false)
+  }
+
+  const handleDueDateChange = (dateString: string) => {
+    const newDate = dateString ? new Date(dateString) : undefined
+    onUpdate?.(task.id, { dueDate: newDate })
+    setIsEditingDueDate(false)
   }
 
   if (compact) {
@@ -342,19 +349,43 @@ export function TaskCard({
             )}
 
             {/* Due Date - pushed to right - ALWAYS VISIBLE */}
-            {task.dueDate && (
+            {isEditingDueDate ? (
+              <div className="flex items-center gap-1 ml-auto">
+                <input
+                  type="date"
+                  defaultValue={task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDueDateChange(e.target.value)}
+                  className="h-7 text-xs rounded px-2 border border-blue-500 bg-background text-foreground"
+                  autoFocus
+                  onBlur={() => setIsEditingDueDate(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setIsEditingDueDate(false)
+                  }}
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditingDueDate(false)}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
               <Badge
                 variant="outline"
                 className={cn(
                   'text-xs px-2 py-1 flex-shrink-0 ml-auto flex items-center gap-1',
-                  'border-2 font-semibold',
-                  isOverdue && 'bg-red-500/10 border-red-500 text-red-400',
-                  isDueToday && 'bg-yellow-500/10 border-yellow-500 text-yellow-400',
-                  !isOverdue && !isDueToday && 'border-blue-500/50 text-blue-400'
+                  'border-2 font-semibold cursor-pointer hover:scale-105 transition-transform',
+                  task.dueDate && isOverdue && 'bg-red-500/10 border-red-500 text-red-400',
+                  task.dueDate && isDueToday && 'bg-yellow-500/10 border-yellow-500 text-yellow-400',
+                  task.dueDate && !isOverdue && !isDueToday && 'border-blue-500/50 text-blue-400',
+                  !task.dueDate && 'border-muted-foreground/50 text-muted-foreground'
                 )}
+                onClick={() => !task.completed && setIsEditingDueDate(true)}
               >
                 <Calendar className="h-3 w-3" />
-                {formatDueDate(task.dueDate)}
+                {task.dueDate ? formatDueDate(task.dueDate) : 'Add date'}
               </Badge>
             )}
           </div>

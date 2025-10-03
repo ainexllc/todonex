@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
-@import '../styles/design-system.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Chat content area uses semantic typography */
 .chat-content-area {
@@ -71,7 +71,7 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --ring: 217 91% 60%;
-  --radius: 0.75rem;                /* 12px default radius */
+  --radius: 0.5rem;                 /* 8px tighter radius */
 
   /* Interactive States */
   --hover-bg: 0 0% 96%;             /* Subtle hover */
@@ -97,31 +97,31 @@
 }
 
 .dark {
-  /* Clean Professional Dark Theme */
-  --background: 0 0% 4%;            /* Rich black #0A0A0A */
-  --foreground: 0 0% 96%;           /* Off-white #F5F5F5 */
-  --card: 0 0% 15%;                 /* Elevated dark #262626 */
-  --card-foreground: 0 0% 96%;
-  --popover: 0 0% 10%;
-  --popover-foreground: 0 0% 96%;
+  /* Vibrant Dark Theme - Horn Family Style */
+  --background: 222 47% 11%;        /* Deep navy blue #0F172A */
+  --foreground: 0 0% 98%;           /* Almost white text */
+  --card: 220 26% 18%;              /* Rich navy cards */
+  --card-foreground: 0 0% 98%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 0 0% 98%;
 
-  /* Accent Colors */
-  --primary: 217 91% 70%;           /* Bright blue #60A5FA */
-  --primary-foreground: 0 0% 10%;
-  --secondary: 0 0% 10%;            /* Dark gray surface */
-  --secondary-foreground: 0 0% 96%;
+  /* Accent Colors - Vibrant */
+  --primary: 217 91% 65%;           /* Vivid blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 32% 17%;         /* Navy surface */
+  --secondary-foreground: 0 0% 98%;
 
   /* Muted & Borders */
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 63%;     /* Light gray text #A1A1A1 */
-  --border: 0 0% 20%;               /* Subtle dark borders */
-  --input: 0 0% 15%;
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20% 65%;  /* Lighter muted text */
+  --border: 217 32% 27%;            /* Subtle borders */
+  --input: 217 32% 17%;
 
   /* Actions */
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --ring: 217 91% 70%;
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
   /* Interactive States */
   --hover-bg: 0 0% 20%;             /* Subtle hover */
@@ -2360,4 +2360,482 @@ code, pre, .grok-mono {
   .task-description {
     font-size: clamp(12px, 1.8vw, 14px);
   }
+}
+/* ========================================
+   NEXTTASK PRO - DESIGN SYSTEM
+   Global styling solution for consistent theming
+   ======================================== */
+
+/* ========================================
+   SEMANTIC TYPOGRAPHY SCALE
+   ======================================== */
+
+/* Primary headings for main page titles and sections */
+.text-heading-1 {
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+}
+
+.text-heading-2 {
+  font-size: clamp(20px, 3vw, 24px);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+
+.text-heading-3 {
+  font-size: clamp(16px, 2.5vw, 20px);
+  line-height: 1.4;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* Body text for main content */
+.text-body {
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.6;
+  font-weight: 400;
+  color: hsl(var(--foreground));
+}
+
+.text-body-sm {
+  font-size: clamp(12px, 1.8vw, 14px);
+  line-height: 1.5;
+  font-weight: 400;
+  color: hsl(var(--foreground));
+}
+
+/* Caption text for metadata, labels, timestamps */
+.text-caption {
+  font-size: clamp(10px, 1.5vw, 12px);
+  line-height: 1.4;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Task-specific typography */
+.text-task-title {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 550;
+  color: hsl(var(--foreground));
+}
+
+.text-task-description {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Sidebar and navigation text */
+.text-nav-primary {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.text-nav-secondary {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.text-nav-label {
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   SEMANTIC COLOR SYSTEM
+   ======================================== */
+
+/* Text colors - Theme adaptive */
+.text-primary { color: hsl(var(--foreground)); }
+.text-secondary { color: hsl(var(--muted-foreground)); }
+.text-muted { color: hsl(var(--muted-foreground) / 0.8); }
+.text-accent { color: hsl(var(--primary)); }
+
+/* Background colors - Theme adaptive */
+.bg-surface { background-color: hsl(var(--background)); }
+.bg-elevated { background-color: hsl(var(--card)); }
+.bg-overlay { background-color: hsl(var(--popover)); }
+.bg-muted { background-color: hsl(var(--muted)); }
+
+/* Border colors - Theme adaptive */
+.border-default { border-color: hsl(var(--border)); }
+.border-subtle { border-color: hsl(var(--border) / 0.5); }
+.border-strong { border-color: hsl(var(--border) / 0.8); }
+
+/* Status colors */
+.status-error {
+  color: hsl(var(--priority-high));
+  background-color: hsl(var(--priority-high-bg));
+  border-color: hsl(var(--priority-high-border));
+}
+
+.status-success {
+  color: hsl(var(--priority-low));
+  background-color: hsl(var(--priority-low-bg));
+  border-color: hsl(var(--priority-low-border));
+}
+
+.status-warning {
+  color: hsl(var(--priority-medium));
+  background-color: hsl(var(--priority-medium-bg));
+  border-color: hsl(var(--priority-medium-border));
+}
+
+/* Priority colors - Theme adaptive */
+.priority-high {
+  color: hsl(var(--priority-high));
+}
+
+.priority-medium {
+  color: hsl(var(--priority-medium));
+}
+
+.priority-low {
+  color: hsl(var(--priority-low));
+}
+
+.priority-high-bg {
+  background-color: hsl(var(--priority-high-bg));
+  border-color: hsl(var(--priority-high-border));
+}
+
+.priority-medium-bg {
+  background-color: hsl(var(--priority-medium-bg));
+  border-color: hsl(var(--priority-medium-border));
+}
+
+.priority-low-bg {
+  background-color: hsl(var(--priority-low-bg));
+  border-color: hsl(var(--priority-low-border));
+}
+
+/* Interactive colors - Theme adaptive */
+.hover-surface:hover { background-color: hsl(var(--hover-bg)); }
+.hover-accent:hover { color: hsl(var(--primary)); }
+.hover-muted:hover { color: hsl(var(--muted-foreground)); }
+
+/* ========================================
+   SEMANTIC SPACING SYSTEM
+   ======================================== */
+
+/* Component spacing */
+.spacing-xs { --spacing: 0.25rem; }
+.spacing-sm { --spacing: 0.5rem; }
+.spacing-md { --spacing: 0.75rem; }
+.spacing-lg { --spacing: 1rem; }
+.spacing-xl { --spacing: 1.5rem; }
+.spacing-2xl { --spacing: 2rem; }
+
+/* Gap utilities */
+.gap-component { gap: 0.75rem; }
+.gap-section { gap: 1.5rem; }
+.gap-inline { gap: 0.5rem; }
+
+/* Padding patterns */
+.padding-card {
+  padding: 1.25rem;
+}
+
+.padding-button {
+  padding: 0.5rem 1rem;
+}
+
+.padding-button-sm {
+  padding: 0.375rem 0.75rem;
+}
+
+.padding-input {
+  padding: 0.625rem 0.875rem;
+}
+
+.padding-sidebar {
+  padding: 0.75rem;
+}
+
+/* Margin patterns */
+.margin-section { margin-bottom: 1.5rem; }
+.margin-component { margin-bottom: 1rem; }
+.margin-inline { margin-left: 0.5rem; margin-right: 0.5rem; }
+
+/* ========================================
+   COMPONENT CLASSES
+   ======================================== */
+
+/* Button variants */
+.btn-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary));
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+.btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.8);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-ghost:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Card variants - Vibrant colors matching Horn Family */
+.card-default {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 hsl(var(--glass-shadow) / 0.1);
+}
+
+.card-elevated {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow:
+    0 4px 6px -1px hsl(var(--glass-shadow) / 0.1),
+    0 2px 4px -1px hsl(var(--glass-shadow) / 0.06);
+}
+
+.card-interactive {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 hsl(var(--glass-shadow) / 0.1);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 25px -5px hsl(var(--glass-shadow) / 0.15),
+    0 8px 10px -6px hsl(var(--glass-shadow) / 0.1);
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+/* Input variants */
+.input-default {
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-default:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.input-error {
+  border-color: hsl(var(--priority-high));
+  box-shadow: 0 0 0 3px hsl(var(--priority-high) / 0.1);
+}
+
+/* Task item styles */
+.task-item {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-item:hover {
+  background-color: hsl(var(--accent));
+  border-color: hsl(var(--border));
+}
+
+.task-completed {
+  opacity: 0.6;
+}
+
+.task-completed .text-task-title,
+.task-completed .text-task-description {
+  text-decoration: line-through;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+.mobile-compact {
+  padding: 0.5rem;
+  gap: 0.5rem;
+}
+
+.desktop-spacious {
+  padding: 1rem;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .mobile-compact {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .desktop-spacious {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transition-default {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-slow {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* ========================================
+   VIBRANT CARD COLORS - Horn Family Style
+   ======================================== */
+
+/* Purple/Indigo gradient cards - Top to Bottom */
+.card-purple {
+  background: linear-gradient(180deg, #6366f1 0%, #3730a3 35%, #1e1b4b 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Pink/Rose gradient cards - Top to Bottom */
+.card-pink {
+  background: linear-gradient(180deg, #ec4899 0%, #831843 35%, #1e1420 100%);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+/* Blue gradient cards - Top to Bottom */
+.card-blue {
+  background: linear-gradient(180deg, #3b82f6 0%, #1e3a8a 35%, #0c1528 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Teal/Cyan gradient cards - Top to Bottom */
+.card-teal {
+  background: linear-gradient(180deg, #14b8a6 0%, #0f766e 35%, #0a1e1c 100%);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+/* Emerald/Green gradient cards - Top to Bottom */
+.card-emerald {
+  background: linear-gradient(180deg, #10b981 0%, #065f46 35%, #0a1e15 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Amber/Orange gradient cards - Top to Bottom */
+.card-amber {
+  background: linear-gradient(180deg, #f59e0b 0%, #92400e 35%, #1e1508 100%);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Red gradient cards - Top to Bottom */
+.card-red {
+  background: linear-gradient(180deg, #ef4444 0%, #991b1b 35%, #1e0e0e 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ========================================
+   BOARD COLUMN GRADIENTS - Dark Gray to Black
+   ======================================== */
+
+/* Upcoming column - Light gray to dark gray */
+.card-gray-light {
+  background: linear-gradient(180deg, #6b7280 0%, #374151 100%);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+/* Today column - Medium gray to darker gray */
+.card-gray-medium {
+  background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+  border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Done column - Dark gray to black */
+.card-gray-dark {
+  background: linear-gradient(180deg, #374151 0%, #111827 100%);
+  border: 1px solid rgba(55, 65, 81, 0.2);
+}
+
+/* All vibrant cards have white text */
+.card-purple, .card-pink, .card-blue, .card-teal,
+.card-emerald, .card-amber, .card-red,
+.card-gray-light, .card-gray-medium, .card-gray-dark {
+  color: white;
+  border-radius: 0.5rem;
+}
+
+.card-purple *, .card-pink *, .card-blue *, .card-teal *,
+.card-emerald *, .card-amber *, .card-red *,
+.card-gray-light *, .card-gray-medium *, .card-gray-dark * {
+  color: white;
 }

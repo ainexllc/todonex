@@ -20,6 +20,7 @@ import { getListColor } from '@/lib/utils/list-colors'
 import { auth } from '@/lib/firebase'
 import { signOut } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
+import { autoArchiveAllLists, filterArchivedTasks } from '@/lib/utils/task-archive'
 
 export default function TasksPage() {
   // Auth redirect hook
@@ -64,6 +65,79 @@ export default function TasksPage() {
       setViewMode(savedViewMode as ViewMode)
     }
   }, [])
+
+  // Auto-archive tasks that have been in "Done" for more than 24 hours
+  useEffect(() => {
+    const archiveTasks = async () => {
+      if (taskLists.length === 0) return
+
+      // Check and archive eligible tasks
+      const updatedLists = autoArchiveAllLists(taskLists)
+
+      // Update each list that has archived tasks
+      for (let i = 0; i < updatedLists.length; i++) {
+        const original = taskLists[i]
+        const updated = updatedLists[i]
+
+        // Check if any tasks were archived
+        const hasArchivedTasks = updated.tasks.some((task, idx) =>
+          task.archived && !original.tasks[idx]?.archived
+        )
+
+        if (hasArchivedTasks) {
+          // Prepare tasks for Firebase (including archived field)
+          const tasksForFirebase = updated.tasks.map((task: any) => {
+            const firebaseTask: any = {
+              id: task.id,
+              title: task.title,
+              completed: task.completed || false,
+              priority: task.priority || 'medium',
+              completedAt: null,
+              archived: task.archived || false,
+              archivedAt: null
+            }
+
+            if (task.completedAt) {
+              const completedDate = new Date(task.completedAt)
+              if (!isNaN(completedDate.getTime())) {
+                firebaseTask.completedAt = completedDate.toISOString()
+              }
+            }
+
+            if (task.archivedAt) {
+              const archivedDate = new Date(task.archivedAt)
+              if (!isNaN(archivedDate.getTime())) {
+                firebaseTask.archivedAt = archivedDate.toISOString()
+              }
+            }
+
+            if (task.description) firebaseTask.description = task.description
+            if (task.category) firebaseTask.category = task.category
+            if (task.categories && Array.isArray(task.categories)) firebaseTask.categories = task.categories
+            if (task.tags && Array.isArray(task.tags)) firebaseTask.tags = task.tags
+            if (task.status) firebaseTask.status = task.status
+
+            if (task.dueDate) {
+              const dueDate = new Date(task.dueDate)
+              if (!isNaN(dueDate.getTime())) {
+                firebaseTask.dueDate = dueDate.toISOString()
+              }
+            }
+
+            return firebaseTask
+          })
+
+          await updateTaskList(updated.id, { tasks: tasksForFirebase })
+        }
+      }
+    }
+
+    // Run on mount and every hour
+    archiveTasks()
+    const interval = setInterval(archiveTasks, 60 * 60 * 1000) // Check every hour
+
+    return () => clearInterval(interval)
+  }, [taskLists, updateTaskList])
 
   // Save view mode preference to localStorage
   const handleViewModeChange = (mode: ViewMode) => {
@@ -205,6 +279,9 @@ export default function TasksPage() {
 
     let tasks = [...activeList.tasks]
 
+    // Filter out archived tasks (they'll be in a separate archive view)
+    tasks = filterArchivedTasks(tasks)
+
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -295,12 +372,13 @@ export default function TasksPage() {
           onOpenChange={setSettingsOpen}
           list={activeList}
           onSave={handleListSettingsUpdate}
+          onDelete={handleDeleteTaskList}
         />
       )}
 
-    <div className="h-dvh flex flex-col overflow-hidden bg-background">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex-1 flex flex-row overflow-hidden">
+      <div className="flex-1 flex flex-row overflow-hidden h-full">
         {/* Sidebar */}
         <Sidebar
           lists={taskLists}
@@ -312,17 +390,20 @@ export default function TasksPage() {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-background">
+        <div className={cn(
+          "flex-1 flex flex-col overflow-hidden",
+          listColorTheme ? listColorTheme.gradient : 'card-purple'
+        )}>
           {/* Task Header */}
-          <div className="flex-shrink-0 border-b border-border bg-card/50 backdrop-blur-sm">
+          <div className="flex-shrink-0">
             {/* Stats Row */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">
+                  <h1 className="text-2xl font-bold text-white drop-shadow-sm">
                     {activeList?.title || 'Tasks'}
                   </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-white/90 mt-1">
                     {stats.total} total {stats.total === 1 ? 'task' : 'tasks'}
                     {stats.today > 0 && ` • ${stats.today} for today`}
                     {stats.done > 0 && ` • ${stats.done} completed`}
@@ -333,7 +414,7 @@ export default function TasksPage() {
                     size="sm"
                     variant="ghost"
                     onClick={() => setSettingsOpen(true)}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/20"
                     title="List settings"
                   >
                     <Settings2 className="h-4 w-4" />
@@ -342,12 +423,12 @@ export default function TasksPage() {
               </div>
               <div className="flex items-center gap-2">
                 {stats.today > 0 && (
-                  <Badge variant="outline" className="text-xs font-semibold">
+                  <Badge variant="outline" className="text-xs font-semibold bg-white/20 text-white border-white/30">
                     {stats.today} today
                   </Badge>
                 )}
                 {stats.done > 0 && (
-                  <Badge variant="outline" className="text-xs font-semibold">
+                  <Badge variant="outline" className="text-xs font-semibold bg-white/20 text-white border-white/30">
                     {stats.done} done
                   </Badge>
                 )}
@@ -355,7 +436,7 @@ export default function TasksPage() {
                   size="sm"
                   variant="ghost"
                   onClick={handleProfile}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/20"
                   title="Profile"
                 >
                   <User className="h-4 w-4" />
@@ -364,7 +445,7 @@ export default function TasksPage() {
                   size="sm"
                   variant="ghost"
                   onClick={handleLogout}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/20"
                   title="Logout"
                 >
                   <LogOut className="h-4 w-4" />
@@ -375,12 +456,12 @@ export default function TasksPage() {
             {/* Filters Row */}
             <div className="flex items-center gap-3 px-6 py-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/70" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search tasks..."
-                  className="h-9 pl-9 text-sm"
+                  className="h-9 pl-9 text-sm bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/15 focus:border-white/30"
                 />
               </div>
 
@@ -388,7 +469,7 @@ export default function TasksPage() {
               {priorityFilter && (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer"
+                  className="cursor-pointer bg-white/20 text-white border-white/30 hover:bg-white/30"
                   onClick={() => setPriorityFilter(null)}
                 >
                   Priority: {priorityFilter}
@@ -399,7 +480,7 @@ export default function TasksPage() {
               {tagFilter && (
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer"
+                  className="cursor-pointer bg-white/20 text-white border-white/30 hover:bg-white/30"
                   onClick={() => setTagFilter(null)}
                 >
                   Tag: {tagFilter}
@@ -410,7 +491,7 @@ export default function TasksPage() {
                 size="sm"
                 variant="default"
                 onClick={() => setShowNewTaskModal(true)}
-                className="gap-2"
+                className="gap-2 bg-white/20 text-white border-white/30 hover:bg-white/30"
               >
                 <Plus className="h-4 w-4" />
                 New Task

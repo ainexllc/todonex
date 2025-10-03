@@ -11,6 +11,7 @@ export interface ListColorTheme {
   border: string   // Border color (Tailwind class)
   text: string     // Text color (Tailwind class)
   hex: string      // Hex value for colored elements (dots, borders, accents)
+  gradient: string // Gradient class for vibrant backgrounds
 }
 
 export const LIST_COLORS = {
@@ -20,96 +21,112 @@ export const LIST_COLORS = {
     border: 'border-red-500',
     text: 'text-red-900 dark:text-red-300',
     hex: '#EF4444',
+    gradient: 'card-red',
   },
   orange: {
     bg: 'bg-orange-100 dark:bg-orange-950',
     border: 'border-orange-500',
     text: 'text-orange-900 dark:text-orange-300',
     hex: '#F97316',
+    gradient: 'card-amber',
   },
   amber: {
     bg: 'bg-amber-100 dark:bg-amber-950',
     border: 'border-amber-500',
     text: 'text-amber-900 dark:text-amber-300',
     hex: '#F59E0B',
+    gradient: 'card-amber',
   },
   yellow: {
     bg: 'bg-yellow-100 dark:bg-yellow-950',
     border: 'border-yellow-500',
     text: 'text-yellow-900 dark:text-yellow-300',
     hex: '#EAB308',
+    gradient: 'card-amber',
   },
   lime: {
     bg: 'bg-lime-100 dark:bg-lime-950',
     border: 'border-lime-500',
     text: 'text-lime-900 dark:text-lime-300',
     hex: '#84CC16',
+    gradient: 'card-emerald',
   },
   green: {
     bg: 'bg-green-100 dark:bg-green-950',
     border: 'border-green-500',
     text: 'text-green-900 dark:text-green-300',
     hex: '#10B981',
+    gradient: 'card-emerald',
   },
   emerald: {
     bg: 'bg-emerald-100 dark:bg-emerald-950',
     border: 'border-emerald-500',
     text: 'text-emerald-900 dark:text-emerald-300',
     hex: '#059669',
+    gradient: 'card-emerald',
   },
   teal: {
     bg: 'bg-teal-100 dark:bg-teal-950',
     border: 'border-teal-500',
     text: 'text-teal-900 dark:text-teal-300',
     hex: '#14B8A6',
+    gradient: 'card-teal',
   },
   cyan: {
     bg: 'bg-cyan-100 dark:bg-cyan-950',
     border: 'border-cyan-500',
     text: 'text-cyan-900 dark:text-cyan-300',
     hex: '#06B6D4',
+    gradient: 'card-teal',
   },
   sky: {
     bg: 'bg-sky-100 dark:bg-sky-950',
     border: 'border-sky-500',
     text: 'text-sky-900 dark:text-sky-300',
     hex: '#0EA5E9',
+    gradient: 'card-blue',
   },
   blue: {
     bg: 'bg-blue-100 dark:bg-blue-950',
     border: 'border-blue-500',
     text: 'text-blue-900 dark:text-blue-300',
     hex: '#3B82F6',
+    gradient: 'card-blue',
   },
   indigo: {
     bg: 'bg-indigo-100 dark:bg-indigo-950',
     border: 'border-indigo-500',
     text: 'text-indigo-900 dark:text-indigo-300',
     hex: '#6366F1',
+    gradient: 'card-purple',
   },
   violet: {
     bg: 'bg-violet-100 dark:bg-violet-950',
     border: 'border-violet-500',
     text: 'text-violet-900 dark:text-violet-300',
     hex: '#8B5CF6',
+    gradient: 'card-purple',
   },
   purple: {
     bg: 'bg-purple-100 dark:bg-purple-950',
     border: 'border-purple-500',
     text: 'text-purple-900 dark:text-purple-300',
     hex: '#A855F7',
+    gradient: 'card-purple',
   },
   fuchsia: {
     bg: 'bg-fuchsia-100 dark:bg-fuchsia-950',
     border: 'border-fuchsia-500',
     text: 'text-fuchsia-900 dark:text-fuchsia-300',
     hex: '#D946EF',
+    gradient: 'card-pink',
   },
   pink: {
     bg: 'bg-pink-100 dark:bg-pink-950',
     border: 'border-pink-500',
     text: 'text-pink-900 dark:text-pink-300',
     hex: '#EC4899',
+    gradient: 'card-pink',
   },
 
   // Neutral colors
@@ -118,12 +135,14 @@ export const LIST_COLORS = {
     border: 'border-slate-500',
     text: 'text-slate-900 dark:text-slate-300',
     hex: '#64748B',
+    gradient: 'card-blue',
   },
   gray: {
     bg: 'bg-gray-100 dark:bg-gray-900',
     border: 'border-gray-500',
     text: 'text-gray-900 dark:text-gray-300',
     hex: '#6B7280',
+    gradient: 'card-blue',
   },
 } as const
 

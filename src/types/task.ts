@@ -39,6 +39,8 @@ export interface Task {
   tags?: string[]
   status: TaskStatus
   note?: string
+  archived?: boolean        // Tasks auto-archived after 24 hours in Done
+  archivedAt?: Date | null  // Timestamp when task was archived
 }
 
 /**
