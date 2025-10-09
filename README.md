@@ -1,4 +1,4 @@
-# NextTaskPro - AI-Powered Task Management Platform
+# TodoNex - AI-Powered Task Management Platform
 
 An intelligent task management platform that adapts to your workflow. Create, organize, and complete tasks with AI assistance, featuring natural language processing and adaptive interface that learns from your habits.
 
@@ -26,8 +26,8 @@ An intelligent task management platform that adapts to your workflow. Create, or
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ainexllc/nexttask.git
-   cd nexttask
+   git clone https://github.com/ainexllc/todonex.git
+   cd todonex
    ```
 
 2. **Install dependencies**
@@ -111,7 +111,7 @@ src/
 
 ## 🎯 Adaptive Behavior
 
-NextTaskPro automatically adapts its interface based on your task management patterns:
+TodoNex automatically adapts its interface based on your task management patterns:
 
 - **New User**: Onboarding experience with getting started guides
 - **Active User**: Task-focused layout with priority management

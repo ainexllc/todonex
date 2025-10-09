@@ -52,7 +52,7 @@ export function PublicHeader() {
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <span className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-            NextTaskPro
+            TodoNex
           </span>
         </Link>
 

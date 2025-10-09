@@ -19,12 +19,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NextTaskPro - Intelligent Task Management",
+  title: "TodoNex - Intelligent Task Management",
   description: "An intelligent task management platform powered by AI. Organize, prioritize, and complete your tasks with smart assistance.",
   keywords: ["task management", "productivity", "AI assistant", "task organization", "smart planning"],
-  authors: [{ name: "NextTaskPro Team" }],
-  creator: "NextTaskPro",
-  publisher: "NextTaskPro",
+  authors: [{ name: "TodoNex Team" }],
+  creator: "TodoNex",
+  publisher: "TodoNex",
   formatDetection: {
     email: false,
     address: false,
@@ -56,7 +56,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="NextTaskPro" />
+        <meta name="apple-mobile-web-app-title" content="TodoNex" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
       <body

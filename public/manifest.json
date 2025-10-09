@@ -1,7 +1,7 @@
 {
-  "name": "NextTaskPro - Family Home Management",
-  "short_name": "NextTaskPro",
-  "description": "Simple home management for families - tasks, bills, shopping & recipes",
+  "name": "TodoNex - AI-Powered Task Management",
+  "short_name": "TodoNex",
+  "description": "Intelligent task management with AI assistance - organize, prioritize, and complete tasks efficiently",
   "start_url": "/",
   "display": "browser",
   "background_color": "#ffffff",

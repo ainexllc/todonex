@@ -51,7 +51,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className="h-screen overflow-hidden bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-          <p className="text-muted-foreground">Loading NextTaskPro...</p>
+          <p className="text-muted-foreground">Loading TodoNex...</p>
           <p className="text-xs text-muted-foreground opacity-60">
             Initialized: {initialized ? 'Yes' : 'No'} | Loading: {loading ? 'Yes' : 'No'}
           </p>

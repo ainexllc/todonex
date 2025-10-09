@@ -4,13 +4,13 @@ export function SimpleFooter() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center space-y-4">
           <div className="text-2xl font-bold text-foreground">
-            NextTaskPro
+            TodoNex
           </div>
           <p className="text-muted-foreground">
             AI-powered task management that actually works.
           </p>
           <div className="text-sm text-muted-foreground">
-            © 2024 NextTaskPro. All rights reserved.
+            © 2024 TodoNex. All rights reserved.
           </div>
         </div>
       </div>

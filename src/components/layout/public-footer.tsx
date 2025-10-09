@@ -30,9 +30,9 @@ export function PublicFooter() {
   }
 
   const socialLinks = [
-    { name: 'Twitter', href: 'https://twitter.com/nexttaskpro', icon: Twitter },
-    { name: 'GitHub', href: 'https://github.com/nexttaskpro', icon: Github },
-    { name: 'Email', href: 'mailto:hello@nexttaskpro.com', icon: Mail },
+    { name: 'Twitter', href: 'https://twitter.com/todonex', icon: Twitter },
+    { name: 'GitHub', href: 'https://github.com/ainexllc/todonex', icon: Github },
+    { name: 'Email', href: 'mailto:hello@todonex.com', icon: Mail },
   ]
 
   return (
@@ -47,7 +47,7 @@ export function PublicFooter() {
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <span className="text-xl font-bold text-white">
-                NextTaskPro
+                TodoNex
               </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm">
@@ -176,7 +176,7 @@ export function PublicFooter() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 NextTaskPro. All rights reserved.
+            © 2024 TodoNex. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground mt-2 sm:mt-0">
             Built with ❤️ for productivity enthusiasts

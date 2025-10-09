@@ -1,4 +1,4 @@
-# NextTaskPro - Project Instructions
+# TodoNex - Project Instructions
 
 ## ⚠️ CRITICAL: Git Commit Rules
 **IMPORTANT**: NEVER commit changes unless explicitly asked by the user
@@ -11,28 +11,29 @@
 **MANDATORY**: Claude MUST automatically push and deploy Firebase components on my behalf:
 
 ### Required Actions for ALL Firebase Operations:
-- ✅ **ALWAYS** run `firebase deploy --only firestore:rules,firestore:indexes --project nexttaskpro` 
+- ✅ **ALWAYS** run `firebase deploy --only firestore:rules,firestore:indexes --project habittracker-eb6bd`
 - ✅ **IMMEDIATELY** create missing indexes when Firestore query errors occur
 - ✅ **AUTOMATICALLY** deploy security rules when modified
 - ✅ **VERIFY** deployment completion before proceeding with other tasks
 
-### Specific Commands for NextTaskPro:
+### Specific Commands for TodoNex:
 ```bash
 # Deploy everything Firebase-related
-firebase deploy --only firestore:rules,firestore:indexes --project nexttaskpro
+firebase deploy --only firestore:rules,firestore:indexes --project habittracker-eb6bd
 
 # Deploy indexes only (most common need)
-firebase deploy --only firestore:indexes --project nexttaskpro
+firebase deploy --only firestore:indexes --project habittracker-eb6bd
 
 # Check current indexes status
-firebase firestore:indexes --project nexttaskpro
+firebase firestore:indexes --project habittracker-eb6bd
 
 # Deploy security rules only
-firebase deploy --only firestore:rules --project nexttaskpro
+firebase deploy --only firestore:rules --project habittracker-eb6bd
 ```
 
 ### Firebase Project Configuration
-- **Project ID**: `nexttaskpro`
+- **Project ID**: `habittracker-eb6bd`
+- **Production Domain**: `habitnex.app`
 - **Environment**: Production Firebase project
 - **Index File**: `/firestore.indexes.json`
 - **Rules File**: `/firestore.rules`
@@ -55,7 +56,7 @@ firebase deploy --only firestore:rules --project nexttaskpro
 ## 🏗️ Development Environment
 ### Required Services Running:
 - **Dev Server**: `npm run dev` (ALWAYS port 3000, run in background)
-- **Firebase Project**: Connected to `nexttaskpro`
+- **Firebase Project**: Connected to `habittracker-eb6bd`
 - **Playwright**: Uses port 3000 for E2E testing
 
 ### Development Server Rules:
