@@ -32,7 +32,7 @@ export function PublicFooter() {
   const socialLinks = [
     { name: 'Twitter', href: 'https://twitter.com/todonex', icon: Twitter },
     { name: 'GitHub', href: 'https://github.com/ainexllc/todonex', icon: Github },
-    { name: 'Email', href: 'mailto:hello@todonex.com', icon: Mail },
+    { name: 'Email', href: 'mailto:hello@todonex.app', icon: Mail },
   ]
 
   return (

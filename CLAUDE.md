@@ -33,7 +33,7 @@ firebase deploy --only firestore:rules --project habittracker-eb6bd
 
 ### Firebase Project Configuration
 - **Project ID**: `habittracker-eb6bd`
-- **Production Domain**: `habitnex.app`
+- **Production Domain**: `todonex.app`
 - **Environment**: Production Firebase project
 - **Index File**: `/firestore.indexes.json`
 - **Rules File**: `/firestore.rules`
