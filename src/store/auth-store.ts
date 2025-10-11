@@ -90,10 +90,7 @@ export const useAuthStore = create<AuthState>()(
             loading: false,
             initialized: true 
           })
-          
-          console.log('Successfully signed out')
         } catch (error) {
-          console.error('Error signing out:', error)
           set({ loading: false })
           throw error
         }

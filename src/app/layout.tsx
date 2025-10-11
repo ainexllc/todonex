@@ -4,6 +4,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { AIProvider } from "@/lib/ai/context";
+import { DEFAULT_THEME_ID } from "@/lib/theme/registry";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,7 +51,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="h-full">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      data-theme={DEFAULT_THEME_ID}
+      className="h-full"
+    >
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -62,13 +69,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased h-full`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           <AuthProvider>
             <AIProvider>
               <MainLayout>

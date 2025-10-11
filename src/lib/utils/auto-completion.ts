@@ -64,7 +64,6 @@ export async function autoCompleteTasksDueToday(): Promise<{
     const taskLists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
 
     if (!taskLists.length) {
-      console.log('Auto-completion: No task lists found')
       return result
     }
 
@@ -79,7 +78,6 @@ export async function autoCompleteTasksDueToday(): Promise<{
 
         // Check if task is due today
         if (isDueToday(task.dueDate)) {
-          console.log(`Auto-completion: Marking task "${task.title}" as completed (due today)`)
           hasUpdates = true
           result.completedCount++
 
@@ -115,24 +113,15 @@ export async function autoCompleteTasksDueToday(): Promise<{
           })
 
           result.updatedLists.push(taskList.title)
-          console.log(`Auto-completion: Updated task list "${taskList.title}"`)
         } catch (error) {
           const errorMsg = `Failed to update task list "${taskList.title}": ${error instanceof Error ? error.message : String(error)}`
-          console.error('Auto-completion:', errorMsg)
           result.errors.push(errorMsg)
         }
       }
     }
 
-    if (result.completedCount > 0) {
-      console.log(`Auto-completion: Completed ${result.completedCount} tasks across ${result.updatedLists.length} lists`)
-    } else {
-      console.log('Auto-completion: No tasks due today found')
-    }
-
   } catch (error) {
     const errorMsg = `Auto-completion failed: ${error instanceof Error ? error.message : String(error)}`
-    console.error('Auto-completion:', errorMsg)
     result.errors.push(errorMsg)
   }
 
@@ -183,7 +172,7 @@ export async function getTasksDueToday(): Promise<{
       }
     }
   } catch (error) {
-    console.error('Failed to get tasks due today:', error)
+    void error
   }
 
   return result

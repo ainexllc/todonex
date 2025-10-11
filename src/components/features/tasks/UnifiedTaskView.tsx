@@ -205,7 +205,7 @@ export function UnifiedTaskView({
       await signOut(auth)
       router.push('/')
     } catch (error) {
-      console.error('Error logging out:', error)
+      void error
     }
   }
 

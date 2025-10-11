@@ -15,21 +15,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { setUser, setFirebaseUser, setLoading, setInitialized } = useAuthStore()
 
   useEffect(() => {
-    console.log('AuthProvider: Starting initialization')
-
     // Don't set loading to true immediately - let the store handle initial state
     // Only set loading during actual Firebase operations
     const timeoutId = setTimeout(() => {
-      console.log('Auth initialization timeout - forcing completion')
       setLoading(false)
       setInitialized(true)
     }, 3000) // Reduced timeout since we start with initialized: true
 
-    console.log('AuthProvider: Setting up Firebase auth listener')
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      console.log('AuthProvider: Auth state changed', firebaseUser ? firebaseUser.email : 'User logged out')
-
       // Only set loading during actual operations
       if (firebaseUser) {
         setLoading(true)
@@ -79,7 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(newUser)
           }
         } catch (error) {
-          console.error('Error loading user data:', error)
+          void error
           // Still set basic user info even if Firestore fails
           const basicUser: User = {
             id: firebaseUser.uid,
@@ -116,7 +109,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Always mark as initialized once auth state is determined
       setLoading(false)
       setInitialized(true)
-      console.log('AuthProvider: Initialization complete')
     })
 
     return () => {

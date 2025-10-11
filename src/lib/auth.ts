@@ -39,13 +39,10 @@ export interface AuthResult {
 // Enhanced Google Sign-In with popup method (like HabitTracker)
 export async function signInWithGoogle(): Promise<AuthResult> {
   try {
-    console.log('Using popup authentication method')
     const userCredential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver)
     return { user: userCredential.user }
     
   } catch (error) {
-    console.error('Google Sign-In Error:', error)
-    
     // If popup fails, provide helpful error message
     const authError = error as AuthError
     if (authError.code === 'auth/popup-blocked') {
@@ -94,8 +91,7 @@ function getAuthErrorMessage(error: AuthError): string {
     case 'auth/internal-error':
       return 'Internal error occurred. Please try again.'
     default:
-      // Log unknown errors for debugging
-      console.error('Unknown auth error:', error.code, error.message)
+      // Preserve full error message for troubleshooting without logging
       return error.message || 'An unexpected error occurred. Please try again.'
   }
 }
@@ -109,7 +105,6 @@ export async function handleRedirectResult(): Promise<AuthResult> {
     }
     return { user: null }
   } catch (error) {
-    console.error('Redirect result error:', error)
     return { 
       user: null, 
       error: getAuthErrorMessage(error as AuthError) 
@@ -126,7 +121,6 @@ export async function signInWithGoogleEnhanced(): Promise<AuthResult> {
       
       // If popup was blocked, fallback to redirect
       if (result.error?.includes('popup')) {
-        console.log('Popup blocked, falling back to redirect method')
         await signInWithRedirect(auth, googleProvider)
         return { user: null } // Will redirect away
       }
@@ -137,7 +131,6 @@ export async function signInWithGoogleEnhanced(): Promise<AuthResult> {
       return await signInWithGoogle()
     }
   } catch (error) {
-    console.error('Enhanced Google Sign-In Error:', error)
     return { 
       user: null, 
       error: getAuthErrorMessage(error as AuthError) 

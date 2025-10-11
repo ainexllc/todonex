@@ -115,26 +115,21 @@ class UnifiedAIClient {
 
     try {
       if (provider === 'grok') {
-        console.log('Using Grok as primary AI provider')
         const response = await grokClient.sendRequest(providerConfig as GrokRequestConfig)
         return this.convertToUnifiedResponse(response, 'grok')
-      } else {
-        console.log('Using Anthropic as fallback AI provider')
-        const response = await anthropicClient.sendRequest(providerConfig as AIRequestConfig)
-        return this.convertToUnifiedResponse(response, 'anthropic')
       }
+
+      const response = await anthropicClient.sendRequest(providerConfig as AIRequestConfig)
+      return this.convertToUnifiedResponse(response, 'anthropic')
     } catch (error) {
-      console.error(`${provider} request failed:`, error)
 
       // Fallback to Anthropic if Grok fails
       if (provider === 'grok') {
-        console.log('Falling back to Anthropic due to Grok failure')
         try {
           const fallbackConfig = this.convertToProviderConfig(config, 'anthropic')
           const response = await anthropicClient.sendRequest(fallbackConfig as AIRequestConfig)
           return this.convertToUnifiedResponse(response, 'anthropic')
         } catch (fallbackError) {
-          console.error('Fallback to Anthropic also failed:', fallbackError)
           throw new Error(`Both AI providers failed: Grok (${error instanceof Error ? error.message : 'Unknown'}), Anthropic (${fallbackError instanceof Error ? fallbackError.message : 'Unknown'})`)
         }
       }
@@ -152,23 +147,19 @@ class UnifiedAIClient {
 
     try {
       if (provider === 'grok') {
-        console.log('Using Grok streaming')
         yield* grokClient.streamRequest(providerConfig as GrokRequestConfig)
       } else {
-        console.log('Using Anthropic streaming')
         yield* anthropicClient.streamRequest(providerConfig as AIRequestConfig)
       }
     } catch (error) {
-      console.error(`${provider} streaming failed:`, error)
 
       // Fallback to Anthropic if Grok fails
       if (provider === 'grok') {
-        console.log('Falling back to Anthropic streaming')
         try {
           const fallbackConfig = this.convertToProviderConfig(config, 'anthropic')
           yield* anthropicClient.streamRequest(fallbackConfig as AIRequestConfig)
         } catch (fallbackError) {
-          console.error('Fallback streaming also failed:', fallbackError)
+          void fallbackError
           throw new Error(`Both streaming providers failed`)
         }
       } else {
@@ -226,14 +217,14 @@ class UnifiedAIClient {
       await grokClient.healthCheck()
       results.grok = true
     } catch (error) {
-      console.warn('Grok health check failed:', error)
+      void error
     }
 
     try {
       await anthropicClient.healthCheck()
       results.anthropic = true
     } catch (error) {
-      console.warn('Anthropic health check failed:', error)
+      void error
     }
 
     results.overall = results.grok || results.anthropic

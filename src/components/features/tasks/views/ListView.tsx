@@ -1,6 +1,7 @@
 'use client'
 
-import { Calendar, Flag } from 'lucide-react'
+import type { CSSProperties } from 'react'
+import { Calendar, Flag, Plus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,15 +14,28 @@ interface ListViewProps {
   onTaskUpdate?: (taskId: string, updates: Partial<Task>) => void
   listColorHex?: string
   className?: string
+  onAddTask?: () => void
 }
 
-const priorityStyles = {
-  low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600',
-  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-700',
-  high: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-700'
+const priorityStyles: Record<string, CSSProperties> = {
+  low: {
+    background: 'var(--priority-low-bg)',
+    color: 'var(--priority-low-text)',
+    borderColor: 'var(--priority-low-border)'
+  },
+  medium: {
+    background: 'var(--priority-medium-bg)',
+    color: 'var(--priority-medium-text)',
+    borderColor: 'var(--priority-medium-border)'
+  },
+  high: {
+    background: 'var(--priority-high-bg)',
+    color: 'var(--priority-high-text)',
+    borderColor: 'var(--priority-high-border)'
+  }
 }
 
-export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, className }: ListViewProps) {
+export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, className, onAddTask }: ListViewProps) {
   const formatDueDate = (date?: Date) => {
     if (!date) return null
 
@@ -38,44 +52,70 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
   const isOverdue = (date?: Date) => date && isPast(new Date(date)) && !isToday(new Date(date))
 
   return (
-    <div className={cn('p-6', className)}>
+    <div
+      className={cn('p-6', className)}
+      style={{
+        background: 'var(--board-background)',
+        color: 'var(--board-text-strong)'
+      }}
+    >
       <div
-        className="rounded-2xl border backdrop-blur-sm overflow-hidden"
+        className="rounded-2xl border backdrop-blur-lg overflow-hidden"
         style={{
-          backgroundColor: listColorHex ? `${listColorHex}60` : 'hsl(var(--card) / 0.5)',
-          borderColor: listColorHex ? `${listColorHex}70` : 'hsl(var(--border) / 0.5)'
+          background: 'var(--board-surface-glass)',
+          borderColor: listColorHex ?? 'var(--board-column-border)',
+          boxShadow: 'var(--board-column-shadow)'
         }}
       >
+        {onAddTask && (
+          <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: listColorHex ?? 'var(--board-column-border)' }}>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--board-text-subtle)' }}>Task list</h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onAddTask}
+              className="h-8 px-3 text-xs rounded-full border"
+              style={{
+                background: 'var(--board-action-bg)',
+                color: 'var(--board-action-text)',
+                borderColor: 'var(--board-action-border)'
+              }}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Add Task
+            </Button>
+          </div>
+        )}
         {/* Header Row */}
         <div
           className="grid grid-cols-12 gap-4 px-6 py-3 border-b"
           style={{
-            backgroundColor: listColorHex ? `${listColorHex}70` : 'hsl(var(--muted) / 0.3)',
-            borderColor: listColorHex ? `${listColorHex}80` : 'hsl(var(--border) / 0.5)'
+            background: listColorHex ? `${listColorHex}40` : 'var(--board-column-bg)',
+            borderColor: listColorHex ?? 'var(--board-column-border)'
           }}
         >
-          <div className="col-span-4 text-xs font-semibold text-black dark:text-white uppercase tracking-wide">
+          <div className="col-span-4 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--board-text-subtle)' }}>
             Task
           </div>
-          <div className="col-span-2 text-xs font-semibold text-black dark:text-white uppercase tracking-wide">
+          <div className="col-span-2 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--board-text-subtle)' }}>
             Priority
           </div>
-          <div className="col-span-2 text-xs font-semibold text-black dark:text-white uppercase tracking-wide">
-            Tags
+          <div className="col-span-2 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--board-text-subtle)' }}>
+            Labels
           </div>
-          <div className="col-span-2 text-xs font-semibold text-black dark:text-white uppercase tracking-wide">
+          <div className="col-span-2 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--board-text-subtle)' }}>
             Due Date
           </div>
-          <div className="col-span-2 text-xs font-semibold text-black dark:text-white uppercase tracking-wide text-right">
+          <div className="col-span-2 text-xs font-semibold uppercase tracking-wide text-right" style={{ color: 'var(--board-text-subtle)' }}>
             Status
           </div>
         </div>
 
         {/* Task Rows */}
         {tasks.length > 0 ? (
-          <div className="divide-y divide-black/10 dark:divide-white/10">
+          <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
             {tasks.map((task) => {
-              const taskTags = task.categories || (task.category ? [task.category] : [])
+              const taskLabels = task.categories || (task.category ? [task.category] : [])
               const overdue = isOverdue(task.dueDate)
               const dueToday = isDueToday(task.dueDate)
 
@@ -83,23 +123,27 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
                 <div
                   key={task.id}
                   className={cn(
-                    'grid grid-cols-12 gap-4 px-6 py-4 hover:bg-black/10 dark:hover:bg-white/10 transition-colors',
+                    'grid grid-cols-12 gap-4 px-6 py-4 transition-colors',
                     task.completed && 'opacity-60'
                   )}
+                  style={{
+                    background: 'transparent'
+                  }}
                 >
                   {/* Task Name + Note */}
                   <div className="col-span-4 min-w-0">
                     <div className="flex flex-col gap-1">
                       <p
                         className={cn(
-                          'text-sm font-medium truncate text-black dark:text-white',
-                          task.completed && 'line-through text-black/60 dark:text-white/60'
+                          'text-sm font-medium truncate',
+                          task.completed && 'line-through'
                         )}
+                        style={{ color: task.completed ? 'var(--board-text-muted)' : 'var(--board-text-strong)' }}
                       >
                         {task.title}
                       </p>
                       {task.note && (
-                        <p className="text-xs text-black/70 dark:text-white/70 truncate">
+                        <p className="text-xs truncate" style={{ color: 'var(--board-text-muted)' }}>
                           {task.note}
                         </p>
                       )}
@@ -111,31 +155,36 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
                     <Badge
                       variant="outline"
                       className={cn(
-                        'text-xs px-2.5 py-1 font-medium border inline-flex items-center gap-1.5',
-                        priorityStyles[task.priority]
+                        'text-xs px-2.5 py-1 font-medium border inline-flex items-center gap-1.5'
                       )}
+                      style={priorityStyles[task.priority] ?? priorityStyles.medium}
                     >
                       <Flag className="h-3 w-3" />
                       {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </Badge>
                   </div>
 
-                  {/* Tags */}
+                  {/* Labels */}
                   <div className="col-span-2 flex items-center gap-1.5 min-w-0">
-                    {taskTags.length > 0 ? (
+                    {taskLabels.length > 0 ? (
                       <div className="flex gap-1 flex-wrap">
-                        {taskTags.map((tag) => (
+                        {taskLabels.map((label) => (
                           <Badge
-                            key={tag}
+                            key={label}
                             variant="secondary"
-                            className="text-xs px-2 py-0.5 bg-black/20 text-black border-black/30 dark:bg-white/20 dark:text-white dark:border-white/30"
+                            className="text-xs px-2 py-0.5 border"
+                            style={{
+                              background: 'var(--board-tag-bg)',
+                              borderColor: 'var(--board-tag-border)',
+                              color: 'var(--board-tag-text)'
+                            }}
                           >
-                            {tag}
+                            {label}
                           </Badge>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-black/50 dark:text-white/50">-</span>
+                      <span className="text-xs" style={{ color: 'var(--board-text-muted)' }}>-</span>
                     )}
                   </div>
 
@@ -146,16 +195,33 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
                         variant="outline"
                         className={cn(
                           'text-xs px-2.5 py-1 font-medium inline-flex items-center gap-1.5',
-                          overdue && 'bg-red-500/20 border-red-400 text-red-300',
-                          dueToday && 'bg-yellow-500/20 border-yellow-400 text-yellow-300',
-                          !overdue && !dueToday && 'bg-blue-500/20 border-blue-400 text-blue-300'
+                          'border'
                         )}
+                        style={
+                          overdue
+                            ? {
+                                background: 'var(--board-due-overdue-bg)',
+                                borderColor: 'var(--board-due-overdue-border)',
+                                color: 'var(--board-due-overdue-text)'
+                              }
+                            : dueToday
+                            ? {
+                                background: 'var(--board-due-today-bg)',
+                                borderColor: 'var(--board-due-today-border)',
+                                color: 'var(--board-due-today-text)'
+                              }
+                            : {
+                                background: 'var(--board-due-future-bg)',
+                                borderColor: 'var(--board-due-future-border)',
+                                color: 'var(--board-due-future-text)'
+                              }
+                        }
                       >
                         <Calendar className="h-3 w-3" />
                         {formatDueDate(task.dueDate)}
                       </Badge>
                     ) : (
-                      <span className="text-xs text-black/50 dark:text-white/50">-</span>
+                      <span className="text-xs" style={{ color: 'var(--board-text-muted)' }}>-</span>
                     )}
                   </div>
 
@@ -165,12 +231,20 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
                       size="sm"
                       variant={task.completed ? 'outline' : 'default'}
                       onClick={() => onTaskToggle?.(task.id, !task.completed)}
-                      className={cn(
-                        'h-8 px-3 text-xs font-medium',
+                      className={cn('h-8 px-3 text-xs font-medium rounded-full border transition-colors')}
+                      style={
                         task.completed
-                          ? 'bg-green-500/20 border-green-400 text-green-300 hover:bg-green-500/30'
-                          : 'bg-black/20 border-black/30 text-black dark:bg-white/20 dark:border-white/30 dark:text-white hover:bg-black/30 dark:hover:bg-white/30'
-                      )}
+                          ? {
+                              background: 'var(--board-task-accent-complete)',
+                              borderColor: 'var(--priority-low-border)',
+                              color: 'var(--priority-low-text)'
+                            }
+                          : {
+                              background: 'var(--board-action-bg)',
+                              borderColor: 'var(--board-action-border)',
+                              color: 'var(--board-action-text)'
+                            }
+                      }
                     >
                       {task.completed ? 'Undo' : 'Done'}
                     </Button>
@@ -180,10 +254,26 @@ export function ListView({ tasks, onTaskToggle, onTaskUpdate, listColorHex, clas
             })}
           </div>
         ) : (
-          <div className="px-6 py-12 text-center">
-            <p className="text-sm text-black/70 dark:text-white/70">
+          <div className="px-6 py-12 text-center space-y-4">
+            <p className="text-sm" style={{ color: 'var(--board-text-muted)' }}>
               No tasks match your filters
             </p>
+            {onAddTask && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onAddTask}
+                className="h-9 px-4 text-sm rounded-full border"
+                style={{
+                  background: 'var(--board-action-bg)',
+                  color: 'var(--board-action-text)',
+                  borderColor: 'var(--board-action-border)'
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Task
+              </Button>
+            )}
           </div>
         )}
       </div>

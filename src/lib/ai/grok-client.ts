@@ -111,7 +111,6 @@ class GrokClient {
         cached: false,
       }
     } catch (error) {
-      console.error('Grok API error:', error)
       throw new Error(`Grok request failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -141,7 +140,6 @@ class GrokClient {
         yield delta
       }
     } catch (error) {
-      console.error('Grok streaming error:', error)
       throw new Error(`Grok streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }

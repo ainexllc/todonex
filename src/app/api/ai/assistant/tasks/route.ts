@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Tasks AI error:', error)
+    void error
     return NextResponse.json(
       { error: 'Task AI service unavailable' },
       { status: 500 }
@@ -171,7 +171,7 @@ Maximum 8 tasks. Return only the JSON array, no other text.`
     })
 
   } catch (error) {
-    console.error('Batch tasks error:', error)
+    void error
     return NextResponse.json(
       { error: 'Batch task creation failed' },
       { status: 500 }

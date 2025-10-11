@@ -67,7 +67,7 @@ export function TasksView({
     )
   }, [taskLists, selectedListId])
 
-  // Get all unique tags from all tasks
+  // Get all unique labels from all tasks
   const allUniqueTags = useMemo(() => {
     const tagsSet = new Set<string>()
     allTasks.forEach(task => {
@@ -85,7 +85,7 @@ export function TasksView({
       filtered = filtered.filter(task => !task.completed)
     }
 
-    // Filter by selected tags
+    // Filter by selected labels
     if (selectedTags.length > 0) {
       filtered = filtered.filter(task =>
         task.tags?.some(tag => selectedTags.includes(tag))
@@ -278,12 +278,12 @@ export function TasksView({
           </Button>
         </div>
 
-        {/* Tag Filter Section */}
+        {/* Label Filter Section */}
         {allUniqueTags.length > 0 && (
           <div className="px-2 pb-2 border-t border-gray-800 pt-2">
             <div className="flex items-center gap-1.5 flex-wrap">
               <TagIcon className="h-3 w-3 text-gray-500 flex-shrink-0" />
-              <span className="text-xs text-gray-500">Filter by tag:</span>
+              <span className="text-xs text-gray-500">Filter by label:</span>
               {allUniqueTags.map(tag => (
                 <Badge
                   key={tag}

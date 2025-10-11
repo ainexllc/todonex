@@ -39,6 +39,8 @@ interface TaskCardProps {
   showCheckbox?: boolean
   draggable?: boolean
   compact?: boolean
+  showCompleteToggle?: boolean
+  showCategories?: boolean
   className?: string
 }
 
@@ -53,6 +55,8 @@ export function TaskCard({
   showCheckbox = false,
   draggable = false,
   compact = false,
+  showCompleteToggle = true,
+  showCategories = true,
   className
 }: TaskCardProps) {
   const [isEditing, setIsEditing] = useState(false)
@@ -61,15 +65,19 @@ export function TaskCard({
   const [isEditingPriority, setIsEditingPriority] = useState(false)
   const [isEditingDueDate, setIsEditingDueDate] = useState(false)
 
-  // Get categories from either new categories array or old category field
-  const taskCategories = task.categories || (task.category ? [task.category] : [])
+  // Get labels from either new categories array or old category field
+  const taskLabels = task.categories || (task.category ? [task.category] : [])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400 border-red-200 dark:border-red-900'
-      case 'medium': return 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-900'
-      case 'low': return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900'
-      default: return 'bg-muted text-muted-foreground border-border'
+      case 'high':
+        return 'border text-[color:var(--priority-high-text)] bg-[color:var(--priority-high-bg)] border-[color:var(--priority-high-border)]'
+      case 'medium':
+        return 'border text-[color:var(--priority-medium-text)] bg-[color:var(--priority-medium-bg)] border-[color:var(--priority-medium-border)]'
+      case 'low':
+        return 'border text-[color:var(--priority-low-text)] bg-[color:var(--priority-low-bg)] border-[color:var(--priority-low-border)]'
+      default:
+        return 'border border-[color:var(--border)] text-muted-foreground bg-muted/20'
     }
   }
 
@@ -87,6 +95,14 @@ export function TaskCard({
 
   const isDueToday = task.dueDate && isToday(new Date(task.dueDate))
   const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate))
+
+  const accentColor = task.completed
+    ? 'var(--board-task-accent-complete)'
+    : isOverdue
+      ? 'var(--board-task-accent-overdue)'
+      : isDueToday
+        ? 'var(--board-task-accent-today)'
+        : 'var(--board-task-accent)'
 
   const handleTitleClick = () => {
     if (!task.completed && !isEditing) {
@@ -130,7 +146,7 @@ export function TaskCard({
     onSelect?.(task.id)
   }
 
-  const handleCategoriesChange = (newCategories: string[]) => {
+  const handleLabelsChange = (newCategories: string[]) => {
     onUpdate?.(task.id, { categories: newCategories })
   }
 
@@ -164,16 +180,18 @@ export function TaskCard({
           />
         )}
 
-        <button
-          onClick={handleToggleComplete}
-          className="flex-shrink-0"
-        >
-          {task.completed ? (
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          ) : (
-            <Circle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-          )}
-        </button>
+        {showCompleteToggle && (
+          <button
+            onClick={handleToggleComplete}
+            className="flex-shrink-0"
+          >
+            {task.completed ? (
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            ) : (
+              <Circle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            )}
+          </button>
+        )}
 
         <span className={cn(
           'text-xs truncate flex-shrink min-w-0',
@@ -199,21 +217,26 @@ export function TaskCard({
   return (
     <Card
       className={cn(
-        'p-4 transition-all duration-200 ease-out',
-        'bg-card',
-        'border border-border/50',
-        'shadow-sm hover:shadow-md hover:-translate-y-0.5',
-        'rounded-xl',
+        'relative overflow-hidden group p-5 transition-all duration-300 ease-out',
+        'border border-border/40 hover:-translate-y-1',
+        'bg-[color:var(--board-card-bg)] text-[color:var(--board-text-strong)]',
+        '[box-shadow:var(--board-card-shadow)] [border-color:var(--board-card-border)]',
+        'group-hover:[box-shadow:var(--board-card-hover-shadow)] group-hover:[border-color:var(--board-card-hover-border)]',
+        'rounded-2xl',
         selected && 'ring-2 ring-primary',
         task.completed && 'opacity-60',
         draggable && 'cursor-move',
         className
       )}
     >
-      <div className="flex items-start gap-3">
+      <span className="absolute inset-x-0 top-0 h-1" style={{ background: accentColor }} />
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0" style={{ background: 'var(--board-card-hover-overlay)' }} />
+      </div>
+      <div className="relative flex items-start gap-4">
         {/* Drag Handle */}
         {draggable && (
-          <div className="flex-shrink-0 mt-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
+          <div className="flex-shrink-0 mt-1 text-[color:var(--board-icon-muted)] hover:text-[color:var(--board-text-strong)] cursor-grab active:cursor-grabbing">
             <GripVertical className="h-4 w-4" />
           </div>
         )}
@@ -229,19 +252,22 @@ export function TaskCard({
         )}
 
         {/* Completion Toggle */}
-        <button
-          onClick={handleToggleComplete}
-          className="flex-shrink-0 mt-0.5 transition-transform hover:scale-110"
-        >
-          {task.completed ? (
-            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-          ) : (
-            <Circle className="h-5 w-5 text-muted-foreground hover:text-primary" />
-          )}
-        </button>
+        {showCompleteToggle && (
+          <button
+            onClick={handleToggleComplete}
+            className="mt-0.5 flex-shrink-0 h-8 w-8 rounded-full border border-border/50 bg-[color:var(--board-surface-glass)] text-[color:var(--board-icon-muted)] transition-all hover:-translate-y-0.5"
+            style={{ borderColor: 'var(--board-column-border)' }}
+          >
+            {task.completed ? (
+              <CheckCircle2 className="mx-auto h-4 w-4" style={{ color: 'var(--priority-low-text)' }} />
+            ) : (
+              <Circle className="mx-auto h-4 w-4" />
+            )}
+          </button>
+        )}
 
         {/* Content */}
-        <div className="flex-1 min-w-0 space-y-2">
+        <div className="flex-1 min-w-0 space-y-3">
           {/* Title */}
           {isEditing ? (
             <div className="flex items-center gap-2">
@@ -267,9 +293,12 @@ export function TaskCard({
             <h3
               onClick={handleTitleClick}
               className={cn(
-                'font-medium text-sm cursor-pointer hover:text-primary transition-colors leading-relaxed text-card-foreground',
-                task.completed && 'line-through text-muted-foreground'
+                'font-semibold text-sm cursor-pointer leading-relaxed transition-colors',
+                task.completed ? 'line-through text-muted-foreground' : ''
               )}
+              style={{
+                color: task.completed ? 'var(--board-text-subtle)' : 'var(--board-text-strong)'
+              }}
             >
               {toTitleCase(task.title)}
             </h3>
@@ -277,13 +306,77 @@ export function TaskCard({
 
           {/* Description */}
           {task.description && isExpanded && (
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--board-text-muted)' }}>
               {task.description}
             </p>
           )}
 
-          {/* Metadata Row - Single Line */}
-          <div className="flex items-center gap-1.5">
+          {/* Metadata Row */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {/* Due Date */}
+            {isEditingDueDate ? (
+              <div className="flex items-center gap-1">
+                <input
+                  type="date"
+                  defaultValue={task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDueDateChange(e.target.value)}
+                  className="h-7 rounded-full border border-primary/60 bg-background/80 px-3 text-[11px] text-foreground shadow-sm focus-visible:outline-none"
+                  autoFocus
+                  onBlur={() => setIsEditingDueDate(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setIsEditingDueDate(false)
+                  }}
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditingDueDate(false)}
+                  className="h-6 w-6 rounded-full p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => !task.completed && setIsEditingDueDate(true)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-medium transition-all',
+                  'shadow-sm hover:shadow-md hover:-translate-y-0.5',
+                  task.completed && 'cursor-default opacity-60 hover:translate-y-0 hover:shadow-none'
+                )}
+                disabled={task.completed}
+                style={
+                  task.dueDate
+                    ? isOverdue
+                      ? {
+                          background: 'var(--board-due-overdue-bg)',
+                          borderColor: 'var(--board-due-overdue-border)',
+                          color: 'var(--board-due-overdue-text)'
+                        }
+                      : isDueToday
+                      ? {
+                          background: 'var(--board-due-today-bg)',
+                          borderColor: 'var(--board-due-today-border)',
+                          color: 'var(--board-due-today-text)'
+                        }
+                      : {
+                          background: 'var(--board-due-future-bg)',
+                          borderColor: 'var(--board-due-future-border)',
+                          color: 'var(--board-due-future-text)'
+                        }
+                    : {
+                        background: 'var(--board-due-empty-bg)',
+                        borderColor: 'var(--board-due-empty-border)',
+                        color: 'var(--board-due-empty-text)'
+                      }
+                }
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                {task.dueDate ? (formatDueDate(task.dueDate) ?? 'Set date') : 'Add date'}
+              </button>
+            )}
+
             {/* Priority Badge - Clickable */}
             {isEditingPriority ? (
               <div className="flex gap-1">
@@ -320,7 +413,11 @@ export function TaskCard({
             ) : (
               <Badge
                 variant="outline"
-                className={cn('text-xs px-1.5 py-0.5 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform', getPriorityColor(task.priority))}
+                className={cn(
+                  'flex-shrink-0 cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium transition-all',
+                  'shadow-sm hover:shadow-md hover:-translate-y-0.5 border',
+                  getPriorityColor(task.priority)
+                )}
                 onClick={() => !task.completed && setIsEditingPriority(true)}
               >
                 <Flag className="h-2.5 w-2.5 mr-0.5" />
@@ -328,12 +425,21 @@ export function TaskCard({
               </Badge>
             )}
 
-            {/* Categories - Multiple */}
-            {taskCategories.length > 0 ? (
-              <div className="flex gap-1 flex-shrink-0">
-                {taskCategories.map(cat => (
-                  <Badge key={cat} variant="outline" className="text-xs px-1.5 py-0.5">
-                    {cat}
+            {/* Labels - Multiple */}
+            {showCategories && (taskLabels.length > 0 ? (
+              <div className="flex flex-shrink-0 gap-1.5">
+                {taskLabels.map(label => (
+                  <Badge
+                    key={label}
+                    variant="outline"
+                    className="rounded-full px-3 py-1 text-[11px]"
+                    style={{
+                      background: 'var(--board-tag-bg)',
+                      borderColor: 'var(--board-tag-border)',
+                      color: 'var(--board-tag-text)'
+                    }}
+                  >
+                    {label}
                   </Badge>
                 ))}
               </div>
@@ -341,62 +447,32 @@ export function TaskCard({
               !task.completed && (
                 <Badge
                   variant="outline"
-                  className="text-xs px-1.5 py-0.5 flex-shrink-0 text-gray-500"
+                  className="flex-shrink-0 rounded-full px-3 py-1 text-[11px]"
+                  style={{
+                    background: 'var(--board-tag-bg)',
+                    borderColor: 'var(--board-tag-border)',
+                    color: 'var(--board-tag-text)'
+                  }}
                 >
-                  No categories
+                  No labels
                 </Badge>
               )
-            )}
-
-            {/* Due Date - pushed to right - ALWAYS VISIBLE */}
-            {isEditingDueDate ? (
-              <div className="flex items-center gap-1 ml-auto">
-                <input
-                  type="date"
-                  defaultValue={task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : ''}
-                  onChange={(e) => handleDueDateChange(e.target.value)}
-                  className="h-7 text-xs rounded px-2 border border-blue-500 bg-background text-foreground"
-                  autoFocus
-                  onBlur={() => setIsEditingDueDate(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') setIsEditingDueDate(false)
-                  }}
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setIsEditingDueDate(false)}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ) : (
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-xs px-2 py-1 flex-shrink-0 ml-auto flex items-center gap-1',
-                  'border-2 font-semibold cursor-pointer hover:scale-105 transition-transform',
-                  task.dueDate && isOverdue && 'bg-red-500/10 border-red-500 text-red-400',
-                  task.dueDate && isDueToday && 'bg-yellow-500/10 border-yellow-500 text-yellow-400',
-                  task.dueDate && !isOverdue && !isDueToday && 'border-blue-500/50 text-blue-400',
-                  !task.dueDate && 'border-muted-foreground/50 text-muted-foreground'
-                )}
-                onClick={() => !task.completed && setIsEditingDueDate(true)}
-              >
-                <Calendar className="h-3 w-3" />
-                {task.dueDate ? formatDueDate(task.dueDate) : 'Add date'}
-              </Badge>
-            )}
+            ))}
           </div>
 
-          {/* Category Editor */}
-          {!task.completed && (
-            <div className="mt-1.5">
+          {/* Label Editor */}
+          {showCategories && !task.completed && (
+            <div
+              className="rounded-xl border px-3 py-2"
+              style={{
+                background: 'var(--board-tag-bg)',
+                borderColor: 'var(--board-tag-border)'
+              }}
+            >
               <TagInput
-                tags={taskCategories}
-                onChange={handleCategoriesChange}
-                placeholder="Add categories..."
+                tags={taskLabels}
+                onChange={handleLabelsChange}
+                placeholder="Add labels..."
                 className="text-xs"
               />
             </div>
@@ -404,26 +480,34 @@ export function TaskCard({
         </div>
 
         {/* Actions */}
-        <div className="flex-shrink-0 flex items-center gap-1">
+        <div className="flex-shrink-0 flex items-start gap-2">
           {/* Always visible delete button */}
           <Button
             size="sm"
             variant="ghost"
             onClick={handleDelete}
-            className="h-7 w-7 p-0 text-red-400 hover:text-red-300"
+            className="h-8 w-8 rounded-full p-0 transition-all hover:bg-[color:var(--board-danger-bg)]/80"
+            style={{
+              background: 'var(--board-danger-bg)',
+              color: 'var(--board-danger-text)'
+            }}
             title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
 
           {/* Other actions - show on hover */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
             {onAIEnhance && !task.completed && (
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={handleAIEnhance}
-                className="h-7 w-7 p-0"
+                className="h-8 w-8 rounded-full p-0 transition-all hover:bg-[color:var(--board-action-bg)]/80"
+                style={{
+                  background: 'var(--board-action-bg)',
+                  color: 'var(--board-action-text)'
+                }}
                 title="AI Enhance"
               >
                 <Sparkles className="h-3.5 w-3.5" />
@@ -435,7 +519,11 @@ export function TaskCard({
                 size="sm"
                 variant="ghost"
                 onClick={handleTitleClick}
-                className="h-7 w-7 p-0"
+                className="h-8 w-8 rounded-full p-0 transition-all hover:bg-[color:var(--board-surface-glass)]/80"
+                style={{
+                  background: 'var(--board-surface-glass)',
+                  color: 'var(--board-text-subtle)'
+                }}
                 title="Edit"
               >
                 <Edit2 className="h-3.5 w-3.5" />

@@ -24,7 +24,6 @@ export function getTaskSortPriority(task: Task): number {
 
   // Check if the date is valid
   if (isNaN(dueDate.getTime())) {
-    console.warn('Invalid date in getTaskSortPriority:', task.dueDate)
     return 900 // Treat as no due date
   }
 
@@ -87,7 +86,6 @@ export function getDueDateColorClass(dueDate?: Date | string): string {
 
   // Check if the date is valid
   if (isNaN(due.getTime())) {
-    console.warn('Invalid date provided to getDueDateColorClass:', dueDate)
     return ''
   }
 
@@ -115,7 +113,6 @@ export function formatCompactDueDate(dueDate?: Date | string): string {
 
   // Check if the date is valid
   if (isNaN(due.getTime())) {
-    console.warn('Invalid date provided to formatCompactDueDate:', dueDate)
     return ''
   }
 

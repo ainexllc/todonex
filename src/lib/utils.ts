@@ -121,7 +121,7 @@ export function setLocalStorage(key: string, value: any): boolean {
     localStorage.setItem(key, JSON.stringify(value))
     return true
   } catch (error) {
-    console.error('Failed to set localStorage:', error)
+    void error
     return false
   }
 }
@@ -131,7 +131,7 @@ export function getLocalStorage<T>(key: string, defaultValue?: T): T | null {
     const item = localStorage.getItem(key)
     return item ? JSON.parse(item) : defaultValue ?? null
   } catch (error) {
-    console.error('Failed to get localStorage:', error)
+    void error
     return defaultValue ?? null
   }
 }
@@ -141,7 +141,7 @@ export function removeLocalStorage(key: string): boolean {
     localStorage.removeItem(key)
     return true
   } catch (error) {
-    console.error('Failed to remove localStorage:', error)
+    void error
     return false
   }
 }
@@ -152,7 +152,7 @@ export function setSessionStorage(key: string, value: any): boolean {
     sessionStorage.setItem(key, JSON.stringify(value))
     return true
   } catch (error) {
-    console.error('Failed to set sessionStorage:', error)
+    void error
     return false
   }
 }
@@ -162,7 +162,7 @@ export function getSessionStorage<T>(key: string, defaultValue?: T): T | null {
     const item = sessionStorage.getItem(key)
     return item ? JSON.parse(item) : defaultValue ?? null
   } catch (error) {
-    console.error('Failed to get sessionStorage:', error)
+    void error
     return defaultValue ?? null
   }
 }

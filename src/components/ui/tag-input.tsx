@@ -18,7 +18,7 @@ export interface TagInputProps {
 export function TagInput({
   tags = [],
   onChange,
-  placeholder = 'Add tag...',
+  placeholder = 'Add label...',
   className,
   disabled = false
 }: TagInputProps) {
@@ -26,7 +26,7 @@ export function TagInput({
   const [isAdding, setIsAdding] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
 
-  const handleAddTag = () => {
+  const handleAddLabel = () => {
     const trimmedValue = inputValue.trim().toLowerCase()
     if (trimmedValue && !tags.includes(trimmedValue)) {
       onChange([...tags, trimmedValue])
@@ -35,14 +35,14 @@ export function TagInput({
     }
   }
 
-  const handleRemoveTag = (tagToRemove: string) => {
+  const handleRemoveLabel = (tagToRemove: string) => {
     onChange(tags.filter(tag => tag !== tagToRemove))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleAddTag()
+      handleAddLabel()
     } else if (e.key === 'Escape') {
       setInputValue('')
       setIsAdding(false)
@@ -51,7 +51,7 @@ export function TagInput({
 
   return (
     <div className={cn('flex flex-wrap items-center gap-1', className)}>
-      {/* Existing Tags */}
+      {/* Existing Labels */}
       {tags.map((tag) => (
         <Badge
           key={tag}
@@ -63,10 +63,10 @@ export function TagInput({
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                handleRemoveTag(tag)
+                handleRemoveLabel(tag)
               }}
               className="ml-0.5 hover:text-destructive transition-colors"
-              aria-label={`Remove ${tag} tag`}
+              aria-label={`Remove ${tag} label`}
             >
               <X className="h-2.5 w-2.5" />
             </button>
@@ -74,7 +74,7 @@ export function TagInput({
         </Badge>
       ))}
 
-      {/* Add Tag Input */}
+      {/* Add Label Input */}
       {!disabled && (
         <>
           {isAdding ? (
@@ -96,7 +96,7 @@ export function TagInput({
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={handleAddTag}
+                onClick={handleAddLabel}
                 className="h-6 w-6 p-0"
               >
                 <Plus className="h-3 w-3" />
@@ -111,7 +111,7 @@ export function TagInput({
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
             >
               <Plus className="h-3 w-3" />
-              <span>Add tag</span>
+              <span>Add label</span>
             </button>
           )}
         </>

@@ -375,7 +375,7 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       
       setAiEnhancement(mockEnhancement)
     } catch (error) {
-      console.error('Failed to enhance task:', error)
+      void error
       setAiError('Failed to enhance task. Please try again.')
     } finally {
       setAiLoading(false)
@@ -530,7 +530,6 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       setFormData(prev => ({ ...prev, ...updates }))
       
     } catch (error) {
-      console.error('Failed to reword task:', error)
       setRewordError(error instanceof Error ? error.message : 'Failed to reword task. Please try again.')
     } finally {
       setRewordLoading(false)

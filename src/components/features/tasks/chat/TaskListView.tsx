@@ -66,14 +66,12 @@ export function TaskListView({
   }
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
-    console.log('TaskListView: Toggling task', taskId, 'to completed:', completed)
     const updates: any = { completed }
     if (completed) {
       updates.completedAt = new Date()
     } else {
       updates.completedAt = null
     }
-    console.log('TaskListView: Sending updates:', updates)
     onTaskUpdate?.(taskId, updates)
   }
 

@@ -803,8 +803,7 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
         content = content.replace(/\{[\s\S]*\}/g, '').trim()
       }
     } catch (error) {
-      // If JSON parsing fails, just return the text response
-      console.log('Could not parse JSON from AI response:', error)
+      void error
     }
 
     return NextResponse.json({
@@ -817,7 +816,7 @@ Always include the JSON structure when creating, modifying, or deleting tasks.`
     })
 
   } catch (error) {
-    console.error('Task chat API error:', error)
+    void error
     return NextResponse.json(
       { error: 'Failed to process chat message' },
       { status: 500 }

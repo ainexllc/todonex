@@ -153,13 +153,13 @@ export function NewTaskModal({ isOpen, onClose, onSubmit, activeListId }: NewTas
                 />
               </div>
 
-              {/* Tags - col-span-2 */}
+              {/* Labels - col-span-2 */}
               <div className="col-span-2">
                 <Input
                   type="text"
                   value={formData.tags}
                   onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                  placeholder="Tags (comma-separated)"
+                  placeholder="Labels (comma-separated)"
                   className="rounded-xl bg-card/50 border backdrop-filter backdrop-blur-sm"
                 />
               </div>

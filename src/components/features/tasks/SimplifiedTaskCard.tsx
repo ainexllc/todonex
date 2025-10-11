@@ -116,7 +116,7 @@ export function SimplifiedTaskCard({
         </Button>
       </div>
 
-      {/* Bottom section: Priority, Tags, and Due Date */}
+      {/* Bottom section: Priority, Labels, and Due Date */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Priority pill */}
         <Badge
@@ -129,7 +129,7 @@ export function SimplifiedTaskCard({
           {task.priority}
         </Badge>
 
-        {/* Tag pills */}
+        {/* Label pills */}
         {task.tags && task.tags.length > 0 && (
           <>
             {task.tags.map((tag) => (

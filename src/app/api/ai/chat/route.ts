@@ -112,8 +112,7 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('AI Chat API error:', error)
-    
+    void error
     return NextResponse.json(
       { error: 'AI service temporarily unavailable' },
       { status: 500 }

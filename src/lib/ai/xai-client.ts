@@ -159,7 +159,6 @@ class XAIClient {
         cached: false,
       }
     } catch (error) {
-      console.error('x.ai API error:', error)
       throw new Error(`AI request failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -178,7 +177,6 @@ class XAIClient {
         yield delta
       }
     } catch (error) {
-      console.error('x.ai streaming error:', error)
       throw new Error(`AI streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -234,4 +232,3 @@ class XAIClient {
 
 // Singleton instance
 export const xaiClient = new XAIClient()
-

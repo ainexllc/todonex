@@ -161,7 +161,6 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
 
       // Show success message
       setSuccess(mode === 'signin' ? 'Welcome back!' : 'Account created successfully!')
-      console.log('Email auth success - auth redirect hook will handle navigation')
     } catch (err: any) {
       setError(err.message || 'An error occurred')
     } finally {
@@ -174,9 +173,7 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
     setError('')
 
     try {
-      console.log('Starting Google auth...')
       const result = await signInWithGoogle()
-      console.log('Google auth result:', { user: !!result.user, error: result.error })
 
       if (result.user && !result.error) {
         // Create or update user document
@@ -204,17 +201,14 @@ export function AuthForm({ mode: initialMode = 'signin' }: AuthFormProps) {
           lastLoginAt: new Date()
         }
 
-        console.log('Creating/updating user document in Firestore...')
         await setDoc(doc(db, 'users', result.user.uid), userDoc, { merge: true })
         setUser(userDoc)
 
-        console.log('Google auth success - auth redirect hook will handle navigation')
         setSuccess('Successfully signed in with Google!')
       } else {
         setError(result.error || 'Google sign-in failed')
       }
     } catch (err: any) {
-      console.error('Google auth error:', err)
       setError(err.message || 'An error occurred during Google sign-in')
     } finally {
       setLoading(false)

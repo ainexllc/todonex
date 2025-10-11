@@ -151,8 +151,7 @@ export async function POST(request: NextRequest) {
       const cleanJson = jsonText.substring(jsonStart, jsonEnd)
       rewordedTask = JSON.parse(cleanJson)
     } catch (parseError) {
-      console.error('Failed to parse AI response:', response.content)
-      
+      void parseError
       // Fallback to basic professional formatting
       rewordedTask = createFallbackReword(body)
     }
@@ -173,8 +172,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Task reword error:', error)
-    
+    void error
     // Return fallback reword on error
     try {
       const body: TaskRewordRequest = await request.json()

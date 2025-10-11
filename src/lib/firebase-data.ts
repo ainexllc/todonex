@@ -56,9 +56,6 @@ export async function createDocument<T extends Record<string, any>>(
 ): Promise<void> {
   if (!auth.currentUser) throw new Error('Not authenticated')
 
-  console.log('createDocument: Creating document in', collectionName, 'with ID:', id)
-  console.log('createDocument: Current user:', auth.currentUser.uid)
-
   // Clean the data to remove undefined fields
   const cleanedData = removeUndefinedFields(data)
 
@@ -71,27 +68,10 @@ export async function createDocument<T extends Record<string, any>>(
     familyId: auth.currentUser.uid // For now, user ID is family ID
   }
 
-  console.log('createDocument: Document data:', docData)
+  // Clean the document data to remove any undefined fields
+  const cleanedDocData = removeUndefinedFields(docData)
 
-  try {
-    // Clean the document data to remove any undefined fields
-    const cleanedDocData = removeUndefinedFields(docData)
-    console.log('createDocument: Cleaned document data:', cleanedDocData)
-
-    await setDoc(doc(db, collectionName, id), cleanedDocData)
-    console.log('createDocument: Document created successfully in Firestore')
-
-    // Verify the document was created
-    const verifyDoc = await getDoc(doc(db, collectionName, id))
-    if (verifyDoc.exists()) {
-      console.log('createDocument: Verified - document exists with ID:', id)
-    } else {
-      console.error('createDocument: WARNING - Document not found after creation!')
-    }
-  } catch (error) {
-    console.error('createDocument: Failed to create document:', error)
-    throw error
-  }
+  await setDoc(doc(db, collectionName, id), cleanedDocData)
 }
 
 export async function updateDocument<T extends Record<string, any>>(
@@ -142,12 +122,8 @@ export async function getUserDocuments<T>(
   orderByField = 'updatedAt'
 ): Promise<T[]> {
   if (!auth.currentUser) {
-    console.log('getUserDocuments: No current user')
     return []
   }
-
-  console.log('getUserDocuments: Querying', collectionName, 'for user:', auth.currentUser.uid)
-
   try {
     const q = query(
       collection(db, collectionName),
@@ -156,10 +132,8 @@ export async function getUserDocuments<T>(
     )
 
     const querySnapshot = await getDocs(q)
-    console.log('getUserDocuments: Found', querySnapshot.docs.length, 'documents in', collectionName)
     return querySnapshot.docs.map(doc => {
       const data = doc.data()
-      console.log('Document data:', doc.id, data)
 
       // Convert nested task dates if this is a taskList document
       if (data.tasks && Array.isArray(data.tasks)) {
@@ -195,8 +169,8 @@ export async function getUserDocuments<T>(
       } as T
     })
   } catch (error) {
+    void error
     // If index doesn't exist, try simpler query without ordering
-    console.log('Falling back to simple query without ordering')
     const q = query(
       collection(db, collectionName),
       where('familyId', '==', auth.currentUser.uid)
@@ -317,7 +291,7 @@ export function savePreference<T>(key: string, value: T): void {
   try {
     localStorage.setItem(`nexttaskpro-${key}`, JSON.stringify(value))
   } catch (error) {
-    console.warn('Failed to save preference:', error)
+    void error
   }
 }
 
@@ -339,4 +313,3 @@ export function clearPreferences(): void {
     }
   })
 }
-

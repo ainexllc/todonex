@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LIST_COLORS, getAllColorKeys, type ListColorKey } from '@/lib/utils/list-colors'
@@ -15,6 +15,12 @@ export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
   const [selectedColor, setSelectedColor] = useState<ListColorKey>(
     (value as ListColorKey) || 'blue'
   )
+
+  useEffect(() => {
+    if (value) {
+      setSelectedColor(value as ListColorKey)
+    }
+  }, [value])
 
   const colors = getAllColorKeys()
 

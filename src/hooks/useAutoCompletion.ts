@@ -37,67 +37,42 @@ export function useAutoCompletion(options: UseAutoCompletionOptions = {}) {
   const lastCheckRef = useRef<number>(0)
 
   const runAutoCompletion = useCallback(async () => {
-    if (!user || !enabled) {
-      console.log('Auto-completion: Skipped (no user or disabled)')
-      return
-    }
+    if (!user || !enabled) return
 
     const now = Date.now()
     const timeSinceLastCheck = now - lastCheckRef.current
 
     // Prevent rapid successive calls (minimum 5 minutes between checks)
-    if (timeSinceLastCheck < 5 * 60 * 1000 && lastCheckRef.current > 0) {
-      console.log('Auto-completion: Skipped (too recent)', {
-        timeSinceLastCheck: Math.round(timeSinceLastCheck / 1000),
-        minInterval: 5 * 60
-      })
-      return
-    }
+    if (timeSinceLastCheck < 5 * 60 * 1000 && lastCheckRef.current > 0) return
 
     try {
-      console.log('Auto-completion: Starting check for tasks due today')
       lastCheckRef.current = now
 
       const result = await autoCompleteTasksDueToday()
 
       if (result.completedCount > 0) {
-        console.log(`Auto-completion: Successfully completed ${result.completedCount} tasks`)
         onAutoComplete?.(result)
       }
-
-      if (result.errors.length > 0) {
-        console.warn('Auto-completion: Completed with errors:', result.errors)
-      }
     } catch (error) {
-      console.error('Auto-completion: Failed to run:', error)
+      void error
     }
   }, [user, enabled, onAutoComplete])
 
   // Set up periodic checks
   useEffect(() => {
-    if (!enabled || !user) {
-      console.log('Auto-completion: Hook disabled or no user')
-      return
-    }
-
-    console.log(`Auto-completion: Setting up periodic checks every ${checkInterval / 1000}s`)
+    if (!enabled || !user) return
 
     // Run immediately if requested
-    if (runImmediately) {
-      console.log('Auto-completion: Running immediate check')
-      runAutoCompletion()
-    }
+    if (runImmediately) runAutoCompletion()
 
     // Set up interval for periodic checks
     intervalRef.current = setInterval(() => {
-      console.log('Auto-completion: Running periodic check')
       runAutoCompletion()
     }, checkInterval)
 
     // Cleanup interval on unmount or dependency change
     return () => {
       if (intervalRef.current) {
-        console.log('Auto-completion: Cleaning up interval')
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
@@ -109,14 +84,10 @@ export function useAutoCompletion(options: UseAutoCompletionOptions = {}) {
     if (!enabled || !user) return
 
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('Auto-completion: Document became visible, running check')
-        runAutoCompletion()
-      }
+      if (!document.hidden) runAutoCompletion()
     }
 
     const handleFocus = () => {
-      console.log('Auto-completion: Window gained focus, running check')
       runAutoCompletion()
     }
 

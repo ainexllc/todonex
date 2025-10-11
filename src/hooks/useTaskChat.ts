@@ -9,8 +9,8 @@ import {
   deleteDocument,
   subscribeToUserDocuments
 } from '@/lib/firebase-data'
-import { getBestIconForList } from '@/lib/utils/icon-matcher'
-import { suggestColorForList } from '@/lib/utils/list-colors'
+import { getBestIconForList, type IconName } from '@/lib/utils/icon-matcher'
+import { suggestColorForList, type ListColorKey } from '@/lib/utils/list-colors'
 import type { Task, TaskList, ChatMessage } from '@/types/task'
 
 interface UseTaskChatResult {
@@ -19,7 +19,7 @@ interface UseTaskChatResult {
   loading: boolean
   error: string | null
   taskLists: TaskList[]
-  createTaskList: (title: string, tasks: Task[]) => void
+  createTaskList: (title: string, tasks: Task[], options?: { icon?: IconName; color?: ListColorKey }) => void
   updateTaskList: (id: string, updates: Partial<TaskList>) => void
   deleteTaskList: (id: string) => void
   resetConversation: () => void
@@ -50,10 +50,9 @@ export function useTaskChat(): UseTaskChatResult {
         return orderA - orderB
       })
 
-      console.log(`Loaded ${lists.length} lists from Firebase`)
       setTaskLists(sortedLists)
     } catch (error) {
-      console.log('Error loading task lists:', error)
+      void error
     }
   }, [user])
 
@@ -61,10 +60,8 @@ export function useTaskChat(): UseTaskChatResult {
   const deleteTaskListFromFirebase = useCallback(async (id: string) => {
     try {
       await deleteDocument('taskLists', id)
-      console.log('Successfully deleted task list from Firebase:', id)
       // Don't reload here - let the caller handle state updates
     } catch (error) {
-      console.error('Failed to delete task list from Firebase:', error)
       throw error // Re-throw to let caller know deletion failed
     }
   }, [])
@@ -91,7 +88,6 @@ export function useTaskChat(): UseTaskChatResult {
       // Delete older duplicates, keeping only the most recent
       for (const [title, duplicates] of duplicateGroups) {
         if (duplicates.length > 1) {
-          console.log(`Found ${duplicates.length} duplicate lists for "${title}"`)
 
           // Sort by date (most recent first)
           duplicates.sort((a, b) => {
@@ -102,7 +98,6 @@ export function useTaskChat(): UseTaskChatResult {
 
           // Keep the first (most recent) and delete the rest
           for (let i = 1; i < duplicates.length; i++) {
-            console.log(`Deleting duplicate list: ${duplicates[i].id} (${duplicates[i].title})`)
             await deleteTaskListFromFirebase(duplicates[i].id)
           }
         }
@@ -111,7 +106,7 @@ export function useTaskChat(): UseTaskChatResult {
       // Reload lists after cleanup
       await reloadTaskLists()
     } catch (error) {
-      console.error('Failed to cleanup duplicate lists:', error)
+      void error
     }
   }, [user, deleteTaskListFromFirebase, reloadTaskLists])
 
@@ -129,7 +124,6 @@ export function useTaskChat(): UseTaskChatResult {
   // Save task list to Firebase
   const saveTaskListToFirebase = useCallback(async (taskList: TaskList) => {
     try {
-      console.log('Saving task list to Firebase:', taskList.title, taskList.id)
 
       // Convert Date objects to ISO strings for Firebase
       const tasksForFirebase = taskList.tasks.map((task: any) => {
@@ -169,18 +163,16 @@ export function useTaskChat(): UseTaskChatResult {
       }
 
       await createDocument('taskLists', taskList.id, documentData)
-      console.log('Successfully saved task list to Firebase:', taskList.title)
       // Reload task lists to update UI
       await reloadTaskLists()
     } catch (error) {
-      console.error('Failed to save task list to Firebase:', error)
+      void error
     }
   }, [reloadTaskLists])
 
   // Update task list in Firebase
   const updateTaskListInFirebase = useCallback(async (id: string, updates: Partial<TaskList>) => {
     try {
-      console.log('Updating task list in Firebase:', id, updates)
 
       // If updates contain tasks, convert Date objects to ISO strings
       const firebaseUpdates: any = { ...updates }
@@ -212,7 +204,6 @@ export function useTaskChat(): UseTaskChatResult {
       }
 
       await updateDocument('taskLists', id, firebaseUpdates)
-      console.log('Successfully updated task list in Firebase:', id)
 
       // For simple updates (title, color, icon), just update the local state
       // instead of doing a full reload to avoid flickering
@@ -225,7 +216,7 @@ export function useTaskChat(): UseTaskChatResult {
         await reloadTaskLists()
       }
     } catch (error) {
-      console.error('Failed to update task list in Firebase:', error)
+      void error
     }
   }, [reloadTaskLists])
 
@@ -278,7 +269,6 @@ export function useTaskChat(): UseTaskChatResult {
       
       // Update task lists if new ones were created
       if (data.taskLists && data.taskLists.length > 0) {
-        console.log('Received task lists from AI:', data.taskLists)
         const updatedTaskLists = [...taskLists]
 
         data.taskLists.forEach((newList: any) => {
@@ -294,16 +284,10 @@ export function useTaskChat(): UseTaskChatResult {
           if (newList.operation === 'deleteList') {
             // Remove ALL lists with matching title
             const titleToDelete = newList.title.toLowerCase()
-            const beforeCount = updatedTaskLists.length
-
             // Filter out all lists with matching title
             const filteredLists = updatedTaskLists.filter(list =>
               list.title.toLowerCase() !== titleToDelete
             )
-
-            const deletedCount = beforeCount - filteredLists.length
-            console.log(`Deleting ${deletedCount} list(s) named "${newList.title}"`)
-
             // Replace the array with filtered version
             updatedTaskLists.length = 0
             updatedTaskLists.push(...filteredLists)
@@ -330,16 +314,14 @@ export function useTaskChat(): UseTaskChatResult {
                     task.title.toLowerCase() === updatedTask.title.toLowerCase()
                   )
 
-                  if (taskIndex !== -1) {
-                    // Update existing task by merging properties
-                    updatedTasks[taskIndex] = {
-                      ...updatedTasks[taskIndex],
-                      ...updatedTask
-                    }
-                    console.log(`Updated task "${updatedTask.title}" in list "${updatedTaskLists[existingIndex].title}"`)
-                  } else {
-                    // Task not found, this shouldn't happen for update operations
-                    console.warn(`Task "${updatedTask.title}" not found for update, skipping`)
+                  if (taskIndex === -1) {
+                    return
+                  }
+
+                  // Update existing task by merging properties
+                  updatedTasks[taskIndex] = {
+                    ...updatedTasks[taskIndex],
+                    ...updatedTask
                   }
                 })
 
@@ -373,11 +355,9 @@ export function useTaskChat(): UseTaskChatResult {
               const listsToDelete = taskLists.filter(list =>
                 list.title.toLowerCase() === newList.title.toLowerCase()
               )
-              console.log(`Found ${listsToDelete.length} lists named "${newList.title}" to delete`)
 
               // Delete all matching lists
               for (const list of listsToDelete) {
-                console.log('Deleting list from Firebase:', list.id, list.title)
                 await deleteTaskListFromFirebase(list.id)
               }
             } else if (newList.isAddToExisting) {
@@ -421,7 +401,7 @@ export function useTaskChat(): UseTaskChatResult {
               }
             }
           } catch (error) {
-            console.error('Failed to save task list changes to Firebase:', error)
+            void error
           }
         }
       }
@@ -443,7 +423,7 @@ export function useTaskChat(): UseTaskChatResult {
     }
   }, [user, messages, taskLists, loading, trackTaskUsage, deleteTaskListFromFirebase, saveTaskListToFirebase, updateTaskListInFirebase])
 
-  const createTaskList = useCallback(async (title: string, tasks: Task[]) => {
+  const createTaskList = useCallback(async (title: string, tasks: Task[], options: { icon?: IconName; color?: ListColorKey } = {}) => {
     // Check if a task list with the same title already exists
     const existingList = taskLists.find(list =>
       list.title.toLowerCase() === title.toLowerCase()
@@ -461,19 +441,18 @@ export function useTaskChat(): UseTaskChatResult {
         const normalizedTitle = newTask.title.toLowerCase().trim()
         const isDuplicate = existingTaskTitles.has(normalizedTitle)
 
-        if (isDuplicate) {
-          console.log('Duplicate task detected, skipping:', newTask.title)
-        }
-
         return !isDuplicate
       })
 
       if (newTasksToAdd.length > 0) {
-        console.log(`Adding ${newTasksToAdd.length} new tasks to existing list "${title}" (${tasks.length - newTasksToAdd.length} duplicates filtered)`)
-        const updatedTasks = [...existingList.tasks, ...newTasksToAdd]
-        await updateTaskListInFirebase(existingList.id, { tasks: updatedTasks })
-      } else {
-        console.log('All tasks were duplicates, no new tasks added to list:', title)
+        const updatePayload: Partial<TaskList> = { tasks: [...existingList.tasks, ...newTasksToAdd] }
+        if (options.icon) {
+          updatePayload.icon = options.icon
+        }
+        if (options.color) {
+          updatePayload.color = options.color
+        }
+        await updateTaskListInFirebase(existingList.id, updatePayload)
       }
     } else {
       // Create new task list with unique tasks only
@@ -488,12 +467,8 @@ export function useTaskChat(): UseTaskChatResult {
         tasks: uniqueTasks,
         createdAt: new Date(),
         // Auto-detect icon and color based on title
-        icon: getBestIconForList(title),
-        color: suggestColorForList(title)
-      }
-
-      if (uniqueTasks.length < tasks.length) {
-        console.log(`Filtered ${tasks.length - uniqueTasks.length} duplicate tasks when creating new list "${title}"`)
+        icon: options.icon ?? getBestIconForList(title),
+        color: options.color ?? suggestColorForList(title)
       }
 
       await saveTaskListToFirebase(newTaskList)

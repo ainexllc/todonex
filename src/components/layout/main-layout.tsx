@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/auth-store'
 
 interface MainLayoutProps {
@@ -16,23 +16,14 @@ export function MainLayout({ children }: MainLayoutProps) {
     initialized
   } = useAuthStore()
 
-  // Debug logging to understand the loading state
-  console.log('MainLayout state:', { initialized, loading, firebaseUser: !!firebaseUser, user: !!user })
-
-  // Log state changes
-  useEffect(() => {
-    console.log('MainLayout state changed:', { initialized, loading, firebaseUser: !!firebaseUser, user: !!user })
-  }, [initialized, loading, firebaseUser, user])
   const [emergencyBypass, setEmergencyBypass] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
   
   // Emergency bypass for persistent loading issues in development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       const timer = setTimeout(() => {
         if (!initialized && loading) {
-          console.warn('MainLayout: Emergency bypass activated due to persistent loading')
           setEmergencyBypass(true)
         }
       }, 15000) // 15 seconds

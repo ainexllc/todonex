@@ -47,103 +47,103 @@
 }
 
 :root {
-  /* Clean Professional Light Theme */
-  --background: 0 0% 100%;          /* Pure white #FFFFFF */
-  --foreground: 0 0% 10%;           /* Dark gray #1A1A1A */
-  --card: 0 0% 100%;                /* White cards */
-  --card-foreground: 0 0% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
+  --background: 222 47% 10%;
+  --foreground: 210 40% 98%;
+  --card: 222 43% 16%;
+  --card-foreground: 210 36% 96%;
+  --popover: 223 45% 12%;
+  --popover-foreground: 210 40% 98%;
 
-  /* Accent Colors */
-  --primary: 217 91% 60%;           /* Vibrant blue #3B82F6 */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 97%;            /* Off-white #F8F9FA */
-  --secondary-foreground: 0 0% 10%;
+  --primary: 199 89% 55%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 215 25% 20%;
+  --secondary-foreground: 210 36% 94%;
 
-  /* Muted & Borders */
-  --muted: 0 0% 96%;                /* Light gray surface */
-  --muted-foreground: 0 0% 42%;     /* Gray text #6B7280 */
-  --border: 0 0% 90%;               /* Subtle borders #E5E7EB */
-  --input: 0 0% 97%;
-
-  /* Actions */
+  --muted: 220 23% 18%;
+  --muted-foreground: 216 20% 70%;
+  --accent: 200 100% 80%;
+  --accent-foreground: 222 47% 12%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 217 91% 60%;
-  --radius: 0.5rem;                 /* 8px tighter radius */
-
-  /* Interactive States */
-  --hover-bg: 0 0% 96%;             /* Subtle hover */
-  --active-bg: 217 91% 95%;         /* Blue tint on active */
-  --focus-ring: 217 91% 60%;
-
-  /* Semantic Priority Colors */
-  --priority-high: 0 84% 60%;       /* Red */
-  --priority-high-bg: 0 100% 97%;   /* Light red bg */
-  --priority-high-text: 0 84% 40%;
-
-  --priority-medium: 38 92% 50%;    /* Amber */
-  --priority-medium-bg: 38 100% 97%;
-  --priority-medium-text: 38 92% 35%;
-
-  --priority-low: 142 71% 45%;      /* Emerald */
-  --priority-low-bg: 142 76% 97%;
-  --priority-low-text: 142 71% 30%;
-
-  /* Completion Green */
-  --success: 142 71% 45%;
-  --success-bg: 142 76% 97%;
-}
-
-.dark {
-  /* Vibrant Dark Theme - Horn Family Style */
-  --background: 222 47% 11%;        /* Deep navy blue #0F172A */
-  --foreground: 0 0% 98%;           /* Almost white text */
-  --card: 220 26% 18%;              /* Rich navy cards */
-  --card-foreground: 0 0% 98%;
-  --popover: 222 47% 11%;
-  --popover-foreground: 0 0% 98%;
-
-  /* Accent Colors - Vibrant */
-  --primary: 217 91% 65%;           /* Vivid blue */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 217 32% 17%;         /* Navy surface */
-  --secondary-foreground: 0 0% 98%;
-
-  /* Muted & Borders */
-  --muted: 217 32% 17%;
-  --muted-foreground: 215 20% 65%;  /* Lighter muted text */
-  --border: 217 32% 27%;            /* Subtle borders */
-  --input: 217 32% 17%;
-
-  /* Actions */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --ring: 217 91% 70%;
+  --border: 216 28% 28%;
+  --input: 216 28% 28%;
+  --ring: 199 89% 58%;
   --radius: 0.5rem;
 
-  /* Interactive States */
-  --hover-bg: 0 0% 20%;             /* Subtle hover */
-  --active-bg: 217 91% 15%;         /* Blue tint on active */
-  --focus-ring: 217 91% 70%;
+  --hover-bg: 215 24% 20%;
+  --active-bg: 200 84% 25%;
+  --focus-ring: 199 89% 58%;
 
-  /* Semantic Priority Colors */
   --priority-high: 0 84% 60%;
-  --priority-high-bg: 0 84% 10%;    /* Dark red bg */
-  --priority-high-text: 0 84% 70%;
+  --priority-high-bg: rgba(239, 68, 68, 0.12);
+  --priority-high-text: rgba(248, 113, 113, 0.95);
+  --priority-high-border: rgba(248, 113, 113, 0.32);
 
   --priority-medium: 38 92% 60%;
-  --priority-medium-bg: 38 92% 10%;
-  --priority-medium-text: 38 92% 70%;
+  --priority-medium-bg: rgba(251, 191, 36, 0.14);
+  --priority-medium-text: rgba(253, 224, 71, 0.95);
+  --priority-medium-border: rgba(251, 191, 36, 0.32);
 
-  --priority-low: 142 71% 50%;
-  --priority-low-bg: 142 71% 10%;
-  --priority-low-text: 142 71% 60%;
+  --priority-low: 142 71% 45%;
+  --priority-low-bg: rgba(45, 212, 191, 0.12);
+  --priority-low-text: rgba(94, 234, 212, 0.95);
+  --priority-low-border: rgba(94, 234, 212, 0.32);
 
-  /* Completion Green */
-  --success: 142 71% 50%;
-  --success-bg: 142 71% 10%;
+  --success: 142 71% 45%;
+  --success-bg: rgba(16, 185, 129, 0.16);
+
+  /* Board theme defaults (Aurora Flow) */
+  --board-background: radial-gradient(160% 120% at 20% 0%, rgba(40, 120, 255, 0.22) 0%, rgba(14, 116, 144, 0.18) 35%, rgba(15, 23, 42, 0.92) 75%);
+  --board-surface-color: #0f172a;
+  --board-surface-glass: rgba(15, 23, 42, 0.75);
+  --board-column-bg: rgba(15, 23, 42, 0.65);
+  --board-column-border: rgba(56, 189, 248, 0.28);
+  --board-column-shadow: 0 24px 70px rgba(8, 47, 73, 0.45);
+  --board-column-hover-shadow: 0 24px 80px rgba(56, 189, 248, 0.45);
+  --board-card-bg: rgba(15, 23, 42, 0.78);
+  --board-card-border: rgba(56, 189, 248, 0.28);
+  --board-card-shadow: 0 22px 60px rgba(14, 116, 144, 0.38);
+  --board-card-hover-border: rgba(129, 140, 248, 0.65);
+  --board-card-hover-shadow: 0 30px 70px rgba(59, 130, 246, 0.38);
+  --board-card-hover-overlay: linear-gradient(135deg, rgba(56, 189, 248, 0.16) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
+  --board-task-accent: linear-gradient(90deg, rgba(94, 234, 212, 0.7), rgba(129, 140, 248, 0.7));
+  --board-task-accent-today: linear-gradient(90deg, rgba(251, 191, 36, 0.75), rgba(94, 234, 212, 0.65));
+  --board-task-accent-overdue: linear-gradient(90deg, rgba(239, 68, 68, 0.85), rgba(251, 113, 133, 0.75));
+  --board-task-accent-complete: linear-gradient(90deg, rgba(34, 197, 94, 0.8), rgba(52, 211, 153, 0.75));
+  --board-chip-bg: rgba(165, 243, 252, 0.12);
+  --board-chip-text: rgba(226, 232, 240, 0.92);
+  --board-chip-border: rgba(165, 243, 252, 0.32);
+  --board-pill-bg: rgba(56, 189, 248, 0.18);
+  --board-pill-text: rgba(226, 232, 240, 0.95);
+  --board-pill-border: rgba(148, 163, 184, 0.35);
+  --board-text-muted: rgba(203, 213, 225, 0.78);
+  --board-text-subtle: rgba(148, 163, 184, 0.85);
+  --board-text-strong: rgba(248, 250, 252, 0.96);
+  --board-heading-color: rgba(224, 242, 254, 0.98);
+  --board-icon-muted: rgba(148, 163, 184, 0.7);
+  --board-focus-glow: 0 0 0 3px rgba(56, 189, 248, 0.45);
+  --board-column-radius: 20px;
+  --board-tag-bg: rgba(15, 23, 42, 0.55);
+  --board-tag-border: rgba(148, 163, 184, 0.35);
+  --board-tag-text: rgba(203, 213, 225, 0.9);
+  --board-due-empty-border: rgba(148, 163, 184, 0.6);
+  --board-due-empty-text: rgba(203, 213, 225, 0.85);
+  --board-due-empty-bg: rgba(15, 23, 42, 0.6);
+  --board-due-today-bg: rgba(251, 191, 36, 0.15);
+  --board-due-today-border: rgba(251, 191, 36, 0.55);
+  --board-due-today-text: rgba(253, 224, 71, 0.95);
+  --board-due-overdue-bg: rgba(239, 68, 68, 0.18);
+  --board-due-overdue-border: rgba(239, 68, 68, 0.55);
+  --board-due-overdue-text: rgba(248, 113, 113, 0.95);
+  --board-due-future-bg: rgba(56, 189, 248, 0.14);
+  --board-due-future-border: rgba(56, 189, 248, 0.45);
+  --board-due-future-text: rgba(191, 219, 254, 0.98);
+  --board-danger-bg: rgba(239, 68, 68, 0.16);
+  --board-danger-text: rgba(248, 250, 252, 0.95);
+  --board-danger-border: rgba(239, 68, 68, 0.4);
+  --board-action-bg: rgba(56, 189, 248, 0.18);
+  --board-action-text: rgba(224, 242, 254, 0.96);
+  --board-action-border: rgba(96, 165, 250, 0.5);
 }
 
 * {

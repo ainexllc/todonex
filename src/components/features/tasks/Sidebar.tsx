@@ -1,19 +1,17 @@
 'use client'
 
-import { Plus, LayoutGrid, List as ListIcon } from 'lucide-react'
+import { Plus, List as ListIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getListColor } from '@/lib/utils/list-colors'
 import { getIconComponent } from '@/lib/utils/icon-matcher'
-import type { TaskList, ViewMode } from '@/types/task'
+import type { TaskList } from '@/types/task'
 
 interface SidebarProps {
   lists: TaskList[]
   activeListId?: string
   onListSelect: (listId: string) => void
   onNewList: () => void
-  viewMode: ViewMode
-  onViewModeChange: (mode: ViewMode) => void
   className?: string
 }
 
@@ -22,8 +20,6 @@ export function Sidebar({
   activeListId,
   onListSelect,
   onNewList,
-  viewMode,
-  onViewModeChange,
   className
 }: SidebarProps) {
   // Calculate incomplete task count for each list
@@ -67,20 +63,13 @@ export function Sidebar({
 
   return (
     <div
-      className={cn('w-72 border-r border-border bg-background flex flex-col h-full', className)}
+      className={cn('w-72 border-r flex flex-col h-full', className)}
+      style={{
+        background: 'var(--board-surface-glass)',
+        borderColor: 'var(--board-column-border)',
+        color: 'var(--board-text-strong)'
+      }}
     >
-      {/* Header with New List button */}
-      <div className="flex-shrink-0 p-4 border-b border-border">
-        <Button
-          onClick={onNewList}
-          className="w-full gap-2 rounded-xl"
-          size="sm"
-          variant="default"
-        >
-          <Plus className="h-4 w-4" />
-          New List
-        </Button>
-      </div>
 
       {/* Task Lists Navigation */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -95,13 +84,12 @@ export function Sidebar({
               key={list.id}
               onClick={() => onListSelect(list.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 transition-all duration-200',
-                'text-left group relative rounded-lg',
-                'hover:bg-accent',
-                isActive ? 'bg-accent' : 'bg-background'
+                'w-full flex items-center gap-3 px-3 py-2 transition-all duration-200 text-left group relative rounded-xl border',
+                isActive
+                  ? 'bg-[color:var(--board-action-bg)]/70 border-[color:var(--board-action-border)] text-[color:var(--board-action-text)]'
+                  : 'bg-transparent border-transparent hover:bg-[color:var(--board-surface-glass)] hover:border-[color:var(--board-column-border)]'
               )}
             >
-              {/* Icon (if available) */}
               {IconComponent && (
                 <IconComponent
                   className="h-4 w-4 flex-shrink-0"
@@ -109,15 +97,14 @@ export function Sidebar({
                 />
               )}
 
-              {/* List title */}
-              <span className="flex-1 text-sm font-medium truncate">
-                {list.title}
-              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{list.title}</p>
+                <p className="text-[11px] text-[color:var(--board-text-muted)]">{incompleteCount} active</p>
+              </div>
 
-              {/* Incomplete task count badge */}
               {incompleteCount > 0 && (
                 <span
-                  className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
                   style={{ backgroundColor: colorTheme.hex }}
                 >
                   {incompleteCount}
@@ -136,59 +123,45 @@ export function Sidebar({
       </div>
 
       {/* Stats Summary Section */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-border">
+      <div
+        className="flex-shrink-0 px-4 py-3 border-t"
+        style={{ borderColor: 'var(--board-column-border)' }}
+      >
         <div className="mb-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Completed
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <div className="text-xs text-muted-foreground">Today</div>
+          <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
+            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>Today</div>
             <div className="text-lg font-bold">{stats.today}</div>
           </div>
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <div className="text-xs text-muted-foreground">This Week</div>
+          <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
+            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Week</div>
             <div className="text-lg font-bold">{stats.week}</div>
           </div>
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <div className="text-xs text-muted-foreground">This Month</div>
+          <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
+            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Month</div>
             <div className="text-lg font-bold">{stats.month}</div>
           </div>
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <div className="text-xs text-muted-foreground">This Year</div>
+          <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
+            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Year</div>
             <div className="text-lg font-bold">{stats.year}</div>
           </div>
         </div>
       </div>
 
-      {/* Middle Section - View Mode Toggle */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-border">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            View Mode
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'masonry' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onViewModeChange('masonry')}
-            className="flex-1 rounded-lg gap-2"
-          >
-            <LayoutGrid className="h-4 w-4" />
-            <span className="text-xs">Board</span>
-          </Button>
-          <Button
-            variant={viewMode === 'timeline' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onViewModeChange('timeline')}
-            className="flex-1 rounded-lg gap-2"
-          >
-            <ListIcon className="h-4 w-4" />
-            <span className="text-xs">List</span>
-          </Button>
-        </div>
+      <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--board-column-border)' }}>
+        <Button
+          onClick={onNewList}
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-xs font-medium rounded-lg border border-dashed border-[color:var(--board-column-border)] hover:border-[color:var(--board-action-border)]"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New List
+        </Button>
       </div>
 
     </div>

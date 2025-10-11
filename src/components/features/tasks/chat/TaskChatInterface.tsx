@@ -61,7 +61,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
     runImmediately: true, // Run check when component mounts
     onAutoComplete: (result) => {
       if (result.completedCount > 0) {
-        console.log(`Auto-completed ${result.completedCount} tasks due today`)
         // Reload task lists to reflect the changes
         reloadTaskLists?.()
       }
@@ -299,7 +298,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
 
                     // Auto-remove completed tasks from active list (but keep in Firebase for history)
                     if (updates.completed === true) {
-                      console.log('TaskChatInterface: Auto-removing completed task from active view:', taskId)
                       updatedTasks = updatedTasks.filter((task: any) => task.id !== taskId)
                     }
 
@@ -543,7 +541,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               taskList={selectedTaskList}
               onClose={handleCloseTaskList}
               onTaskUpdate={async (taskId, updates) => {
-                console.log('TaskChatInterface: Received task update for', taskId, 'with updates:', updates)
                 // Update task in the selected task list
                 if (selectedTaskList) {
                   // First update local state immediately for responsive UI
@@ -553,11 +550,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
 
                   // Auto-remove completed tasks from active list (but keep in Firebase for history)
                   if (updates.completed === true) {
-                    console.log('TaskChatInterface: Auto-removing completed task from active view:', taskId)
                     updatedTasks = updatedTasks.filter((task: any) => task.id !== taskId)
                   }
 
-                  console.log('TaskChatInterface: Updated tasks before Firebase:', updatedTasks)
                   setSelectedTaskList({ ...selectedTaskList, tasks: updatedTasks })
 
                   // Prepare ALL tasks for Firebase (including the completed one for history)
@@ -598,11 +593,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     }
                     return firebaseTask
                   })
-                  console.log('TaskChatInterface: Tasks prepared for Firebase:', allTasksForFirebase)
 
                   // Save all tasks to Firebase (including completed ones for history)
                   await updateTaskList(selectedTaskList.id, { tasks: allTasksForFirebase })
-                  console.log('TaskChatInterface: Firebase update completed')
                 }
               }}
               onTaskDelete={async (taskId) => {
@@ -649,11 +642,9 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     }
                     return firebaseTask
                   })
-                  console.log('TaskChatInterface: Tasks prepared for Firebase:', tasksForFirebase)
 
                   // Then update Firebase
                   await updateTaskList(selectedTaskList.id, { tasks: tasksForFirebase })
-                  console.log('TaskChatInterface: Firebase update completed')
                 }
               }}
               onTaskListDelete={async (taskListId) => {
@@ -676,7 +667,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
               key={index}
               message={message}
               onTaskAction={async (action, taskId, data) => {
-                console.log('TaskChatInterface: Handling task action:', action, 'with data:', data)
 
                 // Handle task actions
                 switch (action) {
@@ -713,13 +703,11 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     break
                   case 'create_list':
                     // Create a new task list with the specified name
-                    console.log('Creating new task list:', data)
                     await createTaskList(data, [])
                     break
                   case 'add_tasks':
                     // Parse tasks from the data string and add to current list
                     if (selectedTaskList && data) {
-                      console.log('Adding tasks to current list:', data)
                       // Simple parsing - split by commas or newlines
                       const taskTitles = data.split(/[,\n]/).map((title: string) => title.trim()).filter(Boolean)
                       const newTasks = taskTitles.map((title: string) => ({
@@ -749,7 +737,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   case 'mark_complete':
                     // Mark tasks as complete based on title match
                     if (selectedTaskList && data) {
-                      console.log('Marking tasks complete:', data)
                       const updatedTasks = selectedTaskList.tasks.map(task => {
                         if (task.title.toLowerCase().includes(data.toLowerCase())) {
                           return { ...task, completed: true, completedAt: new Date() }
@@ -775,7 +762,6 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                   case 'delete_task':
                     // Delete tasks based on title match
                     if (selectedTaskList && data) {
-                      console.log('Deleting tasks:', data)
                       const updatedTasks = selectedTaskList.tasks.filter(task =>
                         !task.title.toLowerCase().includes(data.toLowerCase())
                       )
@@ -801,7 +787,7 @@ export function TaskChatInterface({ className }: TaskChatInterfaceProps) {
                     await handleSubmit(data)
                     break
                   default:
-                    console.warn('Unknown task action:', action)
+                    break
                 }
               }}
             />

@@ -151,7 +151,7 @@ export function TaskHeader({
         {/* Filter Dropdowns */}
         {onFilterChange && (
           <>
-            {/* Tag Filter */}
+            {/* Label Filter */}
             {tags.length > 0 && (
               <div className="relative">
                 <select
@@ -163,7 +163,7 @@ export function TaskHeader({
                     'focus:outline-none focus:ring-2 focus:ring-ring'
                   )}
                 >
-                  <option value="">All Tags</option>
+                  <option value="">All Labels</option>
                   {tags.map((tag) => (
                     <option key={tag} value={tag}>
                       {tag}

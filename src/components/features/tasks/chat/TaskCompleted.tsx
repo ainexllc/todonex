@@ -38,11 +38,6 @@ interface TaskCompletedProps {
   className?: string
 }
 
-interface LoadingState {
-  isLoading: boolean
-  error: string | null
-}
-
 export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
   const [dayGroups, setDayGroups] = useState<DayGroup[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,10 +55,8 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
 
       // Load all task lists from Firebase
       const taskLists = await getUserDocuments<TaskList>('taskLists', 'updatedAt')
-      console.log('TaskCompleted: Loaded', taskLists?.length || 0, 'task lists')
 
       if (!taskLists || taskLists.length === 0) {
-        console.log('TaskCompleted: No task lists found')
         setDayGroups([])
         setTotalTasks(0)
         return
@@ -75,22 +68,18 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
       taskLists.forEach(list => {
         // Safety checks for list data
         if (!list || !list.title) {
-          console.warn('TaskCompleted: Invalid list found:', list)
           return
         }
 
-        console.log('TaskCompleted: Processing list:', list.title, 'with', (list.tasks || []).length, 'tasks')
 
         const completedTasks = (list.tasks || [])
           .filter(task => {
-            // Enhanced filtering with better logging
+            // Filter out invalid tasks and require completion date
             if (!task || typeof task.completed !== 'boolean') {
-              console.warn('TaskCompleted: Invalid task found:', task)
               return false
             }
 
             const hasCompletionDate = task.completedAt != null
-            console.log('TaskCompleted: Task', task.title || 'unnamed', 'completed:', task.completed, 'has date:', hasCompletionDate)
 
             return task.completed && hasCompletionDate
           })
@@ -107,11 +96,9 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
 
                 // Validate the parsed date
                 if (isNaN(completedAtDate.getTime())) {
-                  console.warn('TaskCompleted: Invalid date string:', task.completedAt)
                   completedAtDate = new Date() // Fallback to now
                 }
               } else {
-                console.warn('TaskCompleted: Unexpected date type:', typeof task.completedAt, task.completedAt)
                 completedAtDate = new Date() // Fallback to now
               }
 
@@ -121,7 +108,7 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
                 completedAt: completedAtDate
               }
             } catch (dateError) {
-              console.error('TaskCompleted: Error processing task date:', dateError, task)
+              void dateError
               return {
                 ...task,
                 listTitle: list.title || 'Unknown List',
@@ -130,7 +117,6 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
             }
           })
 
-        console.log('TaskCompleted: Found', completedTasks.length, 'valid completed tasks in list', list.title)
         allCompletedTasks.push(...completedTasks)
       })
 
@@ -140,7 +126,6 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
 
       allCompletedTasks.forEach(task => {
         if (!task.completedAt) {
-          console.warn('TaskCompleted: Skipping task without completion date:', task.title)
           return
         }
 
@@ -150,20 +135,18 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
 
           // Validate the converted date
           if (isNaN(localDate.getTime())) {
-            console.error('TaskCompleted: Invalid local date conversion for task:', task.title)
             return
           }
 
           // Use local date string for grouping (ensures proper day boundaries)
           const dayKey = localDate.toLocaleDateString('en-CA') // YYYY-MM-DD format
-          console.log('TaskCompleted: Grouping task', task.title, 'completed at', task.completedAt, 'into day', dayKey)
 
           if (!groups.has(dayKey)) {
             groups.set(dayKey, [])
           }
           groups.get(dayKey)!.push(task)
         } catch (timezoneError) {
-          console.error('TaskCompleted: Timezone conversion error for task:', task.title, timezoneError)
+          void timezoneError
           // Fallback to simple date grouping
           const fallbackKey = task.completedAt.toLocaleDateString('en-CA')
           if (!groups.has(fallbackKey)) {
@@ -197,13 +180,10 @@ export function TaskCompleted({ onClose, className }: TaskCompletedProps) {
           isExpanded: index < 2 // Only expand first 2 days (today and yesterday)
         }))
 
-      console.log('TaskCompleted: Total completed tasks found:', allCompletedTasks.length)
-      console.log('TaskCompleted: Grouped into', sortedGroups.length, 'days')
 
       setDayGroups(sortedGroups)
       setTotalTasks(allCompletedTasks.length)
     } catch (error) {
-      console.error('Failed to load completed tasks:', error)
       setError(error instanceof Error ? error.message : 'Failed to load completed tasks')
       setDayGroups([])
       setTotalTasks(0)

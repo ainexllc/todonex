@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -702,9 +703,12 @@ export function TaskListSidebar({
             {/* Profile Picture or Avatar */}
             <div className="relative flex-shrink-0">
               {user.photoURL ? (
-                <img
+                <Image
                   src={user.photoURL}
                   alt={user.displayName || 'User'}
+                  width={isMobile ? 16 : 20}
+                  height={isMobile ? 16 : 20}
+                  unoptimized
                   className={cn(
                     "rounded-sm",
                     isMobile ? "w-4 h-4" : "w-5 h-5"

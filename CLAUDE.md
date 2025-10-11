@@ -11,7 +11,7 @@
 **MANDATORY**: Claude MUST automatically push and deploy Firebase components on my behalf:
 
 ### Required Actions for ALL Firebase Operations:
-- ✅ **ALWAYS** run `firebase deploy --only firestore:rules,firestore:indexes --project habittracker-eb6bd`
+- ✅ **ALWAYS** run `firebase deploy --only firestore:rules,firestore:indexes --project nexttaskpro`
 - ✅ **IMMEDIATELY** create missing indexes when Firestore query errors occur
 - ✅ **AUTOMATICALLY** deploy security rules when modified
 - ✅ **VERIFY** deployment completion before proceeding with other tasks
@@ -19,20 +19,20 @@
 ### Specific Commands for TodoNex:
 ```bash
 # Deploy everything Firebase-related
-firebase deploy --only firestore:rules,firestore:indexes --project habittracker-eb6bd
+firebase deploy --only firestore:rules,firestore:indexes --project nexttaskpro
 
 # Deploy indexes only (most common need)
-firebase deploy --only firestore:indexes --project habittracker-eb6bd
+firebase deploy --only firestore:indexes --project nexttaskpro
 
 # Check current indexes status
-firebase firestore:indexes --project habittracker-eb6bd
+firebase firestore:indexes --project nexttaskpro
 
 # Deploy security rules only
-firebase deploy --only firestore:rules --project habittracker-eb6bd
+firebase deploy --only firestore:rules --project nexttaskpro
 ```
 
 ### Firebase Project Configuration
-- **Project ID**: `habittracker-eb6bd`
+- **Project ID**: `nexttaskpro`
 - **Production Domain**: `todonex.app`
 - **Environment**: Production Firebase project
 - **Index File**: `/firestore.indexes.json`
@@ -56,7 +56,7 @@ firebase deploy --only firestore:rules --project habittracker-eb6bd
 ## 🏗️ Development Environment
 ### Required Services Running:
 - **Dev Server**: `npm run dev` (ALWAYS port 3000, run in background)
-- **Firebase Project**: Connected to `habittracker-eb6bd`
+- **Firebase Project**: Connected to `nexttaskpro`
 - **Playwright**: Uses port 3000 for E2E testing
 
 ### Development Server Rules:

@@ -170,8 +170,7 @@ export async function POST(request: NextRequest) {
       const cleanJson = jsonText.substring(jsonStart, jsonEnd)
       enhancement = JSON.parse(cleanJson)
     } catch (parseError) {
-      console.error('Failed to parse AI response:', response.content)
-      
+      void parseError
       // Fallback enhancement based on task title analysis
       enhancement = createFallbackEnhancement(taskTitle)
     }
@@ -193,8 +192,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Task enhancement error:', error)
-    
+    void error
     // Return fallback enhancement on error
     try {
       const body: TaskEnhanceRequest = await request.json()

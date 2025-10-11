@@ -77,26 +77,26 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
       {
         pattern: /create(?:d)?\s+(?:a\s+)?(?:new\s+)?(?:task\s+)?list(?:\s+called)?[\s:"]*([^"\n.!?]+)/gi,
         action: 'create_list',
-        className: 'text-blue-400 hover:text-blue-300 underline cursor-pointer'
+        className: 'text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80'
       },
       {
         pattern: /add(?:ed)?\s+(?:the\s+)?(?:following\s+)?tasks?[:\s]?([^\n.!?]+)/gi,
         action: 'add_tasks',
-        className: 'text-green-400 hover:text-green-300 underline cursor-pointer'
+        className: 'text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80'
       },
       {
         pattern: /mark(?:ed)?\s+(?:as\s+)?complete(?:d)?[:\s]?([^\n.!?]+)/gi,
         action: 'mark_complete',
-        className: 'text-green-400 hover:text-green-300 underline cursor-pointer'
+        className: 'text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80'
       },
       {
         pattern: /delete(?:d)?\s+(?:the\s+)?(?:task\s+)?["']?([^"'\n.!?]+)["']?/gi,
         action: 'delete_task',
-        className: 'text-red-400 hover:text-red-300 underline cursor-pointer'
+        className: 'text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80'
       }
     ]
 
-    let processedContent = content
+    const processedContent = content
     const actions: ClickableAction[] = []
 
     actionPatterns.forEach(({ pattern, action, className }) => {
@@ -126,7 +126,7 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
       return <span>{content}</span>
     }
 
-    let processedContent = content
+    const processedContent = content
     const elements: React.ReactNode[] = []
     let lastIndex = 0
 
@@ -184,12 +184,14 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
         isUser ? "text-right" : "text-left"
       )}>
         {/* Message content */}
-        <div className={cn(
-          "chat-message rounded-sm px-2 py-1.5",
-          isUser
-            ? "bg-primary text-primary-foreground ml-auto"
-            : "bg-gray-800/70 text-gray-100 border border-gray-700/50"
-        )}>
+        <div
+          className={cn(
+            "chat-message rounded-sm px-2 py-1.5",
+            isUser
+              ? "ml-auto bg-primary text-primary-foreground"
+              : "border border-border/60 bg-muted text-foreground"
+          )}
+        >
           <div className="text-xs whitespace-pre-wrap leading-relaxed">
             {isAssistant ? renderClickableContent(message.content) : message.content}
           </div>
@@ -201,13 +203,13 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
             {message.taskLists.map((taskList) => (
               <div
                 key={taskList.id}
-                className="border border-gray-800/30 bg-gray-900/60 rounded overflow-hidden"
+                className="overflow-hidden rounded border border-border/60 bg-muted/60"
               >
                 {/* Responsive header */}
-                <div className="bg-gray-800/40 px-2 py-1 border-b border-gray-800/30">
+                <div className="border-b border-border/60 bg-muted/70 px-2 py-1">
                   <div className="flex items-center gap-1.5">
-                    <List className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                    <span className="font-medium text-gray-300 text-xs">
+                    <List className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                    <span className="text-xs font-medium text-foreground">
                       {taskList.title}
                     </span>
                   </div>
@@ -221,50 +223,52 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
                         <div
                           key={task.id}
                           className={cn(
-                            "flex items-start gap-1.5 py-1 px-1.5 rounded-sm",
-                            "hover:bg-gray-800/20 transition-colors",
-                            task.completed && "opacity-60"
+                            "flex items-start gap-1.5 rounded-sm px-1.5 py-1 transition-colors",
+                            "hover:bg-muted/70",
+                            task.completed && "opacity-70"
                           )}
                         >
                           <button
                             onClick={() => onTaskAction?.('toggle', task.id, { completed: !task.completed })}
-                            className="flex-shrink-0 mt-0.5 hover:scale-110 transition-transform"
+                            className="mt-0.5 flex-shrink-0 transition-transform hover:scale-110"
                           >
                             {task.completed ? (
                               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                             ) : (
-                              <Circle className="h-3.5 w-3.5 text-gray-400 hover:text-blue-400" />
+                              <Circle className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" />
                             )}
                           </button>
 
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div
                               className={cn(
-                                "text-gray-200 text-xs leading-tight",
-                                task.completed && "line-through text-gray-500"
+                                "text-xs leading-tight text-foreground",
+                                task.completed && "line-through text-muted-foreground"
                               )}
                             >
                               {task.title}
                             </div>
                             {task.description && (
-                              <div className="text-gray-500 mt-0.5 text-xs leading-tight">
+                              <div className="mt-0.5 text-xs leading-tight text-muted-foreground">
                                 {task.description}
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex flex-shrink-0 items-center gap-1">
                             {task.priority && task.priority !== 'medium' && (
-                              <Flag className={cn(
-                                "h-3 w-3",
-                                task.priority === 'high' && "text-red-400",
-                                task.priority === 'low' && "text-green-400"
-                              )} />
+                              <Flag
+                                className={cn(
+                                  "h-3 w-3",
+                                  task.priority === 'high' && "text-red-500",
+                                  task.priority === 'low' && "text-green-500"
+                                )}
+                              />
                             )}
                             {task.dueDate && (
-                              <div className="flex items-center gap-0.5">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                <span className="text-gray-400 text-xs">
+                              <div className="flex items-center gap-0.5 text-muted-foreground">
+                                <Calendar className="h-3 w-3" />
+                                <span className="text-xs">
                                   {formatDueDate(task.dueDate)}
                                 </span>
                               </div>
@@ -274,7 +278,7 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 italic text-center py-1.5 text-xs">
+                    <p className="py-1.5 text-center text-xs italic text-muted-foreground">
                       No tasks in this list yet
                     </p>
                   )}
@@ -287,20 +291,17 @@ export function ChatMessage({ message, onTaskAction, onSendMessage }: ChatMessag
         {/* Suggestions (Assistant only) - Quick action buttons */}
         {isAssistant && message.suggestions && message.suggestions.length > 0 && (
           <div className="space-y-1">
-            <div className="text-xs text-gray-400 font-medium px-1">Quick actions:</div>
+            <div className="px-1 text-xs font-medium text-muted-foreground">Quick actions:</div>
             <div className="flex flex-wrap gap-1.5">
               {message.suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => onSendMessage?.(suggestion)}
-                  className="group relative h-auto min-h-[28px] px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
-                    bg-gradient-to-r from-blue-600/90 to-blue-500/90 hover:from-blue-500 hover:to-blue-400
-                    text-white shadow-sm hover:shadow-md
-                    border border-blue-400/20 hover:border-blue-300/40
-                    active:scale-95 transform
-                    flex items-center gap-1.5 break-words text-left"
+                  className="group relative flex min-h-[28px] items-center gap-1.5 break-words rounded-md border border-primary/40 bg-gradient-to-r from-primary/80 to-primary px-3 py-1.5 text-left text-xs font-medium text-primary-foreground shadow-sm transition-all duration-200 hover:from-primary/70 hover:to-primary/90 hover:shadow-md active:scale-95"
                 >
-                  <span className="text-blue-100 group-hover:text-white transition-colors flex-shrink-0">▸</span>
+                  <span className="flex-shrink-0 transition-colors group-hover:text-primary-foreground/80">
+                    ▸
+                  </span>
                   <span className="break-words">{suggestion}</span>
                 </button>
               ))}

@@ -34,7 +34,7 @@ export function TaskAIInput({
       onTaskCreated?.(task)
       setInput('')
     } catch (error) {
-      console.error('Task creation failed:', error)
+      void error
     }
   }
 
@@ -46,7 +46,7 @@ export function TaskAIInput({
       onTasksCreated?.(tasks)
       setInput('')
     } catch (error) {
-      console.error('Batch task creation failed:', error)
+      void error
     }
   }
 

@@ -39,7 +39,7 @@ export function DeleteDialog({
       await onConfirm()
       onClose()
     } catch (error) {
-      console.error('Delete failed:', error)
+      void error
     } finally {
       setIsDeleting(false)
     }
