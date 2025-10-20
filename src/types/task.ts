@@ -19,6 +19,39 @@ export type TaskPriority = 'low' | 'medium' | 'high'
 export type ViewMode = 'masonry' | 'timeline'
 
 /**
+ * Supported habit repetition frequencies
+ */
+export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom'
+
+/**
+ * Tracking metadata for habit-style tasks
+ */
+export interface HabitSettings {
+  frequency: HabitFrequency
+  /**
+   * Number of days between repetitions when using custom cadence.
+   * Required when frequency === 'custom'.
+   */
+  intervalDays?: number
+  /**
+   * Last completion timestamp, used for streak tracking and repeat calculations.
+   */
+  lastCompletion?: Date | null
+  /**
+   * Current streak of consecutive completions based on the configured cadence.
+   */
+  streak?: number
+  /**
+   * Highest streak achieved for the habit.
+   */
+  bestStreak?: number
+  /**
+   * Total number of logged completions.
+   */
+  totalCompletions?: number
+}
+
+/**
  * Task Status Types
  */
 export type TaskStatus = 'today' | 'upcoming' | 'done'
@@ -41,6 +74,8 @@ export interface Task {
   note?: string
   archived?: boolean        // Tasks auto-archived after 24 hours in Done
   archivedAt?: Date | null  // Timestamp when task was archived
+  isHabit?: boolean
+  habitSettings?: HabitSettings
 }
 
 /**

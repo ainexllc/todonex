@@ -1,287 +1,173 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { Sparkles, ArrowRight, Command } from 'lucide-react'
+import { useEffect } from 'react'
+import { useTheme } from 'next-themes'
+import { Sparkles, Check } from 'lucide-react'
 import { useAuthStore } from '@/store/auth-store'
-import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { AuthForm } from '@/components/features/auth/auth-form'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FeaturesGrid } from '@/components/landing/features-grid'
 import { SimpleFooter } from '@/components/landing/simple-footer'
 import { DashboardShell } from '@/components/features/tasks/DashboardShell'
+import { DEFAULT_THEME_ID } from '@/lib/theme/registry'
 
-const FEATURE_PREVIEWS = [
-  {
-    id: 'board',
-    title: 'Plan in color-coded columns',
-    description: 'Drag & drop tasks across AI-enhanced board views.',
-    image: '/previews/board-light.png'
-  },
-  {
-    id: 'list',
-    title: 'Switch to list focus instantly',
-    description: 'Filter and sort with lightning-fast keyboard commands.',
-    image: '/previews/list-dark.png'
-  },
-  {
-    id: 'ai',
-    title: 'Co-create tasks with AI',
-    description: 'Capture voice notes or describe projects in natural language.',
-    image: '/previews/ai-assistant.png'
-  }
-]
-
-const WORKFLOW_STEPS = [
+const FEATURE_CARDS = [
   {
     title: 'Capture in seconds',
     description:
-      'Use keyboard shortcuts, voice capture, or the AI assistant to turn thoughts into tasks without breaking your flow.'
+      'Drop tasks from voice, chat, or keyboard without losing momentum. TodoNex keeps pace and context automatically.'
   },
   {
     title: 'Plan with clarity',
     description:
-      'Move tasks across board and list views, assign priorities, and keep context with inline notes and tags.'
+      'Swap between focus and board views, sequence priorities instantly, and give stakeholders a live picture of progress.'
   },
   {
     title: 'Execute together',
     description:
-      'Share workspaces, comment in real time, and let TodoNex surface what matters most every day.'
+      'Keep teams aligned with shared automations, AI nudges, and rituals that surface exactly what needs attention next.'
   }
 ]
 
+const HIGHLIGHT_POINTS = [
+  'AI copilots orchestrate every backlog',
+  'Capture from email, chat, and voice in one place',
+  'Realtime automations keep everyone aligned'
+]
+
+function LandingWordmark() {
+  return (
+    <div className="logo-wordmark flex items-center text-[43.6px] font-bold font-[family-name:var(--font-kanit)] tracking-[-1.526px]">
+      <span className="text-orange-500">Todo</span>
+      <span className="text-white">Ne</span>
+      <span className="relative inline-block -ml-[21px] translate-y-[7px]" style={{ width: 87.2, height: 87.2 }}>
+        <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true" focusable="false">
+          <rect x="10" y="10" width="15" height="15" fill="#f97316" />
+          <rect x="30" y="30" width="15" height="15" fill="#f97316" />
+          <rect x="50" y="50" width="15" height="15" fill="#f97316" />
+          <rect x="70" y="70" width="15" height="15" fill="#f97316" />
+          <rect x="70" y="10" width="15" height="15" fill="white" />
+          <rect x="50" y="30" width="15" height="15" fill="white" />
+          <rect x="30" y="50" width="15" height="15" fill="white" />
+          <rect x="10" y="70" width="15" height="15" fill="white" />
+        </svg>
+      </span>
+    </div>
+  )
+}
+
 function LandingContent() {
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
-  const [activePreviewIndex, setActivePreviewIndex] = useState(0)
+  const { theme, setTheme } = useTheme()
 
-  const goToAuth = () => {
-    const authSection = document.getElementById('auth-card')
-    if (authSection) {
-      authSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  useEffect(() => {
+    if (!theme || theme === 'system') {
+      setTheme(DEFAULT_THEME_ID)
     }
-  }
-
-  const featurePreview = FEATURE_PREVIEWS[activePreviewIndex]
+  }, [theme, setTheme])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80 text-foreground">
-      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-sm uppercase tracking-[0.4em] text-muted-foreground">TodoNex</p>
-              <p className="text-base font-semibold">AI-first productivity</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden gap-2 text-xs md:inline-flex"
-              onClick={goToAuth}
-            >
-              <Command className="h-3 w-3" />
-              Invite your team
-            </Button>
-            <ThemeToggle />
-          </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#050505] text-gray-100">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.25),_transparent_55%)] opacity-70" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(120deg,_rgba(255,115,35,0.12)_0%,_rgba(17,17,17,0.85)_45%,_rgba(6,6,6,1)_100%)]" />
+
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6 sm:py-7">
+        <LandingWordmark />
+        <div className="hidden items-center gap-3 md:flex">
+          <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-orange-300">
+            Alpha access
+          </span>
+          <a href="#features" className="text-sm text-gray-300 transition hover:text-white">
+            Features
+          </a>
+          <a href="#automations" className="text-sm text-gray-300 transition hover:text-white">
+            Automations
+          </a>
+          <a href="#faq" className="text-sm text-gray-300 transition hover:text-white">
+            FAQ
+          </a>
         </div>
       </header>
 
-      <main>
-        <section className="relative mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-12 lg:px-8 lg:py-16">
-          <div className="relative z-10 flex flex-col gap-8 lg:col-span-7">
-            <div className="space-y-5">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-                <Sparkles className="h-3 w-3" />
-                Built for AI-assisted teams
-              </span>
-              <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                Plan, capture, and complete tasks faster with TodoNex.
-              </h1>
-              <p className="max-w-xl text-base text-muted-foreground">
-                TodoNex blends natural language capture, voice commands, and flexible board views so your team always
-                knows what’s next. Switch themes, automate busywork, and stay perfectly aligned.
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button size="lg" onClick={goToAuth} className="gap-2">
-                  Start free trial
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => setAuthMode('signup')}
-                  className="gap-2 text-sm"
-                >
-                  Explore features
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+      <section className="mx-auto grid w-full max-w-6xl items-start gap-12 px-6 pb-24 pt-10 lg:grid-cols-[1.1fr_minmax(0,1fr)] lg:pb-28 lg:pt-16">
+        <div className="space-y-8">
+          <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-orange-300">
+            <Sparkles className="h-3.5 w-3.5" />
+            New
+          </span>
+          <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
+            Plan bold work on an AI-tuned productivity canvas.
+          </h1>
+          <p className="max-w-xl text-lg text-gray-400">
+            TodoNex blends natural language capture with adaptive automations so your team can move from ideas to done
+            without losing momentum or control.
+          </p>
 
-            <div className="grid gap-4 rounded-2xl border border-border/50 bg-gradient-to-br from-background/60 via-background/40 to-background/20 p-6 shadow-[0_40px_120px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Themes for every workflow</p>
-                  <p className="text-xs text-muted-foreground">Preview board, list, and AI-assisted views.</p>
-                </div>
-                <div className="flex gap-2">
-                  {FEATURE_PREVIEWS.map((preview, index) => (
-                    <button
-                      key={preview.id}
-                      type="button"
-                      className={`flex h-10 items-center justify-center rounded-full border border-border/40 bg-background/70 px-3 text-xs text-muted-foreground transition hover:border-border hover:text-foreground ${
-                        activePreviewIndex === index ? 'border-primary text-foreground shadow-sm' : ''
-                      }`}
-                      onClick={() => {
-                        setActivePreviewIndex(index)
-                        setAuthMode(index % 2 === 0 ? 'signup' : 'signin')
-                      }}
-                      aria-pressed={activePreviewIndex === index}
-                    >
-                      {preview.title.split(' ')[0]}
-                    </button>
-                  ))}
-                </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-300">
+            {HIGHLIGHT_POINTS.map((point) => (
+              <div key={point} className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-orange-400" />
+                {point}
               </div>
-              <div className="overflow-hidden rounded-xl border border-border/60 bg-background/80 shadow-inner">
-                <div className="relative aspect-video">
-                  <Image src={featurePreview.image} alt={featurePreview.title} fill className="object-cover" priority />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div className="rounded-xl border border-border/50 bg-background/70 p-5 text-sm">
-                <p className="font-semibold text-foreground">Loved by fast-moving teams</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  “TodoNex is the first tool that makes AI feel natural in daily planning.”
-                </p>
-                <p className="mt-3 text-[11px] font-medium text-muted-foreground">Laura Chen • Head of Product, Nimbus</p>
-              </div>
-              <div className="rounded-xl border border-border/50 bg-background/70 p-5 text-sm">
-                <p className="font-semibold text-foreground">Keyboard-first experience</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Power users fly with shortcuts, command palette, and bulk editing.
-                </p>
-              </div>
-              <div className="rounded-xl border border-border/50 bg-background/70 p-5 text-sm">
-                <p className="font-semibold text-foreground">Realtime sync</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Collaborate instantly—assign, comment, and track progress live.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
 
-          <div id="auth-card" className="lg:col-span-5">
-            <div className="sticky top-20">
-              <div className="rounded-3xl border border-border/60 bg-background/80 p-6 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.45)] backdrop-blur">
-                <div className="mb-6 flex flex-col gap-2">
-                  <h2 className="text-xl font-semibold text-foreground">Ready when you are</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Create your workspace in seconds. No credit card required.
-                  </p>
-                </div>
-                <Tabs
-                  value={authMode}
-                  onValueChange={(value) => setAuthMode(value as 'signin' | 'signup')}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="signin">Sign In</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="signin" className="mt-4">
-                    <AuthForm mode="signin" />
-                  </TabsContent>
-                  <TabsContent value="signup" className="mt-4">
-                    <AuthForm mode="signup" />
-                  </TabsContent>
-                </Tabs>
-                <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-primary/70">Why teams switch</p>
-                  <ul className="space-y-1.5">
-                    <li>• Capture tasks via AI, voice, or keyboard in seconds.</li>
-                    <li>• Switch between board, timeline, and list views instantly.</li>
-                    <li>• Collaborate live with shared workspaces and comments.</li>
-                  </ul>
-                </div>
+        <AuthForm mode="signin" />
+      </section>
+
+      <section id="features" className="relative border-t border-white/5 bg-black/60 py-16">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.18),_transparent_60%)] opacity-70" />
+        <div className="relative mx-auto grid w-full max-w-6xl gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURE_CARDS.map((feature) => (
+            <div
+              key={feature.title}
+              className="group relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-[#0b0b0b] via-[#090909] to-[#050505] p-6 transition hover:border-orange-500/50"
+            >
+              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.12),_transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-300">
+                <Sparkles className="h-5 w-5" />
               </div>
+              <h3 className="mt-6 text-xl font-semibold text-white">{feature.title}</h3>
+              <p className="mt-3 text-sm font-medium leading-relaxed text-gray-300">{feature.description}</p>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
+      </section>
 
-        <section className="border-t border-border/40 bg-background/60">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <FeaturesGrid />
-          </div>
-        </section>
+      <section id="automations" className="border-t border-white/5 bg-[#070707] py-16">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 text-center sm:gap-8">
+          <span className="self-center rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-orange-200">
+            Automations
+          </span>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            Launch rituals that dispatch nudges, follow-ups, and summaries automatically.
+          </h2>
+          <p className="text-sm text-gray-400 sm:text-base">
+            TodoNex coordinates stand-ups, deep-work blocks, and stakeholder updates with the same AI copilots that shape
+            your backlog. Everything stays auditable and on-brand.
+          </p>
+        </div>
+      </section>
 
-        <section className="border-t border-border/40 bg-background/40">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">
-                How modern teams ship faster with TodoNex
-              </h2>
-              <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-                A guided workflow that keeps planning, execution, and collaboration in perfect sync.
+      <section id="faq" className="border-t border-white/5 bg-black py-16">
+        <div className="mx-auto w-full max-w-5xl space-y-6 px-6 sm:space-y-8">
+          <h2 className="text-center text-3xl font-semibold text-white sm:text-4xl">Questions teams ask us</h2>
+          <div className="space-y-4 text-left">
+            <div className="rounded-2xl border border-white/10 bg-black/60 p-5">
+              <p className="text-sm font-semibold text-white sm:text-base">Does TodoNex replace our existing PM stack?</p>
+              <p className="mt-2 text-sm text-gray-400">
+                We sit alongside your current tooling. TodoNex syncs tasks via integrations and pipes insights back into
+                Slack, Teams, Notion, and more.
               </p>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {WORKFLOW_STEPS.map((step, index) => (
-                <div
-                  key={step.title}
-                  className="rounded-2xl border border-border/40 bg-background/70 p-6 text-left shadow-sm transition hover:border-border hover:shadow-md"
-                >
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-background text-sm font-semibold text-primary">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <p className="mt-4 text-base font-semibold text-foreground">{step.title}</p>
-                  <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-t border-border/40 bg-background py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center gap-6 rounded-3xl border border-primary/40 bg-primary/10 p-8 text-center shadow-lg sm:p-12">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-                Launching soon
-              </span>
-              <h3 className="text-3xl font-semibold text-foreground sm:text-4xl">
-                Bring TodoNex into your team’s daily rhythm
-              </h3>
-              <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Join the waitlist to get early access to AI-assisted planning, keyboard-first tasking, and collaborative
-                workspaces designed for high-performing teams.
+            <div className="rounded-2xl border border-white/10 bg-black/60 p-5">
+              <p className="text-sm font-semibold text-white sm:text-base">How opinionated are the automations?</p>
+              <p className="mt-2 text-sm text-gray-400">
+                Automations are templates you can edit down to the variable. Adjust triggers, approvals, and the tone of AI
+                language so they mirror your rituals.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button size="lg" onClick={goToAuth} className="gap-2">
-                  Join the beta
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => setAuthMode('signin')}
-                  className="gap-2 text-sm"
-                >
-                  See dashboard demo
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
       <SimpleFooter />
     </div>

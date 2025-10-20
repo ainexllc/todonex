@@ -10,6 +10,7 @@ import { BoardView } from "@/components/features/tasks/views/BoardView"
 import { ListView } from "@/components/features/tasks/views/ListView"
 import { FloatingAIButton } from "@/components/features/tasks/FloatingAIButton"
 import { AIAssistantModal } from "@/components/features/tasks/AIAssistantModal"
+import { TaskManageModal } from "@/components/features/tasks/TaskManageModal"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { ListSettingsDialog } from "@/components/features/tasks/ListSettingsDialog"
 import { useTaskChat } from "@/hooks/useTaskChat"
@@ -38,6 +39,7 @@ import { TagInput } from "@/components/ui/tag-input"
 import { ColorPicker } from "@/components/ui/color-picker"
 import { suggestColorForList, type ListColorKey } from "@/lib/utils/list-colors"
 import { POPULAR_ICONS, type IconName, getIconComponent, getBestIconForList } from "@/lib/utils/icon-matcher"
+import { DeleteDialog } from "@/components/ui/delete-dialog"
 
 declare global {
   interface Window {
@@ -81,6 +83,12 @@ export function DashboardShell({ redirectUnauthed = true }: DashboardShellProps)
   const [manualListIcon, setManualListIcon] = useState<IconName>('List')
   const [manualListColorTouched, setManualListColorTouched] = useState(false)
   const [manualListIconTouched, setManualListIconTouched] = useState(false)
+  const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false)
+  const [taskBeingEdited, setTaskBeingEdited] = useState<Task | null>(null)
+  const [taskBeingEditedListId, setTaskBeingEditedListId] = useState<string | null>(null)
+  const [isTaskSaving, setIsTaskSaving] = useState(false)
+  const [isTaskDeleting, setIsTaskDeleting] = useState(false)
+  const [showTaskDeleteConfirm, setShowTaskDeleteConfirm] = useState(false)
   const [voiceSupported, setVoiceSupported] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [voiceTranscript, setVoiceTranscript] = useState('')
@@ -374,6 +382,70 @@ export function DashboardShell({ redirectUnauthed = true }: DashboardShellProps)
     setManualListColorTouched(false)
     setManualListIconTouched(false)
     setShowListForm(true)
+  }
+
+  const clearTaskEditorContext = () => {
+    setTaskBeingEdited(null)
+    setTaskBeingEditedListId(null)
+  }
+
+  const closeTaskManager = (preserveContext = false) => {
+    setIsTaskManagerOpen(false)
+    if (!preserveContext) {
+      clearTaskEditorContext()
+    }
+  }
+
+  const beginTaskEdit = (task: Task, listId: string) => {
+    if (!listId) return
+    setTaskBeingEdited(task)
+    setTaskBeingEditedListId(listId)
+    setShowTaskDeleteConfirm(false)
+    setIsTaskManagerOpen(true)
+  }
+
+  const beginTaskDelete = (task: Task, listId: string) => {
+    if (!listId) return
+    setTaskBeingEdited(task)
+    setTaskBeingEditedListId(listId)
+    setIsTaskManagerOpen(false)
+    setShowTaskDeleteConfirm(true)
+  }
+
+  const handleTaskEditorSubmit = async (updates: Partial<Task>) => {
+    if (!taskBeingEdited || !taskBeingEditedListId) return
+
+    setIsTaskSaving(true)
+    try {
+      await handleTaskUpdate(taskBeingEdited.id, taskBeingEditedListId, updates)
+      closeTaskManager()
+    } finally {
+      setIsTaskSaving(false)
+    }
+  }
+
+  const handleTaskDeleteRequest = () => {
+    setShowTaskDeleteConfirm(true)
+    closeTaskManager(true)
+  }
+
+  const handleTaskDeleteConfirmed = async () => {
+    if (!taskBeingEdited || !taskBeingEditedListId) return
+
+    setIsTaskDeleting(true)
+    try {
+      await handleTaskDelete(taskBeingEdited.id, taskBeingEditedListId)
+      setShowTaskDeleteConfirm(false)
+      clearTaskEditorContext()
+    } finally {
+      setIsTaskDeleting(false)
+    }
+  }
+
+  const handleTaskDeleteDialogClose = () => {
+    setShowTaskDeleteConfirm(false)
+    setIsTaskManagerOpen(false)
+    clearTaskEditorContext()
   }
 
   const activeList = useMemo(() => {
@@ -883,6 +955,8 @@ export function DashboardShell({ redirectUnauthed = true }: DashboardShellProps)
                 tasks={filteredTasks}
                 onTaskToggle={(taskId, completed) => handleTaskToggle(taskId, activeListId, completed)}
                 onTaskUpdate={(taskId, updates) => handleTaskUpdate(taskId, activeListId, updates)}
+                onTaskEdit={(task) => beginTaskEdit(task, activeListId)}
+                onTaskDelete={(task) => beginTaskDelete(task, activeListId)}
                 listColorHex={listColorTheme?.hex}
                 onAddTask={() => handleQuickAddTask()}
               />
@@ -945,6 +1019,27 @@ export function DashboardShell({ redirectUnauthed = true }: DashboardShellProps)
       </div>
 
       <FloatingAIButton onClick={() => setIsAIModalOpen(true)} messageCount={messages.length} />
+
+      {taskBeingEdited && (
+        <TaskManageModal
+          open={isTaskManagerOpen}
+          task={taskBeingEdited}
+          onClose={() => closeTaskManager()}
+          onSubmit={handleTaskEditorSubmit}
+          onRequestDelete={handleTaskDeleteRequest}
+          isSaving={isTaskSaving}
+        />
+      )}
+
+      <DeleteDialog
+        isOpen={showTaskDeleteConfirm}
+        onClose={handleTaskDeleteDialogClose}
+        onConfirm={handleTaskDeleteConfirmed}
+        title="Delete task"
+        description="This action cannot be undone and will remove the task from this list."
+        itemName={taskBeingEdited?.title}
+        loading={isTaskDeleting}
+      />
 
       <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
         <DialogContent className="sm:max-w-md">

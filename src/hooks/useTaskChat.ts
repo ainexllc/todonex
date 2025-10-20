@@ -26,6 +26,98 @@ interface UseTaskChatResult {
 }
 
 export function useTaskChat(): UseTaskChatResult {
+  const normalizeTaskFromFirebase = useCallback((task: any): Task => {
+    const baseTask: Task = {
+      ...task,
+      completed: task.completed ?? false,
+      priority: task.priority ?? 'medium',
+      status: task.status ?? 'upcoming'
+    }
+
+    if (task.dueDate) {
+      const due = new Date(task.dueDate)
+      baseTask.dueDate = isNaN(due.getTime()) ? undefined : due
+    } else {
+      baseTask.dueDate = undefined
+    }
+
+    if (task.completedAt) {
+      const completedDate = new Date(task.completedAt)
+      baseTask.completedAt = isNaN(completedDate.getTime()) ? null : completedDate
+    } else {
+      baseTask.completedAt = null
+    }
+
+    if (task.habitSettings) {
+      const { lastCompletion, ...habitRest } = task.habitSettings
+      baseTask.habitSettings = {
+        ...habitRest,
+        lastCompletion: lastCompletion ? new Date(lastCompletion) : null,
+        streak: task.habitSettings.streak ?? 0,
+        bestStreak: task.habitSettings.bestStreak ?? 0,
+        totalCompletions: task.habitSettings.totalCompletions ?? 0
+      }
+    } else {
+      baseTask.habitSettings = undefined
+    }
+
+    baseTask.isHabit = task.isHabit ?? Boolean(task.habitSettings)
+
+    return baseTask
+  }, [])
+
+  const prepareTaskForFirebase = useCallback((task: Task) => {
+    const firebaseTask: Record<string, any> = {
+      id: task.id,
+      title: task.title,
+      completed: task.completed ?? false,
+      priority: task.priority ?? 'medium'
+    }
+
+    if (task.description) firebaseTask.description = task.description
+    if (task.category) firebaseTask.category = task.category
+    if (task.categories && Array.isArray(task.categories)) firebaseTask.categories = task.categories
+    if (task.tags && Array.isArray(task.tags)) firebaseTask.tags = task.tags
+    if (task.status) firebaseTask.status = task.status
+    if (task.note) firebaseTask.note = task.note
+    if (typeof task.archived === 'boolean') firebaseTask.archived = task.archived
+    if (task.archivedAt) {
+      const archivedDate = new Date(task.archivedAt)
+      if (!isNaN(archivedDate.getTime())) {
+        firebaseTask.archivedAt = archivedDate.toISOString()
+      }
+    }
+
+    if (task.completedAt) {
+      const completedDate = new Date(task.completedAt)
+      if (!isNaN(completedDate.getTime())) {
+        firebaseTask.completedAt = completedDate.toISOString()
+      }
+    } else {
+      firebaseTask.completedAt = null
+    }
+
+    if (task.dueDate) {
+      const dueDate = new Date(task.dueDate)
+      if (!isNaN(dueDate.getTime())) {
+        firebaseTask.dueDate = dueDate.toISOString()
+      }
+    }
+
+    if (task.isHabit || task.habitSettings) {
+      firebaseTask.isHabit = Boolean(task.isHabit ?? task.habitSettings)
+      if (task.habitSettings) {
+        const { lastCompletion, ...habitRest } = task.habitSettings
+        firebaseTask.habitSettings = {
+          ...habitRest,
+          lastCompletion: lastCompletion ? new Date(lastCompletion).toISOString() : null
+        }
+      }
+    }
+
+    return firebaseTask
+  }, [])
+
   const { user } = useAuthStore()
   const { trackTaskUsage } = useAdaptiveStore()
   
@@ -48,13 +140,16 @@ export function useTaskChat(): UseTaskChatResult {
         const orderA = a.order ?? Number.MAX_SAFE_INTEGER
         const orderB = b.order ?? Number.MAX_SAFE_INTEGER
         return orderA - orderB
-      })
+      }).map(list => ({
+        ...list,
+        tasks: Array.isArray(list.tasks) ? list.tasks.map(task => normalizeTaskFromFirebase(task)) : []
+      }))
 
       setTaskLists(sortedLists)
     } catch (error) {
       void error
     }
-  }, [user])
+  }, [normalizeTaskFromFirebase, user])
 
   // Delete task list from Firebase (moved up to fix circular dependency)
   const deleteTaskListFromFirebase = useCallback(async (id: string) => {
@@ -127,26 +222,7 @@ export function useTaskChat(): UseTaskChatResult {
 
       // Convert Date objects to ISO strings for Firebase
       const tasksForFirebase = taskList.tasks.map((task: any) => {
-        const firebaseTask: any = { ...task }
-
-        // Validate and convert dates
-        if (task.dueDate) {
-          const dueDate = new Date(task.dueDate)
-          if (!isNaN(dueDate.getTime())) {
-            firebaseTask.dueDate = dueDate.toISOString()
-          } else {
-            delete firebaseTask.dueDate
-          }
-        }
-
-        if (task.completedAt) {
-          const completedDate = new Date(task.completedAt)
-          if (!isNaN(completedDate.getTime())) {
-            firebaseTask.completedAt = completedDate.toISOString()
-          } else {
-            firebaseTask.completedAt = null
-          }
-        }
+        const firebaseTask = prepareTaskForFirebase(task as Task)
 
         return firebaseTask
       })
@@ -168,7 +244,7 @@ export function useTaskChat(): UseTaskChatResult {
     } catch (error) {
       void error
     }
-  }, [reloadTaskLists])
+  }, [prepareTaskForFirebase, reloadTaskLists])
 
   // Update task list in Firebase
   const updateTaskListInFirebase = useCallback(async (id: string, updates: Partial<TaskList>) => {
@@ -177,30 +253,7 @@ export function useTaskChat(): UseTaskChatResult {
       // If updates contain tasks, convert Date objects to ISO strings
       const firebaseUpdates: any = { ...updates }
       if (firebaseUpdates.tasks && Array.isArray(firebaseUpdates.tasks)) {
-        firebaseUpdates.tasks = firebaseUpdates.tasks.map((task: any) => {
-          const firebaseTask: any = { ...task }
-
-          // Validate and convert dates
-          if (task.dueDate) {
-            const dueDate = new Date(task.dueDate)
-            if (!isNaN(dueDate.getTime())) {
-              firebaseTask.dueDate = dueDate.toISOString()
-            } else {
-              delete firebaseTask.dueDate
-            }
-          }
-
-          if (task.completedAt) {
-            const completedDate = new Date(task.completedAt)
-            if (!isNaN(completedDate.getTime())) {
-              firebaseTask.completedAt = completedDate.toISOString()
-            } else {
-              firebaseTask.completedAt = null
-            }
-          }
-
-          return firebaseTask
-        })
+        firebaseUpdates.tasks = firebaseUpdates.tasks.map((task: any) => prepareTaskForFirebase(task))
       }
 
       await updateDocument('taskLists', id, firebaseUpdates)
@@ -218,7 +271,7 @@ export function useTaskChat(): UseTaskChatResult {
     } catch (error) {
       void error
     }
-  }, [reloadTaskLists])
+  }, [prepareTaskForFirebase, reloadTaskLists])
 
 
   const sendMessage = useCallback(async (message: string) => {
@@ -274,11 +327,7 @@ export function useTaskChat(): UseTaskChatResult {
         data.taskLists.forEach((newList: any) => {
           // Parse dates in tasks that come from the API (JSON serialization converts Date to string)
           if (newList.tasks && Array.isArray(newList.tasks)) {
-            newList.tasks = newList.tasks.map((task: any) => ({
-              ...task,
-              dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-              completedAt: task.completedAt ? new Date(task.completedAt) : null
-            }))
+            newList.tasks = newList.tasks.map((task: any) => normalizeTaskFromFirebase(task))
           }
           // Handle list deletion operation
           if (newList.operation === 'deleteList') {
@@ -365,30 +414,7 @@ export function useTaskChat(): UseTaskChatResult {
               const existingIndex = updatedTaskLists.findIndex(list => list.id === newList.id)
               if (existingIndex !== -1) {
                 // Convert Date objects to ISO strings for Firebase
-                const tasksForFirebase = updatedTaskLists[existingIndex].tasks.map((task: any) => {
-                  const firebaseTask: any = { ...task }
-
-                  // Validate and convert dates
-                  if (task.dueDate) {
-                    const dueDate = new Date(task.dueDate)
-                    if (!isNaN(dueDate.getTime())) {
-                      firebaseTask.dueDate = dueDate.toISOString()
-                    } else {
-                      delete firebaseTask.dueDate
-                    }
-                  }
-
-                  if (task.completedAt) {
-                    const completedDate = new Date(task.completedAt)
-                    if (!isNaN(completedDate.getTime())) {
-                      firebaseTask.completedAt = completedDate.toISOString()
-                    } else {
-                      firebaseTask.completedAt = null
-                    }
-                  }
-
-                  return firebaseTask
-                })
+                const tasksForFirebase = updatedTaskLists[existingIndex].tasks.map((task: any) => prepareTaskForFirebase(task))
 
                 await updateTaskListInFirebase(newList.id, {
                   tasks: tasksForFirebase
@@ -421,7 +447,7 @@ export function useTaskChat(): UseTaskChatResult {
     } finally {
       setLoading(false)
     }
-  }, [user, messages, taskLists, loading, trackTaskUsage, deleteTaskListFromFirebase, saveTaskListToFirebase, updateTaskListInFirebase])
+  }, [deleteTaskListFromFirebase, loading, messages, normalizeTaskFromFirebase, prepareTaskForFirebase, saveTaskListToFirebase, taskLists, trackTaskUsage, updateTaskListInFirebase, user])
 
   const createTaskList = useCallback(async (title: string, tasks: Task[], options: { icon?: IconName; color?: ListColorKey } = {}) => {
     // Check if a task list with the same title already exists

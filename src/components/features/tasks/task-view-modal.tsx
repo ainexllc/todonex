@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import type { HabitSettings } from '@/types/task'
 
 interface Subtask {
   id: string
@@ -27,11 +28,8 @@ interface Task {
   subtasks?: Subtask[]
   createdAt: Date
   updatedAt: Date
-  // Recurring task fields
-  isRecurring?: boolean
-  recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'custom'
-  recurringInterval?: number
-  recurringEndDate?: Date
+  isHabit?: boolean
+  habitSettings?: HabitSettings
 }
 
 interface TaskViewModalProps {
@@ -64,17 +62,23 @@ export function TaskViewModal({ task, onClose, onEdit }: TaskViewModalProps) {
     return `${dateObj.getUTCMonth() + 1}/${dateObj.getUTCDate()}`
   }
 
-  const formatRecurringPattern = (task: Task) => {
-    if (!task.isRecurring) return null
-    
-    const patterns = {
-      daily: 'Daily',
-      weekly: 'Weekly', 
-      monthly: 'Monthly',
-      custom: `Every ${task.recurringInterval} days`
+  const formatHabitCadence = (settings?: HabitSettings | null) => {
+    if (!settings) return null
+
+    switch (settings.frequency) {
+      case 'daily':
+        return 'Repeats daily'
+      case 'weekly':
+        return 'Repeats weekly'
+      case 'monthly':
+        return 'Repeats monthly'
+      case 'custom': {
+        const interval = Math.max(settings.intervalDays ?? 1, 1)
+        return `Repeats every ${interval} day${interval === 1 ? '' : 's'}`
+      }
+      default:
+        return null
     }
-    
-    return patterns[task.recurringPattern || 'daily']
   }
 
   return (
@@ -165,18 +169,31 @@ export function TaskViewModal({ task, onClose, onEdit }: TaskViewModalProps) {
             </div>
           )}
 
-          {/* Recurring Pattern */}
-          {task.isRecurring && (
+          {/* Habit Details */}
+          {task.isHabit && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Recurring Pattern</h3>
-              <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-lg border">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm">{formatRecurringPattern(task)}</span>
-                  {task.recurringEndDate && (
-                    <span className="text-xs text-muted-foreground">
-                      Until {formatDate(task.recurringEndDate)}
-                    </span>
+              <h3 className="text-sm font-medium text-muted-foreground">Habit Cadence</h3>
+              <div className="p-3 bg-muted/20 rounded-lg border space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {formatHabitCadence(task.habitSettings) ?? 'Repeats regularly'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+                  <div>
+                    <span className="block text-foreground text-sm font-medium">Streak</span>
+                    <span>{task.habitSettings?.streak ?? 0} day{(task.habitSettings?.streak ?? 0) === 1 ? '' : 's'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-foreground text-sm font-medium">Total Completions</span>
+                    <span>{task.habitSettings?.totalCompletions ?? 0}</span>
+                  </div>
+                  {task.habitSettings?.lastCompletion && (
+                    <div className="col-span-2">
+                      <span className="block text-foreground text-sm font-medium">Last Logged</span>
+                      <span>{formatDate(task.habitSettings.lastCompletion)}</span>
+                    </div>
                   )}
                 </div>
               </div>

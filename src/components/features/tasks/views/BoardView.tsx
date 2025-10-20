@@ -32,6 +32,8 @@ interface BoardViewProps {
   listColorHex?: string
   className?: string
   onAddTask?: (status: TaskStatus) => void
+  onHabitLog?: (taskId: string) => void
+  onHabitEdit?: (taskId: string) => void
 }
 
 interface BoardColumn {
@@ -90,9 +92,11 @@ interface DraggableTaskCardProps {
   onToggleComplete?: (taskId: string, completed: boolean) => void
   onUpdate?: (taskId: string, updates: Partial<Task>) => void
   onDelete?: (taskId: string) => void
+  onHabitLog?: (taskId: string) => void
+  onHabitEdit?: (taskId: string) => void
 }
 
-function DraggableTaskCard({ task, onToggleComplete, onUpdate, onDelete }: DraggableTaskCardProps) {
+function DraggableTaskCard({ task, onToggleComplete, onUpdate, onDelete, onHabitLog, onHabitEdit }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -116,6 +120,8 @@ function DraggableTaskCard({ task, onToggleComplete, onUpdate, onDelete }: Dragg
         onToggleComplete={onToggleComplete}
         onUpdate={onUpdate}
         onDelete={onDelete}
+        onHabitLog={onHabitLog}
+        onHabitEdit={onHabitEdit}
         showCompleteToggle={false}
         showCategories={false}
       />
@@ -131,11 +137,13 @@ export function BoardView({
   onStatusChange,
   listColorHex,
   className,
-  onAddTask
+  onAddTask,
+  onHabitLog,
+  onHabitEdit
 }: BoardViewProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
-  const accentBorder = listColorHex ?? 'var(--board-column-border)'
-  const accentPillBorder = listColorHex ?? 'var(--board-pill-border)'
+  const accentBorder = 'var(--board-column-border-accent)'
+  const accentPillBorder = 'var(--board-pill-border)'
 
   // Setup sensors for drag and keyboard
   const sensors = useSensors(
@@ -239,7 +247,7 @@ export function BoardView({
       onDragEnd={handleDragEnd}
     >
           <div
-            className={cn('p-4 h-full', className)}
+            className={cn('h-full w-full p-4', className)}
             style={{
               background: 'var(--board-background)',
               color: 'var(--board-text-strong)'
@@ -259,20 +267,20 @@ export function BoardView({
               >
                 <div
                   className={cn(
-                    'flex flex-col h-full overflow-hidden border',
+                    'flex flex-col h-full overflow-hidden border border-[color:var(--board-column-border)]',
                     'backdrop-blur-md'
                   )}
                   style={{
                     borderRadius: 'var(--board-column-radius)',
                     background: 'var(--board-column-bg)',
-                    borderColor: accentBorder,
+                    borderColor: 'var(--board-column-border)',
                     boxShadow: 'var(--board-column-shadow)'
                   }}
                 >
                   {/* Column Header */}
                   <div
-                    className="p-5 border-b"
-                    style={{ borderColor: accentBorder }}
+                    className="border-b p-5"
+                    style={{ borderColor: 'var(--board-column-border)' }}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h3
@@ -297,12 +305,7 @@ export function BoardView({
                             size="sm"
                             variant="ghost"
                             onClick={() => onAddTask(column.id)}
-                            className="h-7 px-2 text-xs rounded-full border"
-                            style={{
-                              background: 'var(--board-action-bg)',
-                              color: 'var(--board-action-text)',
-                              borderColor: 'var(--board-action-border)'
-                            }}
+                            className="h-7 rounded-full border border-[color:var(--board-column-border-accent)] bg-[color:var(--board-column-border-accent)]/30 px-2 text-xs text-[color:var(--board-text-strong)] hover:bg-[color:var(--board-column-border-accent)]/40"
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             Add
@@ -332,6 +335,8 @@ export function BoardView({
                             handleTaskUpdate(taskId, updates)
                           }
                           onDelete={(taskId) => onTaskDelete?.(taskId)}
+                          onHabitLog={(taskId) => onHabitLog?.(taskId)}
+                          onHabitEdit={(taskId) => onHabitEdit?.(taskId)}
                         />
                       ))
                     ) : (
@@ -390,6 +395,8 @@ export function BoardView({
               compact={false}
               showCompleteToggle={false}
               showCategories={false}
+              onHabitLog={onHabitLog}
+              onHabitEdit={onHabitEdit}
             />
           </div>
         ) : null}

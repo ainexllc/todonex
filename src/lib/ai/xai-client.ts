@@ -3,7 +3,7 @@ import { generateText, generateObject, streamText } from 'ai'
 
 // x.ai models configuration
 export const XAI_MODELS = {
-  GROK_FAST: 'grok-4-fast-non-reasoning',  // Fast, cost-effective model
+  GROK_FAST: 'grok-4-fast',                // Fast, cost-effective model (Grok 4 Fast)
   GROK_BETA: 'grok-beta',                 // Latest beta features
   GROK_VISION: 'grok-vision-beta',        // Vision capabilities
 } as const

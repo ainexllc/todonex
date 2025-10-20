@@ -18,7 +18,9 @@ import {
   X,
   GripVertical,
   Sparkles,
-  Clock
+  Clock,
+  Flame,
+  Settings2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, isToday, isTomorrow, isPast, isThisWeek } from 'date-fns'
@@ -36,6 +38,8 @@ interface TaskCardProps {
   onDelete?: (taskId: string) => void
   onSelect?: (taskId: string) => void
   onAIEnhance?: (taskId: string) => void
+  onHabitLog?: (taskId: string) => void
+  onHabitEdit?: (taskId: string) => void
   showCheckbox?: boolean
   draggable?: boolean
   compact?: boolean
@@ -52,6 +56,8 @@ export function TaskCard({
   onDelete,
   onSelect,
   onAIEnhance,
+  onHabitLog,
+  onHabitEdit,
   showCheckbox = false,
   draggable = false,
   compact = false,
@@ -95,14 +101,6 @@ export function TaskCard({
 
   const isDueToday = task.dueDate && isToday(new Date(task.dueDate))
   const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate))
-
-  const accentColor = task.completed
-    ? 'var(--board-task-accent-complete)'
-    : isOverdue
-      ? 'var(--board-task-accent-overdue)'
-      : isDueToday
-        ? 'var(--board-task-accent-today)'
-        : 'var(--board-task-accent)'
 
   const handleTitleClick = () => {
     if (!task.completed && !isEditing) {
@@ -193,22 +191,53 @@ export function TaskCard({
           </button>
         )}
 
-        <span className={cn(
-          'text-xs truncate flex-shrink min-w-0',
-          task.completed && 'line-through text-muted-foreground'
-        )}>
+        <span
+          className={cn(
+            'text-xs truncate flex-shrink min-w-0',
+            task.completed && 'line-through text-muted-foreground'
+          )}
+        >
           {toTitleCase(task.title)}
         </span>
 
-        {task.dueDate && (
-          <span className={cn(
-            'text-xs flex items-center gap-1 flex-shrink-0 ml-auto',
-            isOverdue && 'text-red-400 font-semibold',
-            isDueToday && 'text-yellow-400 font-semibold'
-          )}>
-            <Clock className="h-3 w-3" />
-            {formatDueDate(task.dueDate)}
-          </span>
+        {((task.isHabit && !task.completed && (onHabitLog || onHabitEdit)) || task.dueDate) && (
+          <div className="ml-auto flex items-center gap-2">
+            {task.isHabit && onHabitLog && !task.completed && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onHabitLog(task.id)
+                }}
+                className="text-[10px] font-semibold uppercase tracking-wide rounded-full border border-[color:var(--board-action-border)] bg-[color:var(--board-action-bg)] px-2 py-1 text-[color:var(--board-action-text)] hover:bg-[color:var(--board-action-bg)]/80"
+              >
+                Log
+              </button>
+            )}
+            {task.isHabit && onHabitEdit && !task.completed && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onHabitEdit(task.id)
+                }}
+                className="text-[10px] font-semibold uppercase tracking-wide rounded-full border border-[color:var(--board-column-border)] bg-[color:var(--board-surface-glass)] px-2 py-1 text-[color:var(--board-text-muted)] hover:text-[color:var(--board-text-strong)]"
+              >
+                Edit
+              </button>
+            )}
+
+            {task.dueDate && (
+              <span
+                className={cn(
+                  'text-xs flex items-center gap-1 flex-shrink-0',
+                  isOverdue && 'text-red-400 font-semibold',
+                  isDueToday && 'text-yellow-400 font-semibold'
+                )}
+              >
+                <Clock className="h-3 w-3" />
+                {formatDueDate(task.dueDate)}
+              </span>
+            )}
+          </div>
         )}
       </div>
     )
@@ -218,7 +247,7 @@ export function TaskCard({
     <Card
       className={cn(
         'relative overflow-hidden group p-5 transition-all duration-300 ease-out',
-        'border border-border/40 hover:-translate-y-1',
+        'border border-[color:var(--board-column-border)] hover:-translate-y-1',
         'bg-[color:var(--board-card-bg)] text-[color:var(--board-text-strong)]',
         '[box-shadow:var(--board-card-shadow)] [border-color:var(--board-card-border)]',
         'group-hover:[box-shadow:var(--board-card-hover-shadow)] group-hover:[border-color:var(--board-card-hover-border)]',
@@ -229,7 +258,6 @@ export function TaskCard({
         className
       )}
     >
-      <span className="absolute inset-x-0 top-0 h-1" style={{ background: accentColor }} />
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         <div className="absolute inset-0" style={{ background: 'var(--board-card-hover-overlay)' }} />
       </div>
@@ -411,17 +439,27 @@ export function TaskCard({
                 </Button>
               </div>
             ) : (
+            <Badge
+              variant="outline"
+              className={cn(
+                'flex-shrink-0 cursor-pointer rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-all',
+                'shadow-sm hover:shadow-md hover:-translate-y-0.5 border',
+                getPriorityColor(task.priority)
+              )}
+              onClick={() => !task.completed && setIsEditingPriority(true)}
+            >
+              <Flag className="h-2.5 w-2.5 mr-0.5" />
+              {task.priority}
+            </Badge>
+          )}
+
+            {task.isHabit && task.habitSettings && (task.habitSettings.totalCompletions ?? 0) > 0 && (
               <Badge
                 variant="outline"
-                className={cn(
-                  'flex-shrink-0 cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium transition-all',
-                  'shadow-sm hover:shadow-md hover:-translate-y-0.5 border',
-                  getPriorityColor(task.priority)
-                )}
-                onClick={() => !task.completed && setIsEditingPriority(true)}
+                className="flex-shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border border-[color:var(--board-action-border)] bg-[color:var(--board-action-bg)] text-[color:var(--board-action-text)]"
               >
-                <Flag className="h-2.5 w-2.5 mr-0.5" />
-                {task.priority}
+                <Flame className="h-2.5 w-2.5 mr-1" />
+                {task.habitSettings.streak ?? 0} day streak
               </Badge>
             )}
 
@@ -481,6 +519,44 @@ export function TaskCard({
 
         {/* Actions */}
         <div className="flex-shrink-0 flex items-start gap-2">
+          {task.isHabit && onHabitLog && !task.completed && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                onHabitLog(task.id)
+              }}
+              className="h-8 px-3 text-xs rounded-full border"
+              style={{
+                background: 'var(--board-action-bg)',
+                color: 'var(--board-action-text)',
+                borderColor: 'var(--board-action-border)'
+              }}
+              title="Log habit completion"
+            >
+              Log Habit
+            </Button>
+          )}
+          {task.isHabit && onHabitEdit && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                onHabitEdit(task.id)
+              }}
+              className="h-8 w-8 rounded-full p-0 transition-all hover:bg-[color:var(--board-surface-glass)]/80"
+              style={{
+                background: 'var(--board-surface-glass)',
+                color: 'var(--board-text-subtle)'
+              }}
+              title="Edit habit settings"
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+
           {/* Always visible delete button */}
           <Button
             size="sm"

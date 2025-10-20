@@ -1,11 +1,10 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { getThemeDefinition, getThemeIds, DEFAULT_THEME_ID } from '@/lib/theme/registry'
+import { DEFAULT_THEME_ID } from '@/lib/theme/registry'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -15,39 +14,21 @@ export function ThemeToggle() {
     setMounted(true)
   }, [])
 
-  const themeIds = useMemo(() => getThemeIds(), [])
   const activeThemeId = mounted ? (theme ?? DEFAULT_THEME_ID) : DEFAULT_THEME_ID
-  const activeTheme = getThemeDefinition(activeThemeId)
-
-  const handleNextTheme = () => {
-    const currentIndex = themeIds.indexOf(activeThemeId)
-    const nextIndex = (currentIndex + 1) % themeIds.length
-    setTheme(themeIds[nextIndex])
-  }
-
-  const accentGradient = activeTheme.tokens['board-task-accent']
-  const primaryHsl = activeTheme.tokens['primary']
-  const previewBackground = accentGradient
-    ? accentGradient
-    : primaryHsl
-      ? `hsl(${primaryHsl})`
-      : 'linear-gradient(135deg, rgba(148, 163, 184, 0.45), rgba(59, 130, 246, 0.3))'
-
-  const previewStyle: CSSProperties = {
-    background: previewBackground,
-    boxShadow: '0 0 12px rgba(15, 23, 42, 0.15)'
-  }
+  const isDay = activeThemeId === 'ember-daybreak'
+  const nextTheme = isDay ? 'ember-nightfall' : 'ember-daybreak'
+  const label = isDay ? 'Light mode' : 'Dark mode'
+  const shortLabel = isDay ? 'Light' : 'Dark'
 
   if (!mounted) {
     return (
       <Button
         variant="ghost"
         size="sm"
-        className="h-9 px-3 gap-2 rounded-full"
+        className="h-8 gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-xs font-medium text-white/70"
       >
-        <div className="h-4 w-4 rounded-full bg-muted" />
-        <span className="text-xs font-medium text-muted-foreground">Theme</span>
-        <ChevronRight className="h-3 w-3 text-muted-foreground" />
+        <Moon className="h-3.5 w-3.5" />
+        Theme
       </Button>
     )
   }
@@ -56,22 +37,15 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="sm"
-      onClick={handleNextTheme}
-      className={cn(
-        'h-9 px-3 gap-2 rounded-full border border-border/40 bg-background/60 backdrop-blur transition-all duration-200',
-        'hover:border-primary/40 hover:bg-background/70'
-      )}
+      onClick={() => setTheme(nextTheme)}
+      className="h-8 gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white transition-colors hover:border-orange-400 hover:bg-orange-500/10 hover:text-white dark:border-white/10"
+      aria-pressed={isDay}
     >
-      <span
-        aria-hidden
-        className="h-4 w-4 rounded-full border border-white/20 shadow-sm"
-        style={previewStyle}
-      />
-      <span className="text-xs font-medium text-muted-foreground">
-        {activeTheme.label}
+      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10">
+        {isDay ? <Sun className="h-3.5 w-3.5 text-amber-500" /> : <Moon className="h-3.5 w-3.5 text-amber-300" />}
       </span>
-      <ChevronRight className="h-3 w-3 text-muted-foreground/80" />
-      <span className="sr-only">Cycle theme</span>
+      <span>{shortLabel}</span>
+      <span className="sr-only">Switch to {isDay ? 'dark' : 'light'} mode</span>
     </Button>
   )
 }

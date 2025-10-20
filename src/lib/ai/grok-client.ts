@@ -3,7 +3,7 @@ import { generateText, streamText } from 'ai'
 
 // Grok model configuration
 export const GROK_MODELS = {
-  FAST: 'grok-2-1212',          // Primary fast model
+  FAST: 'grok-4-fast',          // Primary fast model (Grok 4 Fast)
   BETA: 'grok-beta',            // Beta version
   VISION_BETA: 'grok-vision-beta', // Vision model
 } as const

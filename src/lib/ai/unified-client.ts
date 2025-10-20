@@ -4,7 +4,7 @@ import { anthropicClient, AIRequestConfig, AIResponse } from './anthropic-client
 // Unified model types
 export const UNIFIED_MODELS = {
   // Primary models (Grok)
-  GROK_FAST: 'grok-2-1212',
+  GROK_FAST: 'grok-4-fast',
   GROK_BETA: 'grok-beta',
   GROK_VISION: 'grok-vision-beta',
   // Fallback models (Anthropic)
@@ -243,7 +243,7 @@ class UnifiedAIClient {
     }
   } {
     return {
-      primary: 'Grok (grok-2-1212)',
+      primary: 'Grok (grok-4-fast)',
       fallback: 'Anthropic Claude',
       models: {
         grok: [UNIFIED_MODELS.GROK_FAST, UNIFIED_MODELS.GROK_BETA, UNIFIED_MODELS.GROK_VISION],

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { TaskEnhancementCard } from '@/components/ai/task-enhancement-card'
 import { TaskEnhancement, EnhancedTaskData } from '@/types/ai'
 import { parseNaturalLanguage, formatDateForInput } from '@/lib/ai/natural-language-parser'
+import type { HabitFrequency, HabitSettings } from '@/types/task'
 import {
   Select,
   SelectContent,
@@ -38,11 +39,8 @@ interface Task {
   dueDate?: Date
   categoryId?: string
   subtasks?: Subtask[]
-  // Recurring task fields
-  isRecurring?: boolean
-  recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'custom'
-  recurringInterval?: number
-  recurringEndDate?: Date
+  isHabit?: boolean
+  habitSettings?: HabitSettings
 }
 
 interface TaskFormProps {
@@ -68,11 +66,10 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
     dueDate: '',
     categoryId: '',
     subtasks: [] as Subtask[],
-    // Recurring task fields
-    isRecurring: false,
-    recurringPattern: 'daily' as 'daily' | 'weekly' | 'monthly' | 'custom',
-    recurringInterval: 1,
-    recurringEndDate: '',
+    // Habit fields
+    isHabit: false,
+    habitFrequency: 'daily' as HabitFrequency,
+    habitIntervalDays: 2,
     // AI Enhancement fields
     aiEnhanced: false,
     aiEnhancedTitle: '',
@@ -96,6 +93,13 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
   // Populate form when editing
   useEffect(() => {
     if (task) {
+      const legacyPattern = (task as any).recurringPattern as HabitFrequency | undefined
+      const legacyInterval = (task as any).recurringInterval as number | undefined
+      const habitSettings = task.habitSettings
+      const detectedFrequency = habitSettings?.frequency ?? legacyPattern ?? 'daily'
+      const detectedInterval = habitSettings?.intervalDays ?? legacyInterval ?? 2
+      const isHabitTask = Boolean(task.isHabit || habitSettings || legacyPattern)
+
       setFormData({
         title: task.title || '',
         description: task.description || '',
@@ -103,11 +107,9 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         categoryId: task.categoryId || '',
         subtasks: task.subtasks || [],
-        // Recurring task fields
-        isRecurring: task.isRecurring || false,
-        recurringPattern: task.recurringPattern || 'daily',
-        recurringInterval: task.recurringInterval || 1,
-        recurringEndDate: task.recurringEndDate ? new Date(task.recurringEndDate).toISOString().split('T')[0] : '',
+        isHabit: isHabitTask,
+        habitFrequency: detectedFrequency,
+        habitIntervalDays: detectedInterval,
         // AI Enhancement fields
         aiEnhanced: false,
         aiEnhancedTitle: '',
@@ -168,6 +170,12 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
         newErrors.dueDate = 'Due date cannot be in the past'
       }
     }
+
+    if (formData.isHabit && formData.habitFrequency === 'custom') {
+      if (!formData.habitIntervalDays || formData.habitIntervalDays < 1) {
+        newErrors.habitIntervalDays = 'Interval must be at least 1 day'
+      }
+    }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -203,18 +211,28 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       taskData.subtasks = validSubtasks
     }
     
-    // Add recurring task fields if enabled
-    if (formData.isRecurring) {
-      taskData.isRecurring = true
-      taskData.recurringPattern = formData.recurringPattern
-      
-      if (formData.recurringInterval && formData.recurringInterval > 0) {
-        taskData.recurringInterval = formData.recurringInterval
+    if (formData.isHabit) {
+      const existingSettings = task?.habitSettings
+
+      const habitSettings: HabitSettings = {
+        frequency: formData.habitFrequency,
+        streak: existingSettings?.streak ?? 0,
+        bestStreak: existingSettings?.bestStreak ?? 0,
+        totalCompletions: existingSettings?.totalCompletions ?? 0,
+        lastCompletion: existingSettings?.lastCompletion ?? null
       }
-      
-      if (formData.recurringEndDate) {
-        taskData.recurringEndDate = new Date(formData.recurringEndDate)
+
+      if (formData.habitFrequency === 'custom') {
+        habitSettings.intervalDays = formData.habitIntervalDays
+      } else if ('intervalDays' in habitSettings) {
+        delete habitSettings.intervalDays
       }
+
+      taskData.isHabit = true
+      taskData.habitSettings = habitSettings
+    } else {
+      taskData.isHabit = false
+      taskData.habitSettings = undefined
     }
     
     onSubmit(taskData)
@@ -250,6 +268,11 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
       
       if (parsed.extractedDuration) {
         updates.aiEstimatedDuration = parsed.extractedDuration
+      }
+
+      if (parsed.extractedRecurring && !formData.isHabit) {
+        updates.isHabit = true
+        updates.habitFrequency = 'daily' as HabitFrequency
       }
       
       // Only update if we have other fields to update (not the title itself)
@@ -738,38 +761,35 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
             )}
           </div>
 
-          {/* Recurring Task Section */}
+          {/* Habit Tracking */}
           <div className="space-y-3 p-4 bg-muted/20 rounded-lg border border-border">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Task Frequency</Label>
+              <Label className="text-sm font-medium">Habit Tracking</Label>
               <div className="flex items-center space-x-2">
                 <input
-                  id="isRecurring"
+                  id="isHabit"
                   type="checkbox"
-                  checked={formData.isRecurring}
-                  onChange={(e) => updateField('isRecurring', e.target.checked)}
+                  checked={formData.isHabit}
+                  onChange={(e) => updateField('isHabit', e.target.checked)}
                   className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
                 />
-                <Label htmlFor="isRecurring" className="text-sm cursor-pointer">
-                  Make this a recurring task
+                <Label htmlFor="isHabit" className="text-sm cursor-pointer">
+                  Track progress as a habit
                 </Label>
               </div>
             </div>
 
-            {!formData.isRecurring && (
+            {!formData.isHabit ? (
               <p className="text-xs text-muted-foreground">
-                This is a one-time task that will be completed once.
+                Leave this off for one-off tasks. When enabled, the habit will roll forward automatically after you log a completion.
               </p>
-            )}
-
-            {formData.isRecurring && (
+            ) : (
               <div className="space-y-3 pt-2 border-t border-border/50">
-                {/* Recurrence Pattern */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Repeat Pattern</Label>
+                  <Label className="text-sm font-medium">Repeat cadence</Label>
                   <Select
-                    value={formData.recurringPattern}
-                    onValueChange={(value) => updateField('recurringPattern', value)}
+                    value={formData.habitFrequency}
+                    onValueChange={(value) => updateField('habitFrequency', value as HabitFrequency)}
                   >
                     <SelectTrigger className="glass border-glass">
                       <SelectValue />
@@ -778,43 +798,33 @@ export function TaskForm({ task, onSubmit, onClose }: TaskFormProps) {
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="custom">Every X Days</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Each completion will advance the due date based on this cadence.
+                  </p>
                 </div>
 
-                {/* Custom Interval */}
-                {formData.recurringPattern === 'custom' && (
+                {formData.habitFrequency === 'custom' && (
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Repeat Every</Label>
+                    <Label className="text-sm font-medium">Repeat every</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
                         min="1"
                         max="365"
-                        value={formData.recurringInterval}
-                        onChange={(e) => updateField('recurringInterval', parseInt(e.target.value) || 1)}
-                        className="glass border-glass w-20"
+                        value={formData.habitIntervalDays}
+                        onChange={(e) => updateField('habitIntervalDays', parseInt(e.target.value, 10) || 1)}
+                        className={`glass border-glass w-24 ${errors.habitIntervalDays ? 'border-red-500' : ''}`}
                       />
-                      <span className="text-sm text-muted-foreground">days</span>
+                      <span className="text-sm text-muted-foreground">days from the due date</span>
                     </div>
+                    {errors.habitIntervalDays && (
+                      <p className="text-xs text-red-500">{errors.habitIntervalDays}</p>
+                    )}
                   </div>
                 )}
-
-                {/* End Date (Optional) */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">End Date (Optional)</Label>
-                  <Input
-                    type="date"
-                    value={formData.recurringEndDate}
-                    onChange={(e) => updateField('recurringEndDate', e.target.value)}
-                    className="glass border-glass"
-                    min={getCurrentUserDate()}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty to repeat indefinitely
-                  </p>
-                </div>
               </div>
             )}
           </div>

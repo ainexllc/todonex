@@ -63,12 +63,10 @@ export function Sidebar({
 
   return (
     <div
-      className={cn('w-72 border-r flex flex-col h-full', className)}
-      style={{
-        background: 'var(--board-surface-glass)',
-        borderColor: 'var(--board-column-border)',
-        color: 'var(--board-text-strong)'
-      }}
+      className={cn(
+        'flex h-full w-72 flex-col border-r border-[color:var(--board-column-border)] bg-[color:var(--board-surface-glass)]/70 text-[color:var(--board-text-strong)] backdrop-blur-xl',
+        className
+      )}
     >
 
       {/* Task Lists Navigation */}
@@ -86,8 +84,8 @@ export function Sidebar({
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2 transition-all duration-200 text-left group relative rounded-xl border',
                 isActive
-                  ? 'bg-[color:var(--board-action-bg)]/70 border-[color:var(--board-action-border)] text-[color:var(--board-action-text)]'
-                  : 'bg-transparent border-transparent hover:bg-[color:var(--board-surface-glass)] hover:border-[color:var(--board-column-border)]'
+                  ? 'border-[color:var(--board-column-border-accent)] bg-[color:var(--board-column-bg)]/80 text-[color:var(--board-text-strong)]'
+                  : 'border-transparent bg-transparent hover:bg-[color:var(--board-surface-glass)] hover:border-[color:var(--board-column-border)]'
               )}
             >
               {IconComponent && (
@@ -116,43 +114,40 @@ export function Sidebar({
 
         {/* Empty state */}
         {lists.length === 0 && (
-          <div className="text-center py-8 px-4 text-sm text-muted-foreground">
+          <div className="py-8 px-4 text-center text-sm text-[color:var(--board-text-muted)]">
             No lists yet. Create your first list to get started!
           </div>
         )}
       </div>
 
       {/* Stats Summary Section */}
-      <div
-        className="flex-shrink-0 px-4 py-3 border-t"
-        style={{ borderColor: 'var(--board-column-border)' }}
-      >
+      <div className="flex-shrink-0 border-t border-[color:var(--board-column-border)] px-4 py-3">
         <div className="mb-3">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <span className="text-xs font-medium uppercase tracking-wide text-[color:var(--board-text-muted)]">
             Completed
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
-            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>Today</div>
-            <div className="text-lg font-bold">{stats.today}</div>
+            <div className="text-xs text-[color:var(--board-text-muted)]">Today</div>
+            <div className="text-lg font-bold text-[color:var(--board-text-strong)]">{stats.today}</div>
           </div>
           <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
-            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Week</div>
-            <div className="text-lg font-bold">{stats.week}</div>
+            <div className="text-xs text-[color:var(--board-text-muted)]">This Week</div>
+            <div className="text-lg font-bold text-[color:var(--board-text-strong)]">{stats.week}</div>
           </div>
           <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
-            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Month</div>
-            <div className="text-lg font-bold">{stats.month}</div>
+            <div className="text-xs text-[color:var(--board-text-muted)]">This Month</div>
+            <div className="text-lg font-bold text-[color:var(--board-text-strong)]">{stats.month}</div>
           </div>
           <div className="px-3 py-2 rounded-lg bg-[color:var(--board-column-bg)]/60 border border-[color:var(--board-column-border)]">
-            <div className="text-xs" style={{ color: 'var(--board-text-muted)' }}>This Year</div>
-            <div className="text-lg font-bold">{stats.year}</div>
+            <div className="text-xs text-[color:var(--board-text-muted)]">This Year</div>
+            <div className="text-lg font-bold text-[color:var(--board-text-strong)]">{stats.year}</div>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--board-column-border)' }}>
+      <div className="border-t border-[color:var(--board-column-border)] px-4 py-3">
         <Button
           onClick={onNewList}
           variant="ghost"
